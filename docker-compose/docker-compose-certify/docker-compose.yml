@@ -56,8 +56,26 @@ services:
       - kafka
     volumes:
       - ./config/esignet-default.properties:/home/mosip/esignet-default.properties
-      - ./loader_path/:/home/mosip/additional_jars/
+      - ./loader_path/esignet/:/home/mosip/additional_jars/
       - ./data/PKCS12:/home/mosip/PKCS12
+    networks:
+      - network
+  certify:
+    image: certify:latest
+    user: root
+    ports:
+      - 8090:8090
+    environment:
+      - artifactory_url_env=http://artifactory-server:8080/
+      - container_user=mosip
+      - active_profile_env=default
+      - SPRING_CONFIG_NAME=certify
+      - SPRING_CONFIG_LOCATION=/home/mosip/certify-default.properties
+    volumes:
+      - ./config/certify-default.properties:/home/mosip/certify-default.properties
+      - ./loader_path/certify/:/home/mosip/additional_jars/
+    depends_on:
+      - esignet
     networks:
       - network
   esignet-ui:
