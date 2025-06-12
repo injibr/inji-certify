@@ -6,6 +6,7 @@
 package io.mosip.certify.vcformatters;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -101,14 +102,37 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
                 finalTemplate.put(key, new JSONArray((List<Object>) value));
             } else if (value.getClass().isArray()) {
                 finalTemplate.put(key, new JSONArray(List.of(value)));
-            } else if (value instanceof Integer | value instanceof Float | value instanceof Long | value instanceof Double) {
+            } else if (value instanceof Integer | value instanceof Float | value instanceof Long | value instanceof Double| value instanceof BigDecimal) {
                 // entities which don't need to be quoted
                 finalTemplate.put(key, value);
             } else if (value instanceof String){
                 // entities which need to be quoted
                 finalTemplate.put(key, JSONObject.wrap(value));
-            } else {
-                finalTemplate.put(key, value);
+            } else if (value instanceof JSONObject) {
+                JSONObject jsonObject = (JSONObject)value;
+                Iterator<String> jsonKeys = jsonObject.keys();
+                while (jsonKeys.hasNext()){
+                    String jsonKey = jsonKeys.next();
+                    finalTemplate.put(jsonKey, jsonObject.get(jsonKey));
+                }
+            } else if(value instanceof JSONArray){
+                Map<String,String> allData = new HashMap<>();
+                for (int i = 0; i < ((JSONArray) value).length(); i++) {
+                    JSONObject jsonObject = (JSONObject) ((JSONArray) value).get(i);
+                    Iterator<String> jsonKeys = jsonObject.keys();
+                    while (jsonKeys.hasNext()){
+                        String jsonKey = jsonKeys.next();
+                        if (allData.containsKey(jsonKey)){
+                            String prevValue = allData.get(jsonKey);
+                            String newValue = jsonObject.get(String.valueOf(jsonKey)).toString();
+                            String combinedValue = prevValue +"\n"+newValue;
+                            finalTemplate.put(jsonKey,combinedValue);
+                        }else {
+                            allData.put(jsonKey, jsonObject.get(jsonKey).toString());
+                        }
+                    }
+                }
+                finalTemplate.putAll(allData);
             }
         }
         // Date: https://velocity.apache.org/tools/3.1/apidocs/org/apache/velocity/tools/generic/DateTool.html
