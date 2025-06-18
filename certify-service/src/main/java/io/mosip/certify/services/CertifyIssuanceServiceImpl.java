@@ -407,7 +407,7 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                 (issuedEpoch+cNonceExpire) < LocalDateTime.now(ZoneOffset.UTC).toEpochSecond(ZoneOffset.UTC) ) {
             log.error("Client Nonce not found / expired in the access token, generate new cNonce");
             transaction = createVCITransaction();
-//            throw new InvalidNonceException(transaction.getCNonce(), transaction.getCNonceExpireSeconds());
+            throw new InvalidNonceException(transaction.getCNonce(), transaction.getCNonceExpireSeconds());
         }
         return cNonce;
     }
