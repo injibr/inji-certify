@@ -1,0 +1,46 @@
+package io.mosip.certify.api.spi.impl;
+
+import io.mosip.certify.api.dataprovider.DataProviderService;
+import io.mosip.certify.api.exception.DataProviderExchangeException;
+import io.mosip.certify.api.spi.DataProviderPlugin;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Slf4j
+@Component
+public class DataProviderPluginImpl implements DataProviderPlugin {
+    private final List<DataProviderService> providers;
+    private final Map<String, DataProviderService> instanceMap = new HashMap<>();
+
+    @Autowired
+    public DataProviderPluginImpl(List<DataProviderService> providers) {
+        this.providers = providers;
+    }
+
+    @PostConstruct
+    public void init() {
+        for (DataProviderService provider : providers) {
+            instanceMap.put(provider.getDocumentType(), provider);
+        }
+    }
+    @Override
+    public JSONObject fetchData(Map<String, Object> identityDetails) throws DataProviderExchangeException {
+        DataProviderService dataProviderService = instanceMap.get(identityDetails.get("scope").toString());
+        if (dataProviderService == null) {
+            throw new IllegalArgumentException("No provider found for: " + "document");
+        }
+        try {
+            return dataProviderService.getData();
+        } catch (Exception e) {
+            log.info("Error while fetching data from DataProviderService: {}", e.getMessage());
+            return new JSONObject();
+        }
+    }
+}
