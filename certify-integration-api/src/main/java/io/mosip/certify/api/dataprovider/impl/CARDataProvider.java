@@ -1,19 +1,22 @@
-package io.mosip.certify.dataprovider234;
+package io.mosip.certify.api.dataprovider.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
-import lombok.extern.slf4j.Slf4j;
+import io.mosip.certify.api.dataprovider.DataProviderService;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Map;
 
-@Service
-@Slf4j
-public class DataProviderService {
+@Component
+public class CARDataProvider implements DataProviderService {
+
+    @Override
+    public String getDocumentType() {
+        return "CAR";
+    }
 
     private final WebClient webClient;
 
@@ -21,16 +24,16 @@ public class DataProviderService {
     private final String tokenUrl = "https://pisrj.dataprev.gov.br/oauth2/token";
 
     // Client credentials (replace with your actual values)
-    private final String clientId = "clientId";
-    private final String clientSecret = "clientSecret";
+    private final String clientId = "xdDsOG5vguj7QfxzMeRU1idlDd0a";
+    private final String clientSecret = "ezvQJcrbWjO4gSZtHRHYoMQP7W8a";
 
     // Optional scope (empty string if not needed)
     private final String scope = "";
 
     // Protected API endpoint to call with token
-    private final String apiUrl = "https://gateway.apiserpro.serpro.gov.br/consulta-ccir-trial/v1/consultarDadosCcirPorCodigoImovel/11111111";
+    private final String apiUrl = "https://papirj.dataprev.gov.br/sicar/demonstrativoDegustacao/1.0/BA-2902005-AD06AC9BEE924477AA13EFE0908D15E0";
 
-    public DataProviderService(WebClient.Builder webClientBuilder) {
+    public CARDataProvider(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.build();
     }
 
@@ -40,25 +43,25 @@ public class DataProviderService {
      */
     public JSONObject getData() throws JsonProcessingException, JSONException {
         // Step 1: Get access token
-        // String accessToken = getAccessToken();
+        String accessToken = getAccessToken();
 
         // Step 2: Call protected API with Bearer token
         String response =  webClient.get()
                 .uri(apiUrl)
-                .headers(headers -> headers.setBearerAuth("Bearer 06aef429-a981-3ec5-a1f8-71d38d86481e"))
+                .headers(headers -> headers.setBearerAuth(accessToken))
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
         if (response == null) {
             throw new RuntimeException("Failed to retrieve data from the API");
         }
-        return new JSONObject(response);
+        JSONObject jsonObject = new JSONObject(response);
+        return (JSONObject) jsonObject.getJSONArray("result").get(0);
     }
     /**
      * Retrieves the OAuth 2.0 token from the token endpoint using client credentials grant.
      */
     private String getAccessToken() {
-
         Map tokenResponse = webClient.post()
                 .uri(tokenUrl)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
