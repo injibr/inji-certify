@@ -1,0 +1,32 @@
+= Projeto inji-certify
+== Builds
+
+[cols="^1,^1,<1"]
+|===
+| Branch | Versão | Status
+| https://scm.prevnet/inji/inji-certify/tree/desenvolvimento[desenvolvimento]
+| 1.0.0
+| image:https://www-ci.prevnet/job/MGI/job/code_inji-certify/job/desenvolvimento/badge/icon[Build Status, link=https://www-ci.prevnet/job/MGI/job/code_inji-certify/job/desenvolvimento/]
+
+| https://scm.prevnet/inji/inji-certify/tree/entrega[entrega]
+| 1.0.0
+| image:https://www-ci.prevnet/job/MGI/job/code_inji-certify/job/entrega/badge/icon[Build Status, link=https://www-ci.prevnet/job/MGI/job/code_inji-certify/job/entrega/]
+
+| https://scm.prevnet/inji/inji-certify/tree/incidente[incidente]
+| 1.0.0
+| image:https://www-ci.prevnet/job/MGI/job/code_inji-certify/job/incidente/badge/icon[Build Status, link=https://www-ci.prevnet/job/MGI/job/code_inji-certify/job/incidente/]
+
+| https://scm.prevnet/inji/inji-certify/tree/master[master]
+| 1.0.0
+| image:https://www-ci.prevnet/job/MGI/job/code_inji-certify/job/master/badge/icon[Build Status, link=https://www-ci.prevnet/job/MGI/job/code_inji-certify/job/master/]
+|===
+
+== Documentação de apoio
+* http://www-hub.prevnet/gui-entrega-continua/gui-entrega-continua.html[Guia de Integração e Entrega contínua]
+* https://www-ci.prevnet/job/MGI/job/code_inji-certify[Pipeline]
+* http://www-bin.prevnet[Nexus]
+* http://www-qa.prevnet[SonarQube Releases]
+* http://www-dqa.prevnet[SonarQube Checkin]
+* https://chat.dataprev.gov.br/channel/dtp-ic-ec[Dúvidas sobre Jenkins e Sonar]
+* https://chat.dataprev.gov.br/channel/dtp-git[Dúvidas sobre GIT]
+* https://asciidoctor.org/docs/#write-with-asciidoctor[Documentação Asciidoc]
