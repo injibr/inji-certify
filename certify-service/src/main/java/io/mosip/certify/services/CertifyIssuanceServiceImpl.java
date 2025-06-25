@@ -163,6 +163,10 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
            Map<String, Object> vd11IssuerMetadata = convertLatestToVd11(originalIssuerMetadata);
            issuerMetadata.put("CCIR", (LinkedHashMap<String, Object>) vd11IssuerMetadata);
            return vd11IssuerMetadata;
+       }else if(version != null && version.equals("CARReceiptDocument")) {
+           LinkedHashMap<String, Object> originalIssuerMetadata = new LinkedHashMap<>(issuerMetadata.get("CAR"));
+           issuerMetadata.put("CARReceiptDocument", originalIssuerMetadata);
+           return issuerMetadata.get("CARReceiptDocument");
        }
        throw new InvalidRequestException(ErrorConstants.UNSUPPORTED_OPENID_VERSION);
     }
