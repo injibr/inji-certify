@@ -38,6 +38,7 @@ import io.mosip.certify.utils.DIDDocumentUtil;
 import io.mosip.certify.vcsigners.VCSigner;
 import io.mosip.kernel.keymanagerservice.dto.KeyPairGenerateResponseDto;
 import io.mosip.kernel.keymanagerservice.service.KeymanagerService;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -63,8 +64,11 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
             SignatureAlg.ED25519_SIGNATURE_SUITE_2020, List.of(Constants.CERTIFY_VC_SIGN_ED25519, Constants.ED25519_REF_ID));
     @Value("${mosip.certify.data-provider-plugin.issuer.vc-sign-algo:Ed25519Signature2020}")
     private String vcSignAlgorithm;
-    @Value("#{${mosip.certify.key-values}}")
+
     private LinkedHashMap<String, LinkedHashMap<String, Object>> issuerMetadata;
+
+    @Autowired
+    private CertifyKeysService certifyKeysService;
 
     @Value("${mosip.certify.cnonce-expire-seconds:300}")
     private int cNonceExpireSeconds;
@@ -106,6 +110,11 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
     private KeymanagerService keymanagerService;
 
     private Map<String, Object> didDocument;
+
+    @PostConstruct
+    public void init() {
+        this.issuerMetadata = certifyKeysService.getIssuerMetadata();
+    }
 
     @Override
     public CredentialResponse getCredential(CredentialRequest credentialRequest) {
