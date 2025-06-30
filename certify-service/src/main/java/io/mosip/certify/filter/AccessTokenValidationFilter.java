@@ -86,6 +86,8 @@ public class AccessTokenValidationFilter extends OncePerRequestFilter {
             if(isJwt(token)) {
                 try {
                     //Verifies signature and claim predicates, If invalid throws exception
+                    logger.info("Validating JWT access token");
+		    logger.info(token);
                     Jwt jwt = getNimbusJwtDecoder().decode(token);
                     parsedAccessToken.setClaims(new HashMap<>());
                     parsedAccessToken.getClaims().putAll(jwt.getClaims());

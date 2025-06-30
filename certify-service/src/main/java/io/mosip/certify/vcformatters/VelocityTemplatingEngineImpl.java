@@ -187,6 +187,8 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
         }
         String credentialType = key.split(DELIMITER)[0];
         String context = key.split(DELIMITER, 2)[1];
+	log.info("Credential Type{}", credentialType);
+        log.info("Context{}", context);
         CredentialTemplate template = credentialTemplateRepository.findByCredentialTypeAndContext(credentialType, context).orElse(null);
         if (template != null) {
             return template.getTemplate();

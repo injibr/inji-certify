@@ -1,56 +1,58 @@
 {
   "issuers": [
     {
-      "credential_issuer": "Farmer",
-      "issuer_id": "Farmer",
-      "protocol": "OpenId4VCI",
+      "issuer_id": "CCIR_mock",
+      "credential_issuer": "CCIR_mock",
       "display": [
         {
-          "name": "Agriculture Department",
+          "name": "CCIR",
           "logo": {
-            "url": "https://mosip.github.io/inji-config/logos/agro-vertias-logo.png",
-            "alt_text": "agri-logo"
+            "url": "https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png",
+            "alt_text": "a square logo of a CCIR"
           },
-          "title": "Agriculture Department",
-          "description": "Download Farmers Credentials",
-          "language": "en"
+          "language": "en",
+          "title": "Download CCIR Credentials",
+          "description": "Download CCIR credential"
         }
       ],
-      "client_id": "wallet-demo",
+      "protocol": "OpenId4VCI",
+      "client_id": "local1",
+      "client_alias": "local1",
+      "wellknown_endpoint": "https://vcdemo.crabdance.com/certify/v1/certify/issuance/.well-known/openid-credential-issuer?version=CCIR_mock",
       "redirect_uri": "io.mosip.residentapp.inji://oauthredirect",
-      "token_endpoint": "http://localhost:8099/v1/mimoto/get-token/Farmer",
-      "authorization_audience": "https://esignet-mock.collab.mosip.net/v1/esignet/oauth/v2/token",
-      "proxy_token_endpoint": "https://esignet-mock.collab.mosip.net/v1/esignet/oauth/v2/token",
-      "client_alias": "wallet-demo-client",
-      "qr_code_type": "EmbeddedVC",
-      "enabled": "true",
-      "wellknown_endpoint": "http://certify:8090/v1/certify/issuance/.well-known/openid-credential-issuer"
+      "authorization_audience": "https://esignet.crabdance.com/v1/esignet/oauth/v2/token",
+      "token_endpoint": "https://vcdemo.crabdance.com/v1/mimoto/get-token/CCIR_mock",
+      "proxy_token_endpoint": "https://esignet.crabdance.com/v1/esignet/oauth/v2/token",
+      "qr_code_type": "OnlineSharing",
+      "credential_issuer_host": "https://vcdemo.crabdance.com/certify",
+      "enabled": "true"
     },
     {
-      "issuer_id": "MockMdl",
-      "credential_issuer": "MockMdl",
-      "protocol": "OpenId4VCI",
+      "issuer_id": "CAR",
+      "credential_issuer": "CAR",
       "display": [
         {
-          "name": "Transport Department",
+          "name": "CAR",
           "logo": {
-            "url": "https://api.collab.mosip.net/inji/mosip-logo.png",
-            "alt_text": "mosip-logo"
+            "url": "https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png",
+            "alt_text": "a square logo of a CAR"
           },
-          "title": "Transport Department",
-          "description": "Download Mobile Driving License",
-          "language": "en"
+          "language": "en",
+          "title": "Download CAR Credentials",
+          "description": "Download CAR credential"
         }
       ],
-      "client_id": "wallet-demo",
-      "redirect_uri": "io.mosip.residentapp.inji://oauthredirect",
-      "token_endpoint": "http://localhost:8099/v1/mimoto/get-token/MockMdl",
-      "authorization_audience": "https://esignet-mock.collab.mosip.net/v1/esignet/oauth/v2/token",
-      "proxy_token_endpoint": "https://esignet-mock.collab.mosip.net/v1/esignet/oauth/v2/token",
-      "client_alias": "wallet-demo-client",
-      "qr_code_type": "EmbeddedVC",
-      "enabled": "true",
-      "wellknown_endpoint": "http://certify:8090/v1/certify/issuance/.well-known/openid-credential-issuer"
-    }    
+      "protocol": "OpenId4VCI",
+      "client_id": "local1",
+      "client_alias": "local1",
+      "wellknown_endpoint": "http://13.201.134.225:8090/v1/certify/issuance",
+      "redirect_uri": "http://13.201.134.225:3004/redirect",
+      "authorization_audience": "http://13.201.134.225:8088/v1/esignet/oauth/v2/token",
+      "token_endpoint": "https://13.201.134.225:8099/v1/mimoto/get-token/CAR",
+      "proxy_token_endpoint": "http://13.201.134.225:8088/v1/esignet/oauth/v2/token",
+      "qr_code_type": "OnlineSharing",
+      "credential_issuer_host": "http://13.201.134.225:8090",
+      "enabled": "true"
+    }
   ]
 }

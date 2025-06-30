@@ -146,6 +146,9 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
 
         auditWrapper.logAudit(Action.VC_ISSUANCE, ActionStatus.SUCCESS,
                 AuditHelper.buildAuditDto(parsedAccessToken.getAccessTokenHash(), "accessTokenHash"), null);
+  	log.info("credential issued successfully");
+        log.info(vcResult.toString());
+        log.info(credentialRequest.getFormat());
         return getCredentialResponse(credentialRequest.getFormat(), vcResult);
     }
 
@@ -159,10 +162,10 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
            issuerMetadata.put("CAR", (LinkedHashMap<String, Object>) vd12IssuerMetadata);
            return vd12IssuerMetadata;
        } else if(version != null && version.equals("CCIR")) {
-           LinkedHashMap<String, Object> originalIssuerMetadata = new LinkedHashMap<>(issuerMetadata.get("CCIR"));
-           Map<String, Object> vd11IssuerMetadata = convertLatestToVd11(originalIssuerMetadata);
-           issuerMetadata.put("CCIR", (LinkedHashMap<String, Object>) vd11IssuerMetadata);
-           return vd11IssuerMetadata;
+           LinkedHashMap<String, Object> originalIssuerMetadata = new LinkedHashMap<>(issuerMetadata.get("CCIR_mock"));
+         //  Map<String, Object> vd11IssuerMetadata = convertLatestToVd11(originalIssuerMetadata);
+          issuerMetadata.put("CCIR", originalIssuerMetadata);
+          return issuerMetadata.get("CCIR");
        }else if(version != null && version.equals("CARReceiptDocument")) {
            LinkedHashMap<String, Object> originalIssuerMetadata = new LinkedHashMap<>(issuerMetadata.get("CAR"));
            issuerMetadata.put("CARReceiptDocument", originalIssuerMetadata);
