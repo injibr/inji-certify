@@ -163,24 +163,22 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
 
     @Override
     public Map<String, Object> getCredentialIssuerMetadata(String version) {
-       if(issuerMetadata.containsKey(version)) {
-           return issuerMetadata.get(version);
-       } else if(version != null && version.equals("CAR")) {
-           LinkedHashMap<String, Object> originalIssuerMetadata = new LinkedHashMap<>(issuerMetadata.get("CAR"));
-           Map<String, Object> vd12IssuerMetadata = convertLatestToVd12(originalIssuerMetadata);
-           issuerMetadata.put("CAR", (LinkedHashMap<String, Object>) vd12IssuerMetadata);
-           return vd12IssuerMetadata;
-       } else if(version != null && version.equals("CCIR")) {
-           LinkedHashMap<String, Object> originalIssuerMetadata = new LinkedHashMap<>(issuerMetadata.get("CCIR_mock"));
-         //  Map<String, Object> vd11IssuerMetadata = convertLatestToVd11(originalIssuerMetadata);
-          issuerMetadata.put("CCIR", originalIssuerMetadata);
-          return issuerMetadata.get("CCIR");
-       }else if(version != null && version.equals("CARReceiptDocument")) {
-           LinkedHashMap<String, Object> originalIssuerMetadata = new LinkedHashMap<>(issuerMetadata.get("CAR"));
-           issuerMetadata.put("CARReceiptDocument", originalIssuerMetadata);
-           return issuerMetadata.get("CARReceiptDocument");
-       }
-       throw new InvalidRequestException(ErrorConstants.UNSUPPORTED_OPENID_VERSION);
+        if(issuerMetadata.containsKey(version)) {
+            return issuerMetadata.get(version);
+        } else if(version != null && version.equals("CAR")) {
+            LinkedHashMap<String, Object> originalIssuerMetadata = new LinkedHashMap<>(issuerMetadata.get("CAR_mock"));
+            issuerMetadata.put("CAR", originalIssuerMetadata);
+            return issuerMetadata.get("CAR");
+        } else if(version != null && version.equals("CCIR")) {
+            LinkedHashMap<String, Object> originalIssuerMetadata = new LinkedHashMap<>(issuerMetadata.get("CCIR_mock"));
+            issuerMetadata.put("CCIR", originalIssuerMetadata);
+            return issuerMetadata.get("CCIR");
+        }else if(version != null && version.equals("CARReceiptDocument")) {
+            LinkedHashMap<String, Object> originalIssuerMetadata = new LinkedHashMap<>(issuerMetadata.get("CAR_mock"));
+            issuerMetadata.put("CARReceiptDocument", originalIssuerMetadata);
+            return issuerMetadata.get("CARReceiptDocument");
+        }
+        throw new InvalidRequestException(ErrorConstants.UNSUPPORTED_OPENID_VERSION);
     }
 
     @Override
