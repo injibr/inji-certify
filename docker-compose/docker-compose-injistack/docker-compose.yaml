@@ -41,7 +41,7 @@ services:
 
   mimoto-service:
     container_name: 'Mimoto-Service'
-    image: mosipid/mimoto:0.15.0
+    image: mosipid/mimoto:0.17.1
     user: root
     ports:
       - '8099:8099'
@@ -71,6 +71,7 @@ services:
       - ./config/mimoto-issuers-config.json:/home/mosip/mimoto-issuers-config.json
       - ./config/mimoto-trusted-verifiers.json:/home/mosip/mimoto-trusted-verifiers.json
       - ./config/credential-template.html:/home/mosip/credential-template.html
+      - ./config/credential-template.html:/home/mosip/CCIR_mock-CCIRCredential-template.html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - mimoto-service

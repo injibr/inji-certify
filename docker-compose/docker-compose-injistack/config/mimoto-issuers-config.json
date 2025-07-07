@@ -16,15 +16,15 @@
         }
       ],
       "protocol": "OpenId4VCI",
-      "client_id": "local1",
-      "client_alias": "local1",
+      "client_id": "govbr",
+      "client_alias": "govbr",
       "wellknown_endpoint": "https://vcdemo.crabdance.com/certify/v1/certify/issuance/.well-known/openid-credential-issuer?version=CCIR_mock",
       "redirect_uri": "io.mosip.residentapp.inji://oauthredirect",
       "authorization_audience": "https://esignet.crabdance.com/v1/esignet/oauth/v2/token",
       "token_endpoint": "https://vcdemo.crabdance.com/v1/mimoto/get-token/CCIR_mock",
       "proxy_token_endpoint": "https://esignet.crabdance.com/v1/esignet/oauth/v2/token",
       "qr_code_type": "OnlineSharing",
-      "credential_issuer_host": "https://vcdemo.crabdance.com/certify",
+      "credential_issuer_host": "https://vcdemo.crabdance.com/certify/CCIR/proxy",
       "enabled": "true"
     },
     {
@@ -43,15 +43,15 @@
         }
       ],
       "protocol": "OpenId4VCI",
-      "client_id": "local1",
-      "client_alias": "local1",
+      "client_id": "govbr",
+      "client_alias": "govbr",
       "wellknown_endpoint": "http://13.201.134.225:8090/v1/certify/issuance",
       "redirect_uri": "http://13.201.134.225:3004/redirect",
       "authorization_audience": "http://13.201.134.225:8088/v1/esignet/oauth/v2/token",
       "token_endpoint": "https://13.201.134.225:8099/v1/mimoto/get-token/CAR",
       "proxy_token_endpoint": "http://13.201.134.225:8088/v1/esignet/oauth/v2/token",
       "qr_code_type": "OnlineSharing",
-      "credential_issuer_host": "http://13.201.134.225:8090",
+      "credential_issuer_host": "https://vcdemo.crabdance.com/certify/CAR/proxy",
       "enabled": "true"
     }
   ]
