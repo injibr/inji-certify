@@ -37,7 +37,9 @@ public class DataProviderPluginImpl implements DataProviderPlugin {
             throw new IllegalArgumentException("No provider found for: " + "document");
         }
         try {
-            return dataProviderService.getData();
+            JSONObject data = dataProviderService.getData();
+            log.info("Data fetched from DataProviderService : {}", data);
+            return data;
         } catch (Exception e) {
             log.info("Error while fetching data from DataProviderService: {}", e.getMessage());
             return new JSONObject();
