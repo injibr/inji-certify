@@ -28,8 +28,8 @@
       "enabled": "true"
     },
     {
-      "issuer_id": "CAR",
-      "credential_issuer": "CAR",
+      "issuer_id": "CAR_mock",
+      "credential_issuer": "CAR_mock",
       "display": [
         {
           "name": "CAR",
