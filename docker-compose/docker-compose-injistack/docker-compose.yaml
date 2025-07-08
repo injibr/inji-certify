@@ -72,6 +72,8 @@ services:
       - ./config/mimoto-trusted-verifiers.json:/home/mosip/mimoto-trusted-verifiers.json
       - ./config/credential-template.html:/home/mosip/credential-template.html
       - ./config/credential-template.html:/home/mosip/CCIR_mock-CCIRCredential-template.html
+      - ./config/CAR_mock-CARReceipt-template.html:/home/mosip/CAR_mock-CARReceipt-template.html
+      - ./config/CAR_mock-CARCredentail-template.html:/home/mosip/CAR_mock-CARCredentail-template.html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - mimoto-service
