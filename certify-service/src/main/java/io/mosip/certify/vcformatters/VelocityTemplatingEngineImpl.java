@@ -97,7 +97,7 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
         Iterator<String> keys = valueMap.keys();
         while(keys.hasNext()) {
             String key = keys.next();
-            Object value = valueMap.get(key);
+            Object value = Objects.equals(valueMap.get(key),null)?"":valueMap.get(key);
             if (value instanceof List) {
                 finalTemplate.put(key, new JSONArray((List<Object>) value));
             } else if (value.getClass().isArray()) {
@@ -113,7 +113,7 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
                 Iterator<String> jsonKeys = jsonObject.keys();
                 while (jsonKeys.hasNext()){
                     String jsonKey = jsonKeys.next();
-                    finalTemplate.put(jsonKey, jsonObject.get(jsonKey));
+                    finalTemplate.put(jsonKey, Objects.equals(jsonObject.get(jsonKey),null)?"":jsonObject.get(jsonKey));
                 }
             } else if(value instanceof JSONArray){
                 Map<String,String> allData = new HashMap<>();
@@ -123,8 +123,8 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
                     while (jsonKeys.hasNext()){
                         String jsonKey = jsonKeys.next();
                         if (allData.containsKey(jsonKey)){
-                            String prevValue = allData.get(jsonKey);
-                            String newValue = jsonObject.get(String.valueOf(jsonKey)).toString();
+                            String prevValue = Objects.equals(allData.get(jsonKey),null)?"":allData.get(jsonKey);
+                            String newValue = jsonObject.get(String.valueOf(jsonKey)).toString().equals("null")?"":jsonObject.get(String.valueOf(jsonKey)).toString();
                             String combinedValue = prevValue +"\n"+newValue;
                             finalTemplate.put(jsonKey,combinedValue);
                         }else {
@@ -187,7 +187,7 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
         }
         String credentialType = key.split(DELIMITER)[0];
         String context = key.split(DELIMITER, 2)[1];
-	log.info("Credential Type{}", credentialType);
+        log.info("Credential Type{}", credentialType);
         log.info("Context{}", context);
         CredentialTemplate template = credentialTemplateRepository.findByCredentialTypeAndContext(credentialType, context).orElse(null);
         if (template != null) {
