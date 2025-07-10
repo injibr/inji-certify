@@ -1,8 +1,7 @@
 package io.mosip.certify.api.dataprovider.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.mosip.certify.api.dataprovider.DataProviderService;
-import org.json.JSONException;
+import io.mosip.certify.api.service.MapImageGeneratorService;
 import org.json.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -12,6 +11,7 @@ import java.util.Map;
 
 @Component
 public class CARReceiptDataProvider implements DataProviderService {
+    private final MapImageGeneratorService mapImageGeneratorService;
 
     @Override
     public String getDocumentType() {
@@ -33,7 +33,8 @@ public class CARReceiptDataProvider implements DataProviderService {
     // Protected API endpoint to call with token
     private final String apiUrl = "https://papisp.dataprev.gov.br/sicar/reciboDegustacao/1.0/BA-2902005-AD06AC9BEE924477AA13EFE0908D15E0";
 
-    public CARReceiptDataProvider(WebClient.Builder webClientBuilder) {
+    public CARReceiptDataProvider(MapImageGeneratorService mapImageGeneratorService, WebClient.Builder webClientBuilder) {
+        this.mapImageGeneratorService = mapImageGeneratorService;
         this.webClient = webClientBuilder.build();
     }
 
@@ -41,7 +42,7 @@ public class CARReceiptDataProvider implements DataProviderService {
      * Main method to be called after your validations.
      * It fetches the OAuth2 token, then calls the protected API using the token.
      */
-    public JSONObject getData() throws JsonProcessingException, JSONException {
+    public JSONObject getData() throws Exception {
         // Step 1: Get access token
         String accessToken = getAccessToken();
 
@@ -56,7 +57,8 @@ public class CARReceiptDataProvider implements DataProviderService {
             throw new RuntimeException("Failed to retrieve data from the API");
         }
         JSONObject jsonObject = new JSONObject(response);
-        return (JSONObject) jsonObject.getJSONArray("result").get(0);
+        return new JSONObject((jsonObject.getJSONArray("result").get(0)).toString())
+                .put("geoImovel", mapImageGeneratorService.generateMapImage(((JSONObject)jsonObject.getJSONArray("result").get(0)).get("geoImovel").toString()));
     }
     /**
      * Retrieves the OAuth 2.0 token from the token endpoint using client credentials grant.

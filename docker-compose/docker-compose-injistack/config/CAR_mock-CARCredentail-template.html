@@ -4,304 +4,388 @@
     <meta charset="UTF-8">
     <title>Demonstrativo do Status no CAR</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; table-layout: fixed;}
-        th, td { border: 1px solid #000; padding: 8px; vertical-align: top; }
-        .section-title { margin-top: 30px; font-weight: bold; font-size: 18px; text-decoration: underline; }
+        @page {
+          size: A4 portrait;
+          margin: 10mm;
+        }
+
+        body {
+          margin: 0;
+          font-family: Arial, sans-serif;
+          font-size: 11px;
+          line-height: 1.3;
+        }
+
+        .page {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          height: 1000px; /* Adjust depending on page content and print margins */
+          page-break-after: always;
+        }
+
+        .page:last-child {
+          page-break-after: auto;
+        }
+
+        .page-content {
+          padding: 5px;
+          flex: 1;
+        }
+
         .footer {
-    margin-top: 40px;
-    border-top: 3px solid #000;
-    padding-top: 10px;
-    font-size: 14px;
-    position: relative;
-    height: 80px;
- }
- .footer-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    line-height: 1.4;
- }
-        .image-container { margin-top: 25px; text-align: center; }
-        .image-container img { max-width: 100%; height: auto; border: 1px solid #000; }
+          text-align: center;
+          font-size: 10px;
+          padding-top: 10px;
+        }
+
+        h1 {
+          text-align: center;
+          font-size: 16px;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 10px;
+          font-size: 12px;
+        }
+
+        th, td {
+          border: 1px solid #000;
+          padding: 5px;
+          vertical-align: top;
+        }
+
+        .section-title {
+          font-weight: bold;
+          margin-top: 12px;
+        }
+
+        .center {
+          text-align: center;
+        }
+
+        img.flag {
+          display: block;
+          margin: 10px auto;
+          width: 100px;
+        }
+
+        ol {
+          margin-left: 15px;
+        }
     </style>
 </head>
 <body>
-<div style="text-align: center; margin-bottom: 20px;">
-    <img src="https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg" width="100" alt="Bandeira do Brasil">
-</div>
-<h1 style="text-align: center;">Demonstrativo do Status das Informações Declaradas no CAR</h1>
-<table>
-    <tr>
-        <td><strong>Registro de Inscrição no CAR:</strong> $rowProperties.codigoImovel.values().iterator().next()</td>
-        <td><strong>Data de Inscrição:</strong> $rowProperties.dataCadastro.values().iterator().next()</td>
-        <td><strong>Data da Última Alteração:</strong> $rowProperties.dataUltimaAtualizacaoCadastro.values().iterator().next()</td>
-    </tr>
-</table>
-<div class="section-title">Dados do Imóvel Rural</div>
-<table>
-    <tr>
-        <td colspan="2"><strong>Area do Imóvel Rural:</strong> $rowProperties.areaTotalImovel.values().iterator().next()</td>
-        <td><strong>Módulos Fiscais:</strong> $rowProperties.quantidadeModulosFiscais.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td><strong>Coordenadas Geográficas do Centróide:</strong></td>
-        <td><strong>Latitude:</strong> $rowProperties.coordenadasImovelX.values().iterator().next()</td>
-        <td><strong>Longitude:</strong> $rowProperties.coordenadasIimovelY.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td colspan="2"><strong>Município:</strong> $rowProperties.municipio.values().iterator().next()</td>
-        <td><strong>Unidade da Federação:</strong> $rowProperties.unidadeFederativa.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td colspan="3"><strong>Condição Externa:</strong> $rowProperties.descricaoEtapaCadastro.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td colspan="3"><strong>Situação do Cadastro:</strong> $rowProperties.situacaoImovel.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td colspan="3"><strong>Condição do PRA:</strong></td>
-    </tr>
-</table>
 
-<div class="section-title">Informações Gerais</div>
-<ol>
-    <li>Este documento apresenta o status das informações declaradas no CAR relativas às Áreas de Preservação Permanente, Reservas Legais e Áreas de Uso Restrito, conforme estipulado pelo Decreto nº 7.830 de 2012, Art. 51 da Instrução Normativa MMA nº 02 de 06 de maio de 2014 e Resolução nº 03 do SFB de 27 de agosto de 2018.</li>
-    <br>
-    <li>As informações fornecidas no Cadastro Ambiental Rural (CAR) são declaratórias e sujeitas à análise pelo órgão competente.</li>
-    <br>
-    <li>As informações contidas neste documento são de natureza pública, conforme o Artigo 12 da Instrução Normativa MMA nº 02 de 06 de maio de 2014.</li>
-    <br>
-    <li>Este documento não é considerado título para fins de reconhecimento de posse ou domínio.</li>
-    <br>
-    <li>Este documento não substitui licenças ou autorizações ambientais para exploração florestal ou supressão de vegetação, nem isenta as autorizações necessárias para atividade econômica na propriedade rural.</li>
-</ol>
-<div class="section-title">Cobertura do Solo</div>
-<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 14px;">
-    <thead>
-    <tr>
-        <th style="border: 1px solid #000; padding: 6px; text-align: left;">Descrição</th>
-        <th style="border: 1px solid #000; padding: 6px; text-align: right;">Área (ha)</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td style="border: 1px solid #000; padding: 6px;">Área de Remanescente de Vegetação Nativa</td>
-        <td style="border: 1px solid #000; padding: 6px; text-align: right;">$rowProperties.areaRemanescenteVegetacaoNativa.values().iterator().next()</td>
-    </tr>
-    <tr style="background-color: #e6e6e6;">
-        <td style="border: 1px solid #000; padding: 6px;">Área Rural Consolidada</td>
-        <td style="border: 1px solid #000; padding: 6px; text-align: right;">$rowProperties.areaConsolidada.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td style="border: 1px solid #000; padding: 6px;">Área de Servidão Administrativa</td>
-        <td style="border: 1px solid #000; padding: 6px; text-align: right;">$rowProperties.areaServidaoAdministrativa.values().iterator().next()</td>
-    </tr>
-    </tbody>
-</table>
+<!-- Page 1 -->
+<div class="page">
+    <div class="page-content">
+        <img class="flag" src="https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg" alt="Bandeira do Brasil">
+        <h1>Demonstrativo do Status das Informações Declaradas no CAR</h1>
 
-<div class="footer">
-    <div class="footer-text">
-        <p style="font-weight: bold;">CAR – Cadastro Ambiental Rural</p>
-        <p style="font-weight: bold;">Página 1 de 3</p>
-        <p>Demonstrativo gerado em $generatedAt</p>
+        <table>
+            <tr>
+                <td><strong>Registro de Inscrição no CAR:</strong> $rowProperties.codigoImovel.values().iterator().next()</td>
+                <td><strong>Data de Inscrição:</strong> $rowProperties.dataCadastro.values().iterator().next()</td>
+                <td><strong>Data da Última Alteração:</strong>
+                    $rowProperties.dataUltimaAtualizacaoCadastro.values().iterator().next()
+                </td>
+            </tr>
+        </table>
+        <div class="section-title">Dados do Imóvel Rural</div>
+        <table>
+            <tr>
+                <td colspan="2"><strong>Area do Imóvel Rural:</strong> $rowProperties.areaTotalImovel.values().iterator().next()
+                </td>
+                <td><strong>Módulos Fiscais:</strong> $rowProperties.quantidadeModulosFiscais.values().iterator().next()</td>
+            </tr>
+            <tr>
+                <td><strong>Coordenadas Geográficas do Centróide:</strong></td>
+                <td><strong>Latitude:</strong> $rowProperties.coordenadasImovelX.values().iterator().next()</td>
+                <td><strong>Longitude:</strong> $rowProperties.coordenadasIimovelY.values().iterator().next()</td>
+            </tr>
+            <tr>
+                <td colspan="2"><strong>Município:</strong> $rowProperties.municipio.values().iterator().next()</td>
+                <td><strong>Unidade da Federação:</strong> $rowProperties.unidadeFederativa.values().iterator().next()</td>
+            </tr>
+            <tr>
+                <td colspan="3"><strong>Condição Externa:</strong>
+                    $rowProperties.descricaoEtapaCadastro.values().iterator().next()
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3"><strong>Situação do Cadastro:</strong> $rowProperties.situacaoImovel.values().iterator().next()
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3"><strong>Condição do PRA:</strong></td>
+            </tr>
+        </table>
+
+        <div class="section-title">Informações Gerais</div>
+        <ol>
+            <li>Este documento apresenta o status das informações declaradas no CAR relativas às Áreas de Preservação
+                Permanente, Reservas Legais e Áreas de Uso Restrito, conforme estipulado pelo Decreto nº 7.830 de 2012, Art. 51
+                da Instrução Normativa MMA nº 02 de 06 de maio de 2014 e Resolução nº 03 do SFB de 27 de agosto de 2018.
+            </li>
+            <br>
+            <li>As informações fornecidas no Cadastro Ambiental Rural (CAR) são declaratórias e sujeitas à análise pelo órgão
+                competente.
+            </li>
+            <br>
+            <li>As informações contidas neste documento são de natureza pública, conforme o Artigo 12 da Instrução Normativa MMA
+                nº 02 de 06 de maio de 2014.
+            </li>
+            <br>
+            <li>Este documento não é considerado título para fins de reconhecimento de posse ou domínio.</li>
+            <br>
+            <li>Este documento não substitui licenças ou autorizações ambientais para exploração florestal ou supressão de
+                vegetação, nem isenta as autorizações necessárias para atividade econômica na propriedade rural.
+            </li>
+        </ol>
+        <div class="section-title">Cobertura do Solo</div>
+        <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 14px;">
+            <thead>
+            <tr>
+                <th style="border: 1px solid #000; padding: 6px; text-align: left;">Descrição</th>
+                <th style="border: 1px solid #000; padding: 6px; text-align: right;">Área (ha)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td style="border: 1px solid #000; padding: 6px;">Área de Remanescente de Vegetação Nativa</td>
+                <td style="border: 1px solid #000; padding: 6px; text-align: right;">
+                    $rowProperties.areaRemanescenteVegetacaoNativa.values().iterator().next()
+                </td>
+            </tr>
+            <tr style="background-color: #e6e6e6;">
+                <td style="border: 1px solid #000; padding: 6px;">Área Rural Consolidada</td>
+                <td style="border: 1px solid #000; padding: 6px; text-align: right;">
+                    $rowProperties.areaConsolidada.values().iterator().next()
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #000; padding: 6px;">Área de Servidão Administrativa</td>
+                <td style="border: 1px solid #000; padding: 6px; text-align: right;">
+                    0.0
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p><strong>CAR – Cadastro Ambiental Rural</strong></p>
+        <p><strong>Página 1 de 3</strong></p>
+        <p>Demonstrativo gerado em 11/07/25</p>
     </div>
 </div>
 
+<!-- Page 2 -->
+<div class="page">
+    <div class="page-content">
+        <img class="flag" src="https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg" alt="Bandeira do Brasil">
+        <h1>Demonstrativo do Status das Informações Declaradas no CAR</h1>
 
-<div style="text-align: center; margin-bottom: 20px;">
-    <img src="https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg" width="100" alt="Bandeira do Brasil">
-</div>
-<h1 style="text-align: center;">Demonstrativo do Status das Informações Declaradas no CAR</h1>
-<table>
-    <tr>
-        <td><strong>Registro de Inscrição no CAR:</strong>$rowProperties.codigoImovel.values().iterator().next()</td>
-        <td><strong>Data de Inscrição:</strong> $rowProperties.dataCadastro.values().iterator().next()</td>
-        <td><strong>Data da Última Alteração:</strong> $rowProperties.dataUltimaAtualizacaoCadastro.values().iterator().next()</td>
-    </tr>
-</table>
-<div class="section-title">Reserva Legal</div>
-<p><strong>Localização da Reserva Legal:</strong> $rowProperties.legalReserveLocation.values().iterator().next()</p>
-<p><strong>Informação Documental</strong></p>
-<table>
-    <tr>
-        <th>Descrição</th>
-        <th>Área (ha)</th>
-    </tr>
-    <tr>
-        <td>Área de Reserva Legal Averba, referente ao Art. 30 da Lei nº 12.651/2012</td>
-        <td>$rowProperties.areaReservaLegalAverbadaDocumental.values().iterator().next()</td>
-    </tr>
-</table>
-<p><strong>Informação Georreferenciada</strong></p>
-<table>
-    <tr>
-        <th>Descrição</th>
-        <th>Área (ha)</th>
-    </tr>
-    <tr>
-        <td>Área de Reserva Legal Averba</td>
-        <td>$rowProperties.areaReservaLegalAverbada.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td>Área de Reserva Legal Aprovada não Averba</td>
-        <td>$rowProperties.areaReservaLegalAprovadaNaoAverbada.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td>Área de Reserva Legal Proposta</td>
-        <td>$rowProperties.areaReservaLegalProposta.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td><strong>Total de Reserva Legal Declarada pelo Proprietário/Possuidor</strong></td>
-        <td>$rowProperties.areaReservaLegalDeclaradaProprietarioPossuidor.values().iterator().next()</td>
-    </tr>
-</table>
-<div class="section-title">Áreas de Preservação Permanente (APP)</div>
-<table>
-    <tr>
-        <th>Descrição</th>
-        <th>Área (ha)</th>
-    </tr>
-    <tr>
-        <td>APP</td>
-        <td>$rowProperties.areaPreservacaoPermanente.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td>APP em Área Rural Consolidada</td>
-        <td>$rowProperties.areaPreservacaoPermanenteAreaRuralConsolidada.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td>APP em Área de Remanescente de Vegetação Nativa</td>
-        <td>$areaPreservacaoPermanenteAreaRemanescenteVegetacaoNativa.values().iterator().next()</td>
-    </tr>
-</table>
-<div class="section-title">Áreas de Uso Restrito</div>
-<table>
-    <tr>
-        <th>Descrição</th>
-        <th>Área (ha)</th>
-    </tr>
-    <tr>
-        <td>Áreas de Uso Restrito</td>
-        <td>$rowProperties.areaUsoRestrito.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td>Área de Uso Restrito por declividade</td>
-        <td>$rowProperties.areaUsoRestritoDeclividade.values().iterator().next()</td>
-    </tr>
-</table>
-<div class="footer">
-    <div class="footer-text">
-        <p style="font-weight: bold;">CAR – Cadastro Ambiental Rural</p>
-        <p style="font-weight: bold;">Página 2 de 3</p>
-        <p>Demonstrativo gerado em $generatedAt</p>
+        <table>
+            <tr>
+                <td><strong>Registro de Inscrição no CAR:</strong>$rowProperties.codigoImovel.values().iterator().next()</td>
+                <td><strong>Data de Inscrição:</strong> $rowProperties.dataCadastro.values().iterator().next()</td>
+                <td><strong>Data da Última Alteração:</strong>
+                    $rowProperties.dataUltimaAtualizacaoCadastro.values().iterator().next()
+                </td>
+            </tr>
+        </table>
+        <div class="section-title">Reserva Legal</div>
+        <p><strong>Localização da Reserva Legal:</strong> $rowProperties.legalReserveLocation.values().iterator().next()</p>
+        <p><strong>Informação Documental</strong></p>
+        <table>
+            <tr>
+                <th>Descrição</th>
+                <th>Área (ha)</th>
+            </tr>
+            <tr>
+                <td>Área de Reserva Legal Averba, referente ao Art. 30 da Lei nº 12.651/2012</td>
+                <td>0.0</td>
+            </tr>
+        </table>
+        <p><strong>Informação Georreferenciada</strong></p>
+        <table>
+            <tr>
+                <th>Descrição</th>
+                <th>Área (ha)</th>
+            </tr>
+            <tr>
+                <td>Área de Reserva Legal Averba</td>
+                <td>$rowProperties.areaReservaLegalAverbada.values().iterator().next()</td>
+            </tr>
+            <tr>
+                <td>Área de Reserva Legal Aprovada não Averba</td>
+                <td>$rowProperties.areaReservaLegalAprovadaNaoAverbada.values().iterator().next()</td>
+            </tr>
+            <tr>
+                <td>Área de Reserva Legal Proposta</td>
+                <td>$rowProperties.areaReservaLegalProposta.values().iterator().next()</td>
+            </tr>
+            <tr>
+                <td><strong>Total de Reserva Legal Declarada pelo Proprietário/Possuidor</strong></td>
+                <td>$rowProperties.areaReservaLegalDeclaradaProprietarioPossuidor.values().iterator().next()</td>
+            </tr>
+        </table>
+        <div class="section-title">Áreas de Preservação Permanente (APP)</div>
+        <table>
+            <tr>
+                <th>Descrição</th>
+                <th>Área (ha)</th>
+            </tr>
+            <tr>
+                <td>APP</td>
+                <td>$rowProperties.areaPreservacaoPermanente.values().iterator().next()</td>
+            </tr>
+            <tr>
+                <td>APP em Área Rural Consolidada</td>
+                <td>$rowProperties.areaPreservacaoPermanenteAreaRuralConsolidada.values().iterator().next()</td>
+            </tr>
+            <tr>
+                <td>APP em Área de Remanescente de Vegetação Nativa</td>
+                <td>0.0</td>
+            </tr>
+        </table>
+        <div class="section-title">Áreas de Uso Restrito</div>
+        <table>
+            <tr>
+                <th>Descrição</th>
+                <th>Área (ha)</th>
+            </tr>
+            <tr>
+                <td>Áreas de Uso Restrito</td>
+                <td>$rowProperties.areaUsoRestrito.values().iterator().next()</td>
+            </tr>
+            <tr>
+                <td>Área de Uso Restrito por declividade</td>
+                <td>$rowProperties.areaUsoRestritoDeclividade.values().iterator().next()</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p><strong>CAR – Cadastro Ambiental Rural</strong></p>
+        <p><strong>Página 2 de 3</strong></p>
+        <p>Demonstrativo gerado em 11/07/25</p>
     </div>
 </div>
 
+<!-- Page 3 -->
+<div class="page">
+    <div class="page-content">
+        <img class="flag" src="https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg" alt="Bandeira do Brasil">
+        <h1>Demonstrativo do Status das Informações Declaradas no CAR</h1>
 
+        <table>
+            <tr>
+                <td><strong>Registro de Inscrição no CAR:</strong> $rowProperties.codigoImovel.values().iterator().next()</td>
+                <td><strong>Data de Inscrição:</strong> $rowProperties.dataCadastro.values().iterator().next()</td>
+                <td><strong>Data da Última Alteração:</strong>
+                    $rowProperties.dataUltimaAtualizacaoCadastro.values().iterator().next()
+                </td>
+            </tr>
+        </table>
+        <div class="section-title">Regularidade Ambiental</div>
+        <p>Para imóveis não analisados, o sistema adota o artigo 12 da Lei nº 12.651/2012 como referência para garantir a
+            conformidade legal em
+            relação à Reserva Legal. Para imóveis analisados, as informações apresentadas neste item são provenientes da análise
+            realizada pelo órgão
+            estadual competente. No caso de Estados que utilizam sistema próprio, caso as informações da análise da regularidade
+            ambiental não sejam
+            enviadas ao SICAR federal pelo órgão estadual competente, o sistema realiza automaticamente o cálculo com base nos
+            dados declarados, a
+            partir da aplicação da Lei 12.651/2012 e regulamentos.
+        </p>
 
-<div style="text-align: center; margin-bottom: 20px;">
-    <img src="https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg" width="100" alt="Bandeira do Brasil">
-</div>
-<h1 style="text-align: center;">Demonstrativo do Status das Informações Declaradas no CAR</h1>
-<table>
-    <tr>
-        <td><strong>Registro de Inscrição no CAR:</strong> $rowProperties.codigoImovel.values().iterator().next()</td>
-        <td><strong>Data de Inscrição:</strong> $rowProperties.dataCadastro.values().iterator().next()</td>
-        <td><strong>Data da Última Alteração:</strong> $rowProperties.dataUltimaAtualizacaoCadastro.values().iterator().next()</td>
-    </tr>
-</table>
-<div class="section-title">Regularidade Ambiental</div>
-<p>Para imóveis não analisados, o sistema adota o artigo 12 da Lei nº 12.651/2012 como referência para garantir a conformidade legal em
-    relação à Reserva Legal. Para imóveis analisados, as informações apresentadas neste item são provenientes da análise realizada pelo órgão
-    estadual competente. No caso de Estados que utilizam sistema próprio, caso as informações da análise da regularidade ambiental não sejam
-    enviadas ao SICAR federal pelo órgão estadual competente, o sistema realiza automaticamente o cálculo com base nos dados declarados, a
-    partir da aplicação da Lei 12.651/2012 e regulamentos.
-</p>
+        <div class="section-title"></div>
+        <table>
+            <tr>
+                <th>Descrição</th>
+                <th>Área (ha)</th>
+            </tr>
+            <tr>
+                <td>Passivo / Excedente de Reserva Legal</td>
+                <td>-233.4352753232762</td>
+            </tr>
+            <tr>
+                <td>Area de Reserva Legal a recompor</td>
+                <td>0.0</td>
+            </tr>
+            <tr>
+                <td>Áreas de Preservação Permanente a recompor</td>
+                <td>$rowProperties.areaPreservacaoPermanenteRecompor.values().iterator().next()</td>
+            </tr>
+            <tr>
+                <td>Área de Uso Restrito a recompor</td>
+                <td>0.0</td>
+            </tr>
+        </table>
 
-<div class="section-title"></div>
-<table>
-    <tr>
-        <th>Descrição</th>
-        <th>Área (ha)</th>
-    </tr>
-    <tr>
-        <td>Passivo / Excedente de Reserva Legal</td>
-        <td>$rowProperties.areaReservaLegalPassivoExcedente.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td>Area de Reserva Legal a recompor</td>
-        <td>$rowProperties.areaReservaLegalRecompor.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td>Áreas de Preservação Permanente a recompor</td>
-        <td>$rowProperties.areaPreservacaoPermanenteRecompor.values().iterator().next()</td>
-    </tr>
-    <tr>
-        <td>Área de Uso Restrito a recompor</td>
-        <td>$rowProperties.areaPreservacaoPermanenteRecompor.values().iterator().next()</td>
-    </tr>
-</table>
+        <div class="section-title">Informações Adicionais</div>
+        <p><strong>Sobreposições:</strong></p>
+        <table border="1" style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 14px;">
+            <thead>
+            <tr>
+                <th style="padding: 6px;">Tema</th>
+                <th style="padding: 6px;">Fase</th>
+                <th style="padding: 6px;">Descrição</th>
+                <th style="padding: 6px;">Processamento</th>
+                <th style="padding: 6px;">Área de Sobreposição (ha)</th>
+                <th style="padding: 6px;">Percentual de Sobreposição (%)</th>
+            </tr>
+            </thead>
+            <tbody>
 
-<div class="section-title">Informações Adicionais</div>
-<p><strong>Sobreposições:</strong></p>
-<table border="1" style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 14px;">
-    <thead>
-    <tr>
-        <th style="padding: 6px;">Tema</th>
-        <th style="padding: 6px;">Fase</th>
-        <th style="padding: 6px;">Descrição</th>
-        <th style="padding: 6px;">Processamento</th>
-        <th style="padding: 6px;">Área de Sobreposição (ha)</th>
-        <th style="padding: 6px;">Percentual de Sobreposição (%)</th>
-    </tr>
-    </thead>
-    <tbody>
+            <tr>
+                <td style="padding: 6px;">Áreas Embargadas Sobreposição</td>
+                <td style="padding: 6px;"> - </td>
+                <td style="padding: 6px;">Infração: Infração da Flora(Não Classificada-Móvel) </td>
+                <td style="padding: 6px;">25/10/2024 </td>
+                <td style="padding: 6px; text-align: right;">748.1881 </td>
+                <td style="padding: 6px; text-align: right;">64.1024</td>
+            </tr>
 
-    <tr>
-        <td style="padding: 6px;">$item.tema</td>
-        <td style="padding: 6px;">$item.fase</td>
-        <td style="padding: 6px;">$item.descricao</td>
-        <td style="padding: 6px;">$item.processamento</td>
-        <td style="padding: 6px; text-align: right;">$item.areaSobreposicao</td>
-        <td style="padding: 6px; text-align: right;">$item.percentualSobreposicao</td>
-    </tr>
+            </tbody>
+            <tbody>
 
-    </tbody>
-    <tbody>
+            <tr>
+                <td style="padding: 6px;">Unidade de Conservação</td>
+                <td style="padding: 6px;"> - </td>
+                <td style="padding: 6px;">Área de Proteção Ambiental-ÁREA DE PROTEÇÃO AMBIENTAL POUSO ALTO </td>
+                <td style="padding: 6px;">25/10/2024</td>
+                <td style="padding: 6px; text-align: right;">1167.1764 </td>
+                <td style="padding: 6px; text-align: right;">100.0</td>
+            </tr>
 
-    <tr>
-        <td style="padding: 6px;">$item.tema</td>
-        <td style="padding: 6px;">$item.fase</td>
-        <td style="padding: 6px;">$item.descricao</td>
-        <td style="padding: 6px;">$item.processamento</td>
-        <td style="padding: 6px; text-align: right;">$item.areaSobreposicao</td>
-        <td style="padding: 6px; text-align: right;">$item.percentualSobreposicao</td>
-    </tr>
+            </tbody>
+            <tbody>
 
-    </tbody>
-    <tbody>
+            <tr>
+                <td style="padding: 6px;">Unidade de Terra indigena</td>
+                <td style="padding: 6px;"> - </td>
+                <td style="padding: 6px;">Parque-PARQUE NACIONAL DA CHAPADA DOS VEADEIROS </td>
+                <td style="padding: 6px;">25/10/2024</td>
+                <td style="padding: 6px; text-align: right;">25.8206</td>
+                <td style="padding: 6px; text-align: right;">2.2122</td>
+            </tr>
 
-    <tr>
-        <td style="padding: 6px;">$item.tema</td>
-        <td style="padding: 6px;">$item.fase</td>
-        <td style="padding: 6px;">$item.descricao</td>
-        <td style="padding: 6px;">$item.processamento</td>
-        <td style="padding: 6px; text-align: right;">$item.areaSobreposicao</td>
-        <td style="padding: 6px; text-align: right;">$item.percentualSobreposicao</td>
-    </tr>
+            </tbody>
+        </table>
+    </div>
 
-    </tbody>
-</table>
-
-<div class="footer">
-    <div class="footer-text">
-        <p style="font-weight: bold;">CAR – Cadastro Ambiental Rural</p>
-        <p style="font-weight: bold;">Página 3 de 3</p>
-        <p>Demonstrativo gerado em $generatedAt</p>
+    <div class="footer">
+        <p><strong>CAR – Cadastro Ambiental Rural</strong></p>
+        <p><strong>Página 3 de 3</strong></p>
+        <p>Demonstrativo gerado em 11/07/25</p>
     </div>
 </div>
+
 </body>
 </html>

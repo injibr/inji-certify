@@ -4,70 +4,126 @@
     <meta charset="UTF-8">
     <title>Demonstrativo do Status no CAR</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #000; padding: 8px; vertical-align: top; }
-        .section-title { margin-top: 30px; font-weight: bold; font-size: 18px; text-decoration: underline; }
-  .footer {
-    margin-top: 40px;
-    border-top: 1px solid #000;
-    padding-top: 10px;
-    font-size: 14px;
-    position: relative;
-    height: 80px;
- }
- .footer-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    line-height: 1.4;
- }
- .footer img.qr-code {
-    position: absolute;
-    top: 10px;
-    right: 0;
-    width: 60px;
-    height: 60px;
- }
+        @page {
+          margin: 10px; /* Minimal margin on all sides for print/PDF */
+        }
+        body {
+          font-family: Arial, sans-serif;
+          font-size: 13px;
+          margin: 0;
+          padding: 0;
+        }
 
+        .page {
+          page-break-after: always;
+          height: 980px;
+          box-sizing: border-box;
+          position: relative;
+          margin: 0;
+          padding: 18px;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 10px;
+          font-size: 13px;
+        }
+
+        th, td {
+          border: 1px solid #000;
+          padding: 5px;
+          vertical-align: top;
+        }
+
+        .section-title {
+          margin-top: 16px;
+          font-weight: bold;
+          font-size: 17px;
+        }
+
+    .footer {
+      position: absolute;
+      bottom: -100px;
+      left: 0;
+      right: 0;
+      height: 80px;
+      border-top: 1px solid #000;
+      display: flex;
+      justify-content: center; /* centers footer-text horizontally */
+      align-items: center;      /* aligns both footer-text and QR code vertically */
+      padding: 0 18px;
+      box-sizing: border-box;
+    }
+
+    .footer-text {
+      text-align: center;
+      font-size: 13px;
+      font-weight: bold;
+      line-height: 1;
+    }
+
+    .qr-code {
+      position: absolute;
+      right: 18px;
+      bottom: 10px;
+      width: 60px;
+      height: 60px;
+    }
+
+
+
+
+
+        h1 {
+        font-family: Arial, sans-serif;
+        font-size: 25px;
+        font-weight: bold;
+        text-align: center;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+
+        li {
+          font-size: 14px;
+        }
     </style>
+
 </head>
 <body>
 <!-- 🇧🇷 Flag and Page 1 -->
-<div>
+<div class="page">
     <div style="text-align: center; margin-bottom: 20px;">
         <img src="https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg" width="100" alt="Bandeira do Brasil">
     </div>
     <!-- Page 1 -->
-    <h1 style="text-align: center;">Demonstrativo do Status das Informações Declaradas no CAR</h1>
-    <table>
+    <h1>RECIBO DE INSCRIÇÃO DO IMÓVEL RURAL NO CAR</h1>
+    <table style="margin-bottom: 40px;">
         <tr>
-            <td><strong>Registro no CAR:</strong> $rowProperties.codigoImovel.values().iterator().next()</td>
-            <td><strong>Data de Cadastro:</strong> $rowProperties.dataCadastro.values().iterator().next()</td>
+            <td>Registro no CAR: $rowProperties.codigoImovel.values().iterator().next()</td>
+            <td>Data de Cadastro: $rowProperties.dataCadastro.values().iterator().next()</td>
         </tr>
     </table>
     <div class="section-title" style="text-align: center;">RECIBO DE INSCRIÇÃO DO IMÓVEL RURAL NO CAR</div>
     <table>
         <tr>
-            <td colspan="3"><strong>Nome do Imóvel Rural:</strong> $rowProperties.nomeImovel.values().iterator().next()</td>
+            <td colspan="4">Nome do Imóvel Rural: $rowProperties.nomeImovel.values().iterator().next()</td>
         </tr>
         <tr>
-            <td colspan="2"><strong>Módulos Fiscais:</strong> $rowProperties.municipio.values().iterator().next()</td>
-            <td><strong>UF: </strong>$rowProperties.unidadefederativa.values().iterator().next()</td>
+            <td colspan="3">Módulos Fiscais: $rowProperties.municipio.values().iterator().next()</td>
+            <td>UF: $rowProperties.unidadefederativa.values().iterator().next()</td>
         </tr>
         <tr>
-            <td><strong>Coordenadas do Centróide:</strong></td>
-            <td><strong>Latitude:</strong> $rowProperties.coordenadaImovelX.values().iterator().next()</td>
-            <td><strong>Longitude:</strong> $rowProperties.coordenadaImovelY.values().iterator().next()</td>
+            <td colspan="2">Coordenadas Geográficas do Centroide do Imóvel Rural:</td>
+            <td colspan="1">Latitude: $rowProperties.coordenadaImovelX.values().iterator().next()</td>
+            <td colspan="1">Longitude: $rowProperties.coordenadaImovelY.values().iterator().next()</td>
         </tr>
         <tr>
-            <td colspan="2"><strong>Area Total (ha) do Imóvel Rural:</strong> $rowProperties.areaTotalImovel.values().iterator().next()</td>
-            <td><strong>Módulos Fiscais: </strong>$rowProperties.moduloFiscal.values().iterator().next()</td>
+            <td colspan="3">Area Total (ha) do Imóvel Rural: $rowProperties.areaTotalImovel.values().iterator().next()</td>
+            <td>Módulos Fiscais: $rowProperties.moduloFiscal.values().iterator().next()</td>
         </tr>
         <tr>
-            <td colspan="3"><strong>Código do Protocolo:</strong> $rowProperties.protocolo.values().iterator().next()</td>
+            <td colspan="4">Código do Protocolo: $rowProperties.protocolo.values().iterator().next()</td>
         </tr>
     </table>
     <div class="section-title">Informações Gerais</div>
@@ -81,19 +137,20 @@
         <li>Este documento não substitui qualquer licença ou autorização ambiental para exploração florestal ou supressão devegetação, como também nãodispensa as autorizações necessárias ao exercício da atividade econômica no imóvel rural;</li>
         <li>A nscrição do Imóvel Rural no CAR não será considerada título para fins de reconhecimento de direito de propriedadeou posse; e</li>
         <li>O declarante assume plena responsabilidade ambiental sobre o Imóvel Rural declarado em seu nome, sem prejuízode responsabilização por danos ambientais em área contígua, posteriormente comprovada como de sua propriedade ou posse.
-            <br><br><span style="display:block; height:300px;"></span></li>
+            <br><br><span class="spacer-vertical"></span></li>
     </ol>
     <div class="footer">
         <div class="footer-text">
-            <p>CAR – Cadastro Ambiental Rural</p>
+            <p style="font-size: 15px;">CAR – Cadastro Ambiental Rural</p>
             <p>Página 1/2</p>
         </div>
-        <img class="qr-code" src="path/to/qr-code.png" alt="QR Code">
+        <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?data=YOUR_DATA&size=150x150" alt="QR Code">
+
     </div>
 
 </div>
 <!-- Page Break for PDF Rendering -->
-<div>
+<div class="page">
     <!-- Page 2 -->
     <div style="text-align: center;">
         <img src="https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg" width="100" alt="Bandeira do Brasil">
@@ -101,25 +158,30 @@
     </div>
     <table>
         <tr>
-            <td><strong>Registro no CAR:</strong> $rowProperties.codigoImovel.values().iterator().next()</td>
-            <td><strong>Data de Cadastro:</strong> $rowProperties.dataCadastro.values().iterator().next()</td>
+            <td>Registro no CAR: $rowProperties.codigoImovel.values().iterator().next()</td>
+            <td>Data de Cadastro: $rowProperties.dataCadastro.values().iterator().next()</td>
         </tr>
     </table>
     <div class="section-title">INFORMAÇÕES ADICIONAIS</div>
     <p style="border: 1px solid black;">$rowProperties.informacoesAdicionais.values().iterator().next()</p>
     <div class="section-title">REPRESENTAÇÃO GRÁFICA</div>
-    <img src="$graphicImageBase64" width="100%" alt="Representação Gráfica" />
+    <div>
+        <img src="data:image/jpeg;base64,$rowProperties.geoImovel.values().iterator().next()" alt="Satellite Image" style="width:100%; max-width:800px;" />
+        <!--        <p style="width:100%; max-width:800px;">$rowProperties.geoImovel.values().iterator().next()</p>-->
+    </div>
+
+
     <div class="section-title">IDENTIFICAÇÃO DO PROPRIETÁRIO/POSSUIDOR</div>
     <table>
         <tr>
-            <td colspan="3"><strong>CPF:</strong> $rowProperties.cpfCnpj.values().iterator().next()</td>
-            <td colspan="3"><strong>Nome:</strong> $rowProperties.nomeProprietario.values().iterator().next()</td>
+            <td colspan="3">CPF: $rowProperties.cpfCnpj.values().iterator().next()</td>
+            <td colspan="3">Nome: $rowProperties.nomeProprietario.values().iterator().next()</td>
         </tr>
     </table>
     <div class="section-title" style="font-weight: bold; margin-bottom: 4px;">
         ÁREAS DECLARADAS (em hectares)
     </div>
-    <table style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 16px; table-layout: fixed;">
+    <table>
         <colgroup>
             <col style="width: 40%;">
             <col style="width: 10%;">
@@ -165,10 +227,10 @@
     </table>
     <div class="footer">
         <div class="footer-text">
-            <p>CAR – Cadastro Ambiental Rural</p>
+            <p style="font-size: 16px;">CAR – Cadastro Ambiental Rural</p>
             <p>Página 1/2</p>
         </div>
-        <img class="qr-code" src="path/to/qr-code.png" alt="QR Code">
+        <img class="qr-code" src="data:image/png;base64,$qrCodeImage" alt="QR Code">
     </div>
 </div>
 </body>
