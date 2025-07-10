@@ -67,6 +67,11 @@
 			<id>danubetech-maven-public</id>
 			<url>https://repo.danubetech.com/repository/maven-public/</url>
 		</repository>
+		<repository>
+			<id>osgeo</id>
+			<name>GeoTools Release Repository</name>
+			<url>https://repo.osgeo.org/repository/release/</url>
+		</repository>
 	</repositories>
 
 	<distributionManagement>
