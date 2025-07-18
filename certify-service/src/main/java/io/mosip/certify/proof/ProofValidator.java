@@ -23,6 +23,7 @@ public interface ProofValidator {
      * @return true if proof passes all the validation else false
      */
     boolean validate(String clientId, String cNonce, CredentialProof credentialProof);
+    boolean validate(String clientId, CredentialProof credentialProof);
 
     /**
      * Extracts the holders public key for VC cryptographic binding from the proof header

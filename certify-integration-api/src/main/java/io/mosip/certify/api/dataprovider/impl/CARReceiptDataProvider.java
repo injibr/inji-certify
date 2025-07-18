@@ -15,7 +15,7 @@ public class CARReceiptDataProvider implements DataProviderService {
 
     @Override
     public String getDocumentType() {
-        return "CARReceiptDocument";
+        return "CARReceipt";
     }
 
     private final WebClient webClient;

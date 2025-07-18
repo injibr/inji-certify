@@ -126,17 +126,16 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
 
         if(!parsedAccessToken.isActive())
             throw new NotAuthenticatedException();
-        // 2. Scope Validation
-        String scopeClaim = (String) parsedAccessToken.getClaims().getOrDefault("scope", "");
-        CredentialMetadata credentialMetadata = null;
-        for(String scope : scopeClaim.split(Constants.SPACE)) {
+        String scopeClaim = credentialRequest.getDoctype();
+        Optional<CredentialMetadata> credentialMetadataOptional = getScopeCredentialMapping(credentialRequest.getDoctype(), credentialRequest.getIssuerId(), credentialRequest.getFormat());
+        /*for(String scope : scopeClaim.split(Constants.SPACE)) {
             Optional<CredentialMetadata> result = getScopeCredentialMapping(scope, credentialRequest.getFormat());
             if(result.isPresent()) {
                 credentialMetadata = result.get(); //considering only first credential scope
                 break;
             }
-        }
-
+        }*/
+        CredentialMetadata credentialMetadata = credentialMetadataOptional.orElse(null);
         if(credentialMetadata == null) {
             log.error("No credential mapping found for the provided scope {}", scopeClaim);
             throw new CertifyException(ErrorConstants.INVALID_SCOPE);
@@ -144,8 +143,7 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
 
         // 3. Proof Validation
         ProofValidator proofValidator = proofValidatorFactory.getProofValidator(credentialRequest.getProof().getProof_type());
-        if(!proofValidator.validate((String)parsedAccessToken.getClaims().get(Constants.CLIENT_ID), getValidClientNonce(),
-                credentialRequest.getProof())) {
+        if(!proofValidator.validate((String)parsedAccessToken.getClaims().get(Constants.CLIENT_ID), credentialRequest.getProof())) {
             throw new CertifyException(ErrorConstants.INVALID_PROOF);
         }
 
@@ -162,24 +160,13 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
     }
 
     @Override
-    public Map<String, Object> getCredentialIssuerMetadata(String version) {
-        if(issuerMetadata.containsKey(version)) {
-            return issuerMetadata.get(version);
-        } else if(version != null && version.equals("CAR")) {
-            LinkedHashMap<String, Object> originalIssuerMetadata = new LinkedHashMap<>(issuerMetadata.get("CAR_mock"));
-            issuerMetadata.put("CAR", originalIssuerMetadata);
-            return issuerMetadata.get("CAR");
-        } else if(version != null && version.equals("CCIR")) {
-            LinkedHashMap<String, Object> originalIssuerMetadata = new LinkedHashMap<>(issuerMetadata.get("CCIR_mock"));
-            issuerMetadata.put("CCIR", originalIssuerMetadata);
-            return issuerMetadata.get("CCIR");
-        }else if(version != null && version.equals("CARReceiptDocument")) {
-            LinkedHashMap<String, Object> originalIssuerMetadata = new LinkedHashMap<>(issuerMetadata.get("CAR_mock"));
-            issuerMetadata.put("CARReceiptDocument", originalIssuerMetadata);
-            return issuerMetadata.get("CARReceiptDocument");
-        }
+    public Map<String, Object> getCredentialIssuerMetadata(String issuerId) {
+        HashMap<String, Object> credentialIssuerMetadata = issuerMetadata.get(issuerId);
+        if (credentialIssuerMetadata != null)
+            return credentialIssuerMetadata;
         throw new InvalidRequestException(ErrorConstants.UNSUPPORTED_OPENID_VERSION);
     }
+
 
     @Override
     public Map<String, Object> getDIDDocument() {
@@ -327,6 +314,8 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                 vcRequestDto.setType(credentialRequest.getCredential_definition().getType());
                 vcRequestDto.setCredentialSubject(credentialRequest.getCredential_definition().getCredentialSubject());
                 validateLdpVcFormatRequest(credentialRequest, credentialMetadata);
+                Map <String, Object> idenityDetails = parsedAccessToken.getClaims();
+                idenityDetails.put("docType", credentialRequest.getDoctype());
                 try {
                     // TODO(multitenancy): later decide which plugin out of n plugins is the correct one
                     JSONObject jsonObject = dataProviderPlugin.fetchData(parsedAccessToken.getClaims());
@@ -373,11 +362,11 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
         throw new CertifyException(ErrorConstants.UNSUPPORTED_VC_FORMAT);
     }
 
-    private Optional<CredentialMetadata>  getScopeCredentialMapping(String scope, String format) {
-        Map<String, Object> vciMetadata = getCredentialIssuerMetadata(scope);
+    private Optional<CredentialMetadata>  getScopeCredentialMapping(String doctype, String issuerId, String format) {
+        Map<String, Object> vciMetadata = getCredentialIssuerMetadata(issuerId);
         LinkedHashMap<String, Object> supportedCredentials = (LinkedHashMap<String, Object>) vciMetadata.get("credential_configurations_supported");
         Optional<Map.Entry<String, Object>> result = supportedCredentials.entrySet().stream()
-                .filter(cm -> ((LinkedHashMap<String, Object>) cm.getValue()).get("scope").equals(scope)).findFirst();
+                .filter(cm -> cm.getKey().equals(doctype)).findFirst();
 
         if(result.isPresent()) {
             LinkedHashMap<String, Object> metadata = (LinkedHashMap<String, Object>)result.get().getValue();

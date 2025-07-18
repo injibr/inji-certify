@@ -47,4 +47,5 @@ public class CredentialRequest {
     private String doctype;
 
     private Map<String,Object> claims;
+    private String issuerId;
 }

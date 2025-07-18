@@ -34,7 +34,7 @@ public class CCIRDataProvider implements DataProviderService {
 
     @Override
     public String getDocumentType() {
-        return "CCIR";
+        return "CCIRCredential";
     }
 
     @Override

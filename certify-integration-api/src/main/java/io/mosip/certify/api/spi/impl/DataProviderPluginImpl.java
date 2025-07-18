@@ -32,7 +32,7 @@ public class DataProviderPluginImpl implements DataProviderPlugin {
     }
     @Override
     public JSONObject fetchData(Map<String, Object> identityDetails) throws DataProviderExchangeException {
-        DataProviderService dataProviderService = instanceMap.get(identityDetails.get("scope").toString());
+        DataProviderService dataProviderService = instanceMap.get((String) identityDetails.get("docType"));
         if (dataProviderService == null) {
             throw new IllegalArgumentException("No provider found for: " + "document");
         }
