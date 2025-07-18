@@ -126,6 +126,59 @@ public class JwtProofValidator implements ProofValidator {
     }
 
     @Override
+    public boolean validate(String clientId, CredentialProof credentialProof) {
+        if(credentialProof.getJwt() == null || credentialProof.getJwt().isBlank()) {
+            log.error("Found invalid jwt in the credential proof");
+            return false;
+        }
+
+        try {
+            SignedJWT jwt = (SignedJWT) JWTParser.parse(credentialProof.getJwt());
+            validateHeaderClaims(jwt.getHeader());
+
+            JWK jwk = getKeyFromHeader(jwt.getHeader());
+            if(jwk.isPrivate()) {
+                log.error("Provided key material contains private key! Rejecting proof.");
+                throw new InvalidRequestException(ErrorConstants.PROOF_HEADER_INVALID_KEY);
+            }
+
+            DefaultJWTClaimsVerifier claimsSetVerifier = new DefaultJWTClaimsVerifier(new JWTClaimsSet.Builder()
+                    .audience(credentialIdentifier)
+                    .build(), REQUIRED_CLAIMS);
+            claimsSetVerifier.setMaxClockSkew(0);
+            JWSKeySelector keySelector;
+            if(JWSAlgorithm.ES256K.equals(jwt.getHeader().getAlgorithm())) {
+                ECDSAVerifier verifier = new ECDSAVerifier((com.nimbusds.jose.jwk.ECKey) jwk);
+                verifier.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
+                boolean verified = jwt.verify(verifier);
+                claimsSetVerifier.verify(jwt.getJWTClaimsSet(), null);
+                return verified;
+            } else if (JWSAlgorithm.Ed25519.equals(jwt.getHeader().getAlgorithm())) {
+                Ed25519Verifier verifier = new Ed25519Verifier(jwk.toOctetKeyPair());
+                boolean verified = jwt.verify(verifier);
+                claimsSetVerifier.verify(jwt.getJWTClaimsSet(), null);
+                return verified;
+            } else {
+                keySelector = new JWSVerificationKeySelector(allowedSignatureAlgorithms,
+                        new ImmutableJWKSet(new JWKSet(jwk)));
+                ConfigurableJWTProcessor jwtProcessor = new DefaultJWTProcessor();
+                jwtProcessor.setJWSKeySelector(keySelector);
+                jwtProcessor.setJWSTypeVerifier(new DefaultJOSEObjectTypeVerifier(new JOSEObjectType(HEADER_TYP)));
+                jwtProcessor.setJWTClaimsSetVerifier(claimsSetVerifier);
+                jwtProcessor.process(credentialProof.getJwt(), null);
+                return true;
+            }
+        } catch (InvalidRequestException e) {
+            log.error("Invalid proof : {}", e.getErrorCode());
+        } catch (ParseException e) {
+            log.error("Failed to parse jwt in the credential proof", e);
+        } catch (BadJOSEException | JOSEException e) {
+            log.error("JWT proof verification failed", e);
+        }
+        return false;
+    }
+
+    @Override
     public String getKeyMaterial(CredentialProof credentialProof) {
         try {
             SignedJWT jwt = (SignedJWT) JWTParser.parse(credentialProof.getJwt());
