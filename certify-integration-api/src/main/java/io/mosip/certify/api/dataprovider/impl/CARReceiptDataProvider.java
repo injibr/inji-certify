@@ -15,6 +15,7 @@ public class CARReceiptDataProvider implements DataProviderService {
 
     @Override
     public String getDocumentType() {
+        //Changed the data provider type to CARReceipt to match with certify json key to integrate with govbr
         return "CARReceipt";
     }
 

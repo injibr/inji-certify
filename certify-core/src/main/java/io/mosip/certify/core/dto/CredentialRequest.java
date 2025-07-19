@@ -47,5 +47,7 @@ public class CredentialRequest {
     private String doctype;
 
     private Map<String,Object> claims;
+
+    //Added issuerId to track the issuer of the credential to integrate with govbr
     private String issuerId;
 }

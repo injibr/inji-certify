@@ -77,6 +77,7 @@ public class VCIssuanceController {
     @GetMapping(value = "/.well-known/openid-credential-issuer",produces = "application/json")
     public Map<String, Object> getMetadata(
             @RequestParam(name = "issuer_id", required = false, defaultValue = "latest") String issuerId) {
+        // Changed Request param from version to issuer_id, to integrate with govbr
         return vcIssuanceService.getCredentialIssuerMetadata(issuerId);
     }
 
