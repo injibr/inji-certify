@@ -128,6 +128,7 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
             throw new NotAuthenticatedException();
         String scopeClaim = credentialRequest.getDoctype();
         Optional<CredentialMetadata> credentialMetadataOptional = getScopeCredentialMapping(credentialRequest.getDoctype(), credentialRequest.getIssuerId(), credentialRequest.getFormat());
+        // Removed the loop to get the first credential scope mapping, as we are now fetching it directly based on doctype and issuerId, to integrate with govbr
         /*for(String scope : scopeClaim.split(Constants.SPACE)) {
             Optional<CredentialMetadata> result = getScopeCredentialMapping(scope, credentialRequest.getFormat());
             if(result.isPresent()) {
