@@ -125,6 +125,7 @@ public class JwtProofValidator implements ProofValidator {
         return false;
     }
 
+    //Overloaded method to support legacy clients that do not send cNonce, to integrate with govbr
     @Override
     public boolean validate(String clientId, CredentialProof credentialProof) {
         if(credentialProof.getJwt() == null || credentialProof.getJwt().isBlank()) {

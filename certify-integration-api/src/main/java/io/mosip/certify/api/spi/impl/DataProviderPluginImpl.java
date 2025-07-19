@@ -32,6 +32,7 @@ public class DataProviderPluginImpl implements DataProviderPlugin {
     }
     @Override
     public JSONObject fetchData(Map<String, Object> identityDetails) throws DataProviderExchangeException {
+        //Sending docType as certify key from mimoto that should match the instance Map key, to integrate with govbr
         DataProviderService dataProviderService = instanceMap.get((String) identityDetails.get("docType"));
         if (dataProviderService == null) {
             throw new IllegalArgumentException("No provider found for: " + "document");

@@ -34,6 +34,7 @@ public class CCIRDataProvider implements DataProviderService {
 
     @Override
     public String getDocumentType() {
+        //Changed the data provider type to CCIRCredential to match with certify json key to integrate with govbr
         return "CCIRCredential";
     }
 
