@@ -71,9 +71,10 @@ services:
       - ./config/mimoto-issuers-config.json:/home/mosip/mimoto-issuers-config.json
       - ./config/mimoto-trusted-verifiers.json:/home/mosip/mimoto-trusted-verifiers.json
       - ./config/credential-template.html:/home/mosip/credential-template.html
-      - ./config/CCIR_mock-CCIRCredential-template.html:/home/mosip/CCIR_mock-CCIRCredential-template.html
-      - ./config/CAR_mock-CARReceipt-template.html:/home/mosip/CAR_mock-CARReceipt-template.html
-      - ./config/CAR_mock-CARCredentail-template.html:/home/mosip/CAR_mock-CARCredentail-template.html
+      - ./config/INCRA-CCIRCredential-template.html:/home/mosip/INCRA-CCIRCredential-template.html
+      - ./config/MGI-CARReceipt-template.html:/home/mosip/MGI-CARReceipt-template.html
+      - ./config/MGI-CARDocument-template.html:/home/mosip/MGI-CARDocument-template.html
+      - ./config/MDA-CAFCredential-template.html:/home/mosip/MDA-CAFCredential-template.html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - mimoto-service
