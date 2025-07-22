@@ -13,6 +13,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Component
 public class CARDataProvider implements DataProviderService {
 
+    private final SicarCpfCnpjClient sicarCpfCnpjClient;
+
     private final WebClient webClient;
 
     private final String scope = "";
@@ -21,9 +23,10 @@ public class CARDataProvider implements DataProviderService {
 
     private final CarTokenClient carTokenClient;
 
-    public CARDataProvider(WebClient.Builder webClientBuilder,
+    public CARDataProvider(SicarCpfCnpjClient sicarCpfCnpjClient, WebClient.Builder webClientBuilder,
                            @Value("${car.document.api.url}")String apiUrl,
                            CarTokenClient carTokenClient) {
+        this.sicarCpfCnpjClient = sicarCpfCnpjClient;
         this.webClient = webClientBuilder.build();
         this.apiUrl = apiUrl;
         this.carTokenClient = carTokenClient;
@@ -51,10 +54,11 @@ public class CARDataProvider implements DataProviderService {
     public JSONObject getData() throws JSONException {
         // Step 1: Get access token
         String accessToken = carTokenClient.getAccessToken();
+        String registrationNumber = sicarCpfCnpjClient.getRegistrationNumber("06005017951", accessToken);
 
         // Step 2: Call protected API with Bearer token
         String response =  webClient.get()
-                .uri(apiUrl)
+                .uri(String.format(apiUrl, registrationNumber))
                 .headers(headers -> headers.setBearerAuth(accessToken))
                 .retrieve()
                 .bodyToMono(String.class)
