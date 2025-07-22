@@ -9,7 +9,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
 public class CARReceiptDataProvider implements DataProviderService {
+
     private final MapImageGeneratorService mapImageGeneratorService;
+
+    private final SicarCpfCnpjClient sicarCpfCnpjClient;
 
     private final WebClient webClient;
 
@@ -21,11 +24,12 @@ public class CARReceiptDataProvider implements DataProviderService {
 
     private final CarTokenClient carTokenClient;
 
-    public CARReceiptDataProvider(MapImageGeneratorService mapImageGeneratorService,
+    public CARReceiptDataProvider(MapImageGeneratorService mapImageGeneratorService, SicarCpfCnpjClient sicarCpfCnpjClient,
                                   WebClient.Builder webClientBuilder,
                                   @Value("${car.receipt.api.url}") String apiUrl,
                                   CarTokenClient carTokenClient) {
         this.mapImageGeneratorService = mapImageGeneratorService;
+        this.sicarCpfCnpjClient = sicarCpfCnpjClient;
         this.webClient = webClientBuilder.build();
         this.apiUrl = apiUrl;
         this.carTokenClient = carTokenClient;
@@ -50,10 +54,10 @@ public class CARReceiptDataProvider implements DataProviderService {
     public JSONObject getData() throws Exception {
         // Step 1: Get access token
         String accessToken = carTokenClient.getAccessToken();
-
+        String registrationNumber = sicarCpfCnpjClient.getRegistrationNumber("06005017951", accessToken);
         // Step 2: Call protected API with Bearer token
         String response = webClient.get()
-                .uri(apiUrl)
+                .uri(String.format(apiUrl,registrationNumber))
                 .headers(headers -> headers.setBearerAuth(accessToken))
                 .retrieve()
                 .bodyToMono(String.class)
