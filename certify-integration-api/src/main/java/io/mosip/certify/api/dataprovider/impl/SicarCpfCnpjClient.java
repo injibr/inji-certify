@@ -3,6 +3,7 @@ package io.mosip.certify.api.dataprovider.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -11,6 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * Client for retrieving registration numbers based on CPF numbers from the Sicar service.
  * This client uses WebClient to make HTTP requests to the specified URL.
  */
+@Slf4j
 @Component
 public class SicarCpfCnpjClient {
     private final WebClient webClient;
@@ -29,6 +31,7 @@ public class SicarCpfCnpjClient {
      * @return the registration number associated with the CPF
      */
     public String getRegistrationNumber(String cpfNo, String accessToken) {
+        log.info("Fetching registration number for CPF: {} with token {}", cpfNo,accessToken);
         String response = webClient.get()
                 .uri(String.format(url, cpfNo))
                 .headers(headers -> headers.setBearerAuth(accessToken))

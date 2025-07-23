@@ -1,6 +1,7 @@
 package io.mosip.certify.api.dataprovider.impl;
 
 import io.mosip.certify.api.dataprovider.DataProviderService;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 /* This class implements the DataProviderService to fetch data from the CAR API.
  * It retrieves an OAuth2 token and uses it to access protected resources.
  */
+@Slf4j
 @Component
 public class CARDataProvider implements DataProviderService {
 
@@ -55,7 +57,7 @@ public class CARDataProvider implements DataProviderService {
         // Step 1: Get access token
         String accessToken = carTokenClient.getAccessToken();
         String registrationNumber = sicarCpfCnpjClient.getRegistrationNumber("06005017951", accessToken);
-
+        log.info("Registration Number: {}", registrationNumber);
         // Step 2: Call protected API with Bearer token
         String response =  webClient.get()
                 .uri(String.format(apiUrl, registrationNumber))
