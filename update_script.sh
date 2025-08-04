@@ -182,8 +182,10 @@ function baixar_codigo() {
     escrever_mensagem "Atualizando código para nova versão $TAG..."
     escrever_log "Iniciando download do código versão $TAG"
     
+    git fetch github tag $TAG
     # Capturar saída completa do comando git pull
-    resultado_pull=$(git pull --no-edit github "$TAG" --allow-unrelated-histories 2>&1)
+    resultado_pull=$(git merge --allow-unrelated-histories -X theirs tags/$TAG 2>&1)
+   
     if [ $? -ne 0 ]; then
         mensagem_erro="Falha ao baixar o código da versão $TAG."
         detalhes_erro="Código de erro: $?. Detalhes: $resultado_pull"
@@ -282,7 +284,7 @@ function enviar_scm() {
 function enviar_versao_para_ic() {
     # atualizar_arquivos_propriedades
     baixar_codigo
-    enviar_codigo
+    #enviar_codigo
     #enviar_scm
 }
 
