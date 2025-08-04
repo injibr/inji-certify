@@ -15,7 +15,7 @@ INPUT_LDAP_CREDENTIAL=true
 LDAP_USER="USER"  # Substitua pelo seu usuário
 LDAP_PASSWORD="PASS"  # Substitua pela sua senha
 
-#####
+#####f
 
 USAR_TAG_PREDEFINIDA=true   # Defina como true para usar a tag predefinida ou false para solicitar ao usuário
 TAG=""
@@ -284,8 +284,8 @@ function enviar_scm() {
 function enviar_versao_para_ic() {
     # atualizar_arquivos_propriedades
     baixar_codigo
-    #enviar_codigo
-    #enviar_scm
+    enviar_codigo
+    enviar_scm
 }
 
 function atualizar_arquivos_propriedades() {
