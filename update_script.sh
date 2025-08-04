@@ -245,7 +245,8 @@ function enviar_codigo() {
     
     # Realizar o commit
     git commit -m "Atualizando arquivos para versão $TAG"
-    nova_tag_git
+    #Tag ja baixada junto com o codigo
+    #nova_tag_git
 }
 
 function enviar_scm() {
