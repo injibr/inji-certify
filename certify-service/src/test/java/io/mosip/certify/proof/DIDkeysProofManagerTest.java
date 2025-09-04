@@ -109,6 +109,7 @@ public class DIDkeysProofManagerTest {
         assertEquals("EC", result.getKeyType().getValue());
         assertEquals("-wim35fhXPUsGq78EeP90JV1Fq0YvvYTbc_0kqhB6cQ", ((ECKey) result).getX().toString());
         assertEquals("42YsvtOfjrHASU_mJTraPLeEuA-At3YsXQwbRZDpM_A", ((ECKey) result).getY().toString());
+        assertEquals("did:key:literal:REDACTED", result.getKeyID() );
     }
 
     @Test
