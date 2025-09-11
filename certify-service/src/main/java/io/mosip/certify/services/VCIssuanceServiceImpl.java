@@ -48,7 +48,8 @@ import java.util.*;
 @ConditionalOnProperty(value = "mosip.certify.plugin-mode", havingValue = "VCIssuance")
 public class VCIssuanceServiceImpl implements VCIssuanceService {
 
-    @Value("#{${mosip.certify.key-values}}")
+    //This map contains the issuer metadata for different versions
+    //removed the implementation that picks up the value from property file,to integrate with govbr
     private LinkedHashMap<String, LinkedHashMap<String, Object>> issuerMetadata;
 
     @Value("${mosip.certify.cnonce-expire-seconds:300}")
