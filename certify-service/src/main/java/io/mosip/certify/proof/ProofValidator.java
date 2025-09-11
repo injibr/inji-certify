@@ -25,6 +25,16 @@ public interface ProofValidator {
     boolean validate(String clientId, String cNonce, CredentialProof credentialProof);
 
     /**
+     * Validates the input proof.
+     * @param clientId Client ID as in the bearer access token
+     * @param credentialProof proof from the credential request.
+     * @return true if proof passes all the validation else false
+     *
+     * Overloaded method to support legacy clients that do not send cNonce, to integrate with govbr
+     */
+    boolean validate(String clientId, CredentialProof credentialProof);
+
+    /**
      * Extracts the holders public key for VC cryptographic binding from the proof header
      * @param credentialProof proof from the credential request.
      * @return public key as did:jwk equivalent
