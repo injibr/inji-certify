@@ -12,8 +12,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Component
 public class CARReceiptDataProvider implements DataProviderService {
 
-    private final MapImageGeneratorService mapImageGeneratorService;
-
     private final SicarCpfCnpjClient sicarCpfCnpjClient;
 
     private final WebClient webClient;
@@ -26,11 +24,10 @@ public class CARReceiptDataProvider implements DataProviderService {
 
     private final CarTokenClient carTokenClient;
 
-    public CARReceiptDataProvider(MapImageGeneratorService mapImageGeneratorService, SicarCpfCnpjClient sicarCpfCnpjClient,
+    public CARReceiptDataProvider( SicarCpfCnpjClient sicarCpfCnpjClient,
                                   WebClient.Builder webClientBuilder,
                                   @Value("${car.receipt.api.url}") String apiUrl,
                                   CarTokenClient carTokenClient) {
-        this.mapImageGeneratorService = mapImageGeneratorService;
         this.sicarCpfCnpjClient = sicarCpfCnpjClient;
         this.webClient = webClientBuilder.build();
         this.apiUrl = apiUrl;
@@ -69,7 +66,6 @@ public class CARReceiptDataProvider implements DataProviderService {
             throw new RuntimeException("Failed to retrieve data from the API");
         }
         JSONObject jsonObject = new JSONObject(response);
-        return new JSONObject((jsonObject.getJSONArray("result").get(0)).toString())
-                .put("geoImovel", mapImageGeneratorService.generateMapImage(((JSONObject) jsonObject.getJSONArray("result").get(0)).get("geoImovel").toString()));
+        return new JSONObject((jsonObject.getJSONArray("result").get(0)).toString());
     }
 }
