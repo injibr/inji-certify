@@ -1,7 +1,6 @@
 package io.mosip.certify.api.dataprovider.impl;
 
 import io.mosip.certify.api.dataprovider.DataProviderService;
-import io.mosip.certify.api.service.MapImageGeneratorService;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
