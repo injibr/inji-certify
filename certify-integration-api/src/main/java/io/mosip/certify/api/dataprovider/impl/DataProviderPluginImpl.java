@@ -7,7 +7,9 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,12 +40,12 @@ public class DataProviderPluginImpl implements DataProviderPlugin {
             throw new IllegalArgumentException("No provider found for: " + "document");
         }
         try {
-            JSONObject data = dataProviderService.getData();
+            JSONObject data = dataProviderService.getData((String) identityDetails.get("sub"));
             log.info("Data fetched from DataProviderService : {}", data);
             return data;
         } catch (Exception e) {
             log.info("Error while fetching data from DataProviderService: {}", e.getMessage());
-            return new JSONObject();
+            throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "Error while fetching data from DataProviderService", e);
         }
     }
 }

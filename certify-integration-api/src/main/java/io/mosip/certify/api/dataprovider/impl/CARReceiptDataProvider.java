@@ -49,10 +49,10 @@ public class CARReceiptDataProvider implements DataProviderService {
      * Main method to be called after your validations.
      * It fetches the OAuth2 token, then calls the protected API using the token.
      */
-    public JSONObject getData() throws Exception {
+    public JSONObject getData(String cpfNumber) throws Exception {
         // Step 1: Get access token
         String accessToken = carTokenClient.getAccessToken();
-        String registrationNumber = sicarCpfCnpjClient.getRegistrationNumber("06005017951", accessToken);
+        String registrationNumber = sicarCpfCnpjClient.getRegistrationNumber(cpfNumber, accessToken);
         log.info("Registration Number: {}", registrationNumber);
         // Step 2: Call protected API with Bearer token
         String response = webClient.get()

@@ -14,7 +14,7 @@ public class CAFDataProvider implements DataProviderService {
     }
 
     @Override
-    public JSONObject getData() throws JSONException {
+    public JSONObject getData(String cpfNumber) throws JSONException {
         return new JSONObject()
                 .put("enquadramentoPronaf", "Simples Nacional")
                 .put("situacao", "Ativo")
