@@ -31,7 +31,7 @@ public class SicarCpfCnpjClient {
      * @return the registration number associated with the CPF
      */
     public String getRegistrationNumber(String cpfNo, String accessToken) {
-        log.info("Fetching registration number for CPF: {} with token {}", cpfNo,accessToken);
+        log.info("Fetching registration number for CPF: {}", cpfNo);
         String response = webClient.get()
                 .uri(String.format(url, cpfNo))
                 .headers(headers -> headers.setBearerAuth(accessToken))

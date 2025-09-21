@@ -39,7 +39,7 @@ public class CCIRDataProvider implements DataProviderService {
     }
 
     @Override
-    public JSONObject getData() throws JSONException {
+    public JSONObject getData(String cpfNumber) throws JSONException {
         // Step 1: Get access token
         // String accessToken = getAccessToken();
 

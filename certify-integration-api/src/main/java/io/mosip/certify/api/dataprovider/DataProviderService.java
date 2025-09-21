@@ -5,5 +5,5 @@ import org.json.JSONObject;
 
 public interface DataProviderService {
     String getDocumentType();
-    JSONObject getData() throws Exception;
+    JSONObject getData(String cpfNumber) throws Exception;
 }

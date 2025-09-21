@@ -1,6 +1,7 @@
 package io.mosip.certify.api.dataprovider.impl;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -20,15 +21,19 @@ public class CarTokenClient {
 
     private final String clientSecret;
 
+    private final boolean wireMockEnabled;
+
     public CarTokenClient(
             WebClient webClient,
             @Value("${car.token.url}") String tokenUrl,
             @Value("${car.client.id}") String clientId,
-            @Value("${car.client.secret}") String clientSecret) {
+            @Value("${car.client.secret}") String clientSecret,
+            @Value("${wiremock.enabled:false}") boolean wireMockEnabled) {
         this.webClient = webClient;
         this.tokenUrl = tokenUrl;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
+        this.wireMockEnabled = wireMockEnabled;
     }
 
     /**
@@ -41,6 +46,11 @@ public class CarTokenClient {
         Map tokenResponse = webClient.post()
                 .uri(tokenUrl)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .headers(headers -> {
+                    if (wireMockEnabled) {
+                        headers.add(HttpHeaders.AUTHORIZATION, "Basic Og==");
+                    }
+                })
                 .bodyValue("grant_type=client_credentials" +
                         "&client_id=" + clientId +
                         "&client_secret=" + clientSecret +
