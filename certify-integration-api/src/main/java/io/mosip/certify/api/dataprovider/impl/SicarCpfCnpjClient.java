@@ -48,7 +48,7 @@ public class SicarCpfCnpjClient {
         JsonNode firstCodigoImovel = rootNode
                 .path("result")
                 .path(0)
-                .path("codigoimovel");
+                .path("codigoImovel");
 
         return firstCodigoImovel.asText();
     }
