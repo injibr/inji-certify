@@ -61,7 +61,7 @@ public class AccessTokenValidationFilter extends OncePerRequestFilter {
                     new JwtIssuerValidator(issuerUri),
                     new JwtClaimValidator<List<String>>(JwtClaimNames.AUD, allowedAudiences::containsAll),
                     new JwtClaimValidator<String>(JwtClaimNames.SUB, Objects::nonNull),
-                    new JwtClaimValidator<String>(Constants.CLIENT_ID, Objects::nonNull),
+                    //Removed Client ID validation as in govbr token ClientId is not present, to integrate with govbr
                     new JwtClaimValidator<Instant>(JwtClaimNames.IAT,
                             iat -> iat != null && iat.isBefore(Instant.now(Clock.systemUTC()))),
                     new JwtClaimValidator<Instant>(JwtClaimNames.EXP,
