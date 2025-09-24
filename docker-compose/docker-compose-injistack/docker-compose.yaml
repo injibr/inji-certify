@@ -41,7 +41,7 @@ services:
 
   mimoto-service:
     container_name: 'Mimoto-Service'
-    image: mosipid/mimoto:0.15.0
+    image: mosipid/mimoto:0.17.1
     user: root
     ports:
       - '8099:8099'
@@ -65,12 +65,16 @@ services:
       - '3001:3004'
     environment:
       - DEFAULT_LANG=en
-      - MIMOTO_HOST=http://localhost:3001/v1/mimoto
+      - MIMOTO_HOST=https://vcdemo.crabdance.com/v1/mimoto
     volumes:
       - ./config/mimoto-default.properties:/home/mosip/mimoto-default.properties
       - ./config/mimoto-issuers-config.json:/home/mosip/mimoto-issuers-config.json
       - ./config/mimoto-trusted-verifiers.json:/home/mosip/mimoto-trusted-verifiers.json
       - ./config/credential-template.html:/home/mosip/credential-template.html
+      - ./config/INCRA-CCIRCredential-template.html:/home/mosip/INCRA-CCIRCredential-template.html
+      - ./config/MGI-CARReceipt-template.html:/home/mosip/MGI-CARReceipt-template.html
+      - ./config/MGI-CARDocument-template.html:/home/mosip/MGI-CARDocument-template.html
+      - ./config/MDA-CAFCredential-template.html:/home/mosip/MDA-CAFCredential-template.html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - mimoto-service
