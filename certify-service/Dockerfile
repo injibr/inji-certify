@@ -72,7 +72,7 @@ ENV hsm_local_dir_name=${hsm_local_dir}
 RUN apt-get -y update \
 && apt-get install -y unzip sudo\
 && groupadd -g ${container_user_gid} ${container_user_group} \
-&& useradd -u ${container_user_uid} -g ${container_user_group} -s /bin/sh -m ${container_user} \
+&& useradd -u -l ${container_user_uid} -g ${container_user_group} -s /bin/sh -m ${container_user} \
 && usermod -aG sudo ${container_user} \
 && echo "%sudo ALL=(ALL) NOPASSWD:/home/${container_user}/${hsm_local_dir}/install.sh" >> /etc/sudoers
 
