@@ -87,7 +87,7 @@ RUN mkdir -p ${loader_path}
 
 ENV loader_path_env=${loader_path}
 
-ADD configure_start.sh configure_start.sh
+ADD certify-service/configure_start.sh configure_start.sh
 
 RUN chmod +x configure_start.sh
 
