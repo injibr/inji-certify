@@ -1,7 +1,7 @@
 
 automata {
     // Parâmetros gerais
-    t//ype = 'CUSTOM'
+    //type = 'CUSTOM'
     def version = '2.0.0'
 
     descriptor = "groupId=inji,artifactId=inji-certify,version=${version}"
