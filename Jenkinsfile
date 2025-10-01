@@ -1,7 +1,7 @@
 
 automata {
     // Parâmetros gerais
-    type = 'CUSTOM'
+    t//ype = 'CUSTOM'
     def version = '2.0.0'
 
     descriptor = "groupId=inji,artifactId=inji-certify,version=${version}"
@@ -14,6 +14,5 @@ automata {
     containers.add descriptor: 'certify-service/Dockerfile', imageName: 'inji/inji-certify'
     
     qa.sonarOpts = '-Dsonar.exclusions=**/*.java'
-    
 }
 
