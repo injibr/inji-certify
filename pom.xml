@@ -207,6 +207,7 @@
 						<configuration>
 							<executable>true</executable>
 							<layout>ZIP</layout>
+							<skip>true</skip>
 						</configuration>
 						<executions>
 							<execution>
