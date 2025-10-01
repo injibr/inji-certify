@@ -207,7 +207,6 @@
 						<configuration>
 							<executable>true</executable>
 							<layout>ZIP</layout>
-							<skip>true</skip>
 						</configuration>
 						<executions>
 							<execution>
@@ -392,6 +391,7 @@
 								<arg>--pinentry-mode</arg>
 								<arg>loopback</arg>
 							</gpgArguments>
+							<skip>true</skip>
 						</configuration>
 					</execution>
 				</executions>
