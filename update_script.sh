@@ -168,7 +168,7 @@ function configurar_credenciais_ldap() {
 }
 
 function set_proxy() {
-    export http_proxy=http://$LDAP_USER:$LDAP_PASSWORD@prxrj.prevnet:3128 && export https_proxy=http://$LDAP_USER:$LDAP_PASSWORD@prxrj.prevnet:3128 
+    export http_proxy="http://${LDAP_USER}:${LDAP_PASSWORD}@10.70.124.16:3128" && export https_proxy="http://${LDAP_USER}:${LDAP_PASSWORD}@10.70.124.16:3128"
     
 }
 
@@ -182,10 +182,15 @@ function baixar_codigo() {
     escrever_mensagem "Atualizando código para nova versão $TAG..."
     escrever_log "Iniciando download do código versão $TAG"
     
-    git fetch github tag $TAG
+    #git fetch github tag $TAG
     # Capturar saída completa do comando git pull
-    resultado_pull=$(git merge --allow-unrelated-histories -X theirs tags/$TAG 2>&1)
+    #resultado_pull=$(git merge --allow-unrelated-histories -X theirs tags/$TAG 2>&1)
    
+    git fetch github
+    git merge --allow-unrelated-histories -X theirs github/$TAG
+
+
+
     if [ $? -ne 0 ]; then
         mensagem_erro="Falha ao baixar o código da versão $TAG."
         detalhes_erro="Código de erro: $?. Detalhes: $resultado_pull"
