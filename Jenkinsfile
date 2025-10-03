@@ -11,7 +11,7 @@ automata {
     gitOps.namespace = 'inji'     
     gitOps.repos = [dev: 'gitops-np/inji']
 
-    containers.add descriptor: 'certify-service/Dockerfile', imageName: 'inji/inji-certify'
+    containers.add descriptor: 'certify-service/Dockerfile', imageName: 'inji/inji-certify' args: '--build-arg VERSION=2.0.0'
     
     qa.sonarOpts = '-Dsonar.exclusions=**/*.java'
 }
