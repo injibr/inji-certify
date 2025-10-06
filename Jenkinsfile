@@ -14,6 +14,6 @@ automata {
 
     containers.add descriptor: 'certify-service/Dockerfile', imageName: 'inji/inji-certify'
     
-    qa.sonarOpts = '-Dsonar.exclusions=**/*.java'
+    //qa.sonarOpts = '-Dsonar.exclusions=**/*.java'
 }
 
