@@ -132,38 +132,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <inlineDescriptors>
-                        <inlineDescriptor>
-                        <id>generate-tar</id>
-                        <formats>
-                            <format>tar</format>
-                        </formats>
-                        <includeBaseDirectory>false</includeBaseDirectory>
-                        <fileSets>
-                            <fileSet>
-                            <directory>${project.build.directory}</directory>
-                            <outputDirectory></outputDirectory>
-                            <includes>
-                                <include>${artifactId}-${version}.jar</include>
-                            </includes>
-                            </fileSet>
-                        </fileSets>
-                        </inlineDescriptor>
-                    </inlineDescriptors>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
             <version>3.5.4</version>
