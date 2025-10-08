@@ -18,7 +18,7 @@ automata {
     
     containers.add descriptor: 'certify-service/Dockerfile', imageName: 'inji/inji-certify'
  
-    build.opts = "-Dgpg.skip=true -Dmaven.javadoc.skip=true  -Dtest=!io.mosip.certify.CertifyApplicationTests, *Tests"
+    build.opts = "-Dgpg.skip=true -Dmaven.javadoc.skip=true"
     
    
 }
