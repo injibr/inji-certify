@@ -13,7 +13,7 @@ automata {
     //gitOps.repos = [dev: 'gitops-np/inji']
 
     //Dependency check
-    artifacts.add artifactId: 'certify-service/target/certify-service-${version}.jar'
+    artifacts.add file: 'certify-service/target/certify-service-${version}.jar'
     
     
     containers.add descriptor: 'certify-service/Dockerfile', imageName: 'inji/inji-certify'
