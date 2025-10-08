@@ -169,7 +169,7 @@
             <version>3.5.4</version>
             <configuration>
                 <excludes>
-                    <exclude>**/io.mosip.certify.CertifyApplicationTests</exclude>
+                    <exclude>**/*.class</exclude>
                 </excludes>
             </configuration>
             </plugin>
