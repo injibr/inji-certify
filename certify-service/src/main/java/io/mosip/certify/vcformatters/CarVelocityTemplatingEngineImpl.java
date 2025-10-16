@@ -1,28 +1,14 @@
-/*
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/.
- */
 package io.mosip.certify.vcformatters;
 
-import java.io.*;
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.*;
-
-import io.mosip.certify.core.constants.ErrorConstants;
-import io.mosip.certify.core.exception.CertifyException;
-import io.mosip.certify.entity.CredentialTemplate;
 import io.mosip.certify.core.constants.Constants;
+import io.mosip.certify.core.constants.ErrorConstants;
 import io.mosip.certify.core.constants.VCDM2Constants;
 import io.mosip.certify.core.constants.VCDMConstants;
+import io.mosip.certify.core.exception.CertifyException;
 import io.mosip.certify.core.exception.RenderingTemplateException;
-import io.mosip.certify.repository.CredentialTemplateRepository;
 import io.mosip.certify.core.spi.RenderingTemplateService;
+import io.mosip.certify.entity.CredentialTemplate;
+import io.mosip.certify.repository.CredentialTemplateRepository;
 import io.mosip.certify.services.CredentialUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
@@ -41,10 +27,18 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.*;
+
 @Slf4j
-@Service("velocityEngineDefault")
-@Primary
-public class VelocityTemplatingEngineImpl implements VCFormatter {
+@Service("velocityEngineCar")
+public class CarVelocityTemplatingEngineImpl implements VCFormatter {
     VelocityEngine engine;
     public static final String DELIMITER = ":";
     public static final String TEMPLATE_CACHE = "templatecache";
@@ -85,7 +79,7 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
     @Override
     public String format(JSONObject valueMap, Map<String, Object> templateSettings) {
         // TODO: Isn't template name becoming too complex with VC_CONTEXTS & CREDENTIAL_TYPES both?
-            String templateName = templateSettings.get(Constants.TEMPLATE_NAME).toString();
+        String templateName = templateSettings.get(Constants.TEMPLATE_NAME).toString();
         String template = getTemplate(templateName);
         if (template == null) {
             log.error("Template {} not found", templateName);
@@ -119,7 +113,9 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
                 }
             } else if(value instanceof JSONArray){
                 Map<String,String> allData = new HashMap<>();
+                List<String> allObjects = new ArrayList<>();
                 for (int i = 0; i < ((JSONArray) value).length(); i++) {
+                    Map<String,String> theObject = new HashMap<>();
                     JSONObject jsonObject = (JSONObject) ((JSONArray) value).get(i);
                     Iterator<String> jsonKeys = jsonObject.keys();
                     while (jsonKeys.hasNext()){
@@ -127,14 +123,17 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
                         if (allData.containsKey(jsonKey)){
                             String prevValue = Objects.equals(allData.get(jsonKey),null)?"":allData.get(jsonKey);
                             String newValue = jsonObject.get(String.valueOf(jsonKey)).toString().equals("null")?"":jsonObject.get(String.valueOf(jsonKey)).toString();
-                            String combinedValue = prevValue +"\n"+newValue;
-                            finalTemplate.put(jsonKey,combinedValue);
+                            String combinedValue = prevValue +","+newValue;
+                            allData.put(jsonKey,combinedValue);
+                            theObject.put(jsonKey,newValue);
                         }else {
                             allData.put(jsonKey, jsonObject.get(jsonKey).toString());
+                            theObject.put(jsonKey,jsonObject.get(jsonKey).toString());
                         }
                     }
+                    allObjects.add(theObject.toString());
                 }
-                finalTemplate.putAll(allData);
+                finalTemplate.put(key, allObjects.toString());
             }
         }
         // Date: https://velocity.apache.org/tools/3.1/apidocs/org/apache/velocity/tools/generic/DateTool.html
