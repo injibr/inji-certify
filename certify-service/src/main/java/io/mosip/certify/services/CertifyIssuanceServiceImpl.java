@@ -35,6 +35,7 @@ import io.mosip.certify.proof.ProofValidator;
 import io.mosip.certify.proof.ProofValidatorFactory;
 import io.mosip.certify.utils.CredentialUtils;
 import io.mosip.certify.utils.DIDDocumentUtil;
+import io.mosip.certify.vcformatters.VelocityTemplatingEngineFactory;
 import io.mosip.certify.vcsigners.VCSigner;
 import io.mosip.kernel.keymanagerservice.dto.KeyPairGenerateResponseDto;
 import io.mosip.kernel.keymanagerservice.service.KeymanagerService;
@@ -77,9 +78,6 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
     private ParsedAccessToken parsedAccessToken;
 
     @Autowired
-    private VCFormatter vcFormatter;
-
-    @Autowired
     private VCSigner vcSigner;
 
     @Autowired
@@ -108,6 +106,9 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
 
     @Autowired
     private KeymanagerService keymanagerService;
+
+    @Autowired
+    private VelocityTemplatingEngineFactory velocityTemplatingEngineFactory;
 
     private Map<String, Object> didDocument;
 
@@ -320,6 +321,15 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                 try {
                     // TODO(multitenancy): later decide which plugin out of n plugins is the correct one
                     JSONObject jsonObject = dataProviderPlugin.fetchData(parsedAccessToken.getClaims());
+                    String tipoImovel = jsonObject.optString("tipoImovel");
+                    String vcFormatterVersion = "velocityEngineDefault";
+                    if ("AST".equals(tipoImovel)) {
+                        vcRequestDto.setType(List.of("CARReceiptAST", "VerifiableCredential"));
+                        vcFormatterVersion = "velocityEngineCar";
+                    } else if ("PCT".equals(tipoImovel)) {
+                        vcRequestDto.setType(List.of("CARReceiptPCT", "VerifiableCredential"));
+                        vcFormatterVersion = "velocityEngineCar";
+                    }
                     Map<String, Object> templateParams = new HashMap<>();
                     templateParams.put(Constants.TEMPLATE_NAME, CredentialUtils.getTemplateName(vcRequestDto));
                     templateParams.put(Constants.ISSUER_URI, issuerURI);
@@ -327,7 +337,7 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                         templateParams.put(Constants.RENDERING_TEMPLATE_ID, renderTemplateId);
                     }
                     jsonObject.put("_holderId", holderId);
-                    String unSignedVC = vcFormatter.format(jsonObject, templateParams);
+                    String unSignedVC = velocityTemplatingEngineFactory.getVelocityInstance(vcFormatterVersion).format(jsonObject, templateParams);
                     Map<String, String> signerSettings = new HashMap<>();
                     // NOTE: This is a quasi implementation to add support for multi-tenancy.
                     signerSettings.put(Constants.APPLICATION_ID, keyChooser.get(vcSignAlgorithm).getFirst());
