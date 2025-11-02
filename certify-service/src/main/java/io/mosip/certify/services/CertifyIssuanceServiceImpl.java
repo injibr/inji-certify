@@ -321,15 +321,21 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                 try {
                     // TODO(multitenancy): later decide which plugin out of n plugins is the correct one
                     JSONObject jsonObject = dataProviderPlugin.fetchData(parsedAccessToken.getClaims());
-                    String tipoImovel = jsonObject.optString("tipoImovel");
-                    String vcFormatterVersion = "velocityEngineDefault";
-                    if ("AST".equals(tipoImovel)) {
-                        vcRequestDto.setType(List.of("CARReceiptAST", "VerifiableCredential"));
-                        vcFormatterVersion = "velocityEngineCar";
-                    } else if ("PCT".equals(tipoImovel)) {
-                        vcRequestDto.setType(List.of("CARReceiptPCT", "VerifiableCredential"));
-                        vcFormatterVersion = "velocityEngineCar";
-                    }
+                    String vcFormatterVersion = switch (credentialRequest.getDoctype()) {
+                        case "CARReceipt" -> {
+                            String tipoImovel = jsonObject.optString("tipoImovel");
+                            if ("AST".equals(tipoImovel)) {
+                                vcRequestDto.setType(List.of("CARReceiptAST", "VerifiableCredential"));
+                                yield "velocityEngineCar";
+                            } else if ("PCT".equals(tipoImovel)) {
+                                vcRequestDto.setType(List.of("CARReceiptPCT", "VerifiableCredential"));
+                                yield "velocityEngineCar";
+                            }
+                            yield "velocityEngineDefault";
+                        }
+                        case "CAFCredential" -> "velocityEngineCaf";
+                        default -> "velocityEngineDefault";
+                    };
                     Map<String, Object> templateParams = new HashMap<>();
                     templateParams.put(Constants.TEMPLATE_NAME, CredentialUtils.getTemplateName(vcRequestDto));
                     templateParams.put(Constants.ISSUER_URI, issuerURI);
