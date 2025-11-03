@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @Component
@@ -54,7 +56,7 @@ public class CAFDataProvider implements DataProviderService {
                 .bodyToMono(String.class)
                 .block();
         if (response == null) {
-            throw new RuntimeException("Failed to retrieve data from the API");
+            throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "No data found for CAF for Cpf:"+cpfNumber);
         }
         return new JSONObject(response);
     }
