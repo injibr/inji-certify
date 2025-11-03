@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 
 /* This class implements the DataProviderService to fetch data from the CAR API.
  * It retrieves an OAuth2 token and uses it to access protected resources.
@@ -66,7 +68,7 @@ public class CARDataProvider implements DataProviderService {
                 .bodyToMono(String.class)
                 .block();
         if (response == null) {
-            throw new RuntimeException("Failed to retrieve data from the API");
+            throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "No data found for CAR Document for Cpf:"+cpfNumber);
         }
         JSONObject jsonObject = new JSONObject(response);
         return (JSONObject) jsonObject.getJSONArray("result").get(0);
