@@ -334,6 +334,7 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                             yield "velocityEngineDefault";
                         }
                         case "CAFCredential" -> "velocityEngineCaf";
+                        case "CARDocument" -> "velocityEngineCarDocument";
                         default -> "velocityEngineDefault";
                     };
                     Map<String, Object> templateParams = new HashMap<>();
