@@ -1,5 +1,6 @@
 package io.mosip.certify.aspect;
 
+import io.mosip.certify.config.AuditConfig;
 import io.mosip.certify.core.dto.CredentialRequest;
 import io.mosip.certify.services.CertifyAuditService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,21 +10,31 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
-
 @Aspect
 @Component
 @Slf4j
 public class ControllerAuditAspect {
+
     private final CertifyAuditService auditService;
     private final HttpServletRequest request;
+    private final AuditConfig auditConfig;
 
-    public ControllerAuditAspect(CertifyAuditService auditService, HttpServletRequest request) {
+    public ControllerAuditAspect(CertifyAuditService auditService,
+                                 HttpServletRequest request,
+                                 AuditConfig auditConfig) {
         this.auditService = auditService;
         this.request = request;
+        this.auditConfig = auditConfig;
     }
 
     @Around("execution(* io.mosip.certify.controller.VCIssuanceController.getCredential(..))")
     public Object auditController(ProceedingJoinPoint joinPoint) throws Throwable {
+
+        // If audit disabled → just proceed without logging anything
+        if (!auditConfig.isAuditEnabled()) {
+            return joinPoint.proceed();
+        }
+
         Object[] args = joinPoint.getArgs();
         String vcType = "UNKNOWN";
 
