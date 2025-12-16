@@ -4,8 +4,10 @@ import io.mosip.certify.api.dataprovider.DataProviderService;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @Component
@@ -62,7 +64,7 @@ public class CARReceiptDataProvider implements DataProviderService {
                 .bodyToMono(String.class)
                 .block();
         if (response == null) {
-            throw new RuntimeException("Failed to retrieve data from the API");
+            throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "No data found for CarReceipt for Cpf:"+cpfNumber);
         }
         JSONObject jsonObject = new JSONObject(response);
         return new JSONObject((jsonObject.getJSONArray("result").get(0)).toString());
