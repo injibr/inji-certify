@@ -4,9 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.mosip.certify.api.dataprovider.DataProviderService;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 
@@ -51,7 +53,7 @@ public class CCIRDataProvider implements DataProviderService {
                 .bodyToMono(String.class)
                 .block();
         if (response == null) {
-            throw new RuntimeException("Failed to retrieve data from the API");
+            throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "No data found for CCIR for Cpf:"+cpfNumber);
         }
         return new JSONObject(response);
     }
