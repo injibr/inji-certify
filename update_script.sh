@@ -164,7 +164,7 @@ function configurar_credenciais_ldap() {
     escrever_log "Credenciais LDAP carregadas (usuário: $LDAP_USER)"
     
     # Configurar proxy
-    set_proxy
+    # set_proxy
 }
 
 function set_proxy() {
@@ -291,7 +291,7 @@ function enviar_versao_para_ic() {
     # atualizar_arquivos_propriedades
     baixar_codigo
     enviar_codigo
-    enviar_scm
+    #enviar_scm
 }
 
 function atualizar_arquivos_propriedades() {

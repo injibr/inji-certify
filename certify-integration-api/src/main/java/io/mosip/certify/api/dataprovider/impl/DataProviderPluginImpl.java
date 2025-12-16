@@ -45,7 +45,7 @@ public class DataProviderPluginImpl implements DataProviderPlugin {
             return data;
         } catch (Exception e) {
             log.info("Error while fetching data from DataProviderService: {}", e.getMessage());
-            throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "Error while fetching data from DataProviderService", e);
+            throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "Error while fetching data from "+identityDetails.get("docType") +"Dataprovider for Cpf:"+identityDetails.get("sub"), e);
         }
     }
 }
