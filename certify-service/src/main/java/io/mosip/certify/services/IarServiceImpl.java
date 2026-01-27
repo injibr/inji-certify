@@ -13,6 +13,9 @@ import io.mosip.certify.core.dto.*;
 import io.mosip.certify.core.exception.CertifyException;
 import io.mosip.certify.core.exception.InvalidRequestException;
 import io.mosip.certify.core.spi.IarService;
+import jakarta.validation.Validator;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +26,8 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
+
 import io.mosip.certify.entity.IarSession;
 import io.mosip.certify.repository.IarSessionRepository;
 import io.mosip.certify.utils.AccessTokenJwtUtil;
@@ -54,10 +59,13 @@ public class IarServiceImpl implements IarService {
     @Autowired
     private AccessTokenJwtUtil accessTokenJwtUtil;
 
+    @Autowired
+    private Validator validator;
+
     @Value("${mosip.certify.oauth.token.expires-in-seconds:3600}")
     private int tokenExpiresInSeconds;
 
-    @Value("${mosip.certify.oauth.c-nonce.expires-in-seconds:300}")
+    @Value("${mosip.certify.cnonce-expire-seconds:300}")
     private int cNonceExpiresInSeconds;
 
     @Value("${mosip.certify.iar.authorization-code.expires-minutes:10}")
@@ -176,6 +184,12 @@ public class IarServiceImpl implements IarService {
     
     @Override
     public OAuthTokenResponse processTokenRequest(OAuthTokenRequest tokenRequest) throws CertifyException {
+        Set<ConstraintViolation<OAuthTokenRequest>> violations =
+                validator.validate(tokenRequest);
+
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
         log.info("Processing OAuth token request for grant_type: {}", 
                  tokenRequest.getGrant_type());
 
@@ -190,7 +204,9 @@ public class IarServiceImpl implements IarService {
             IarSession session = validateAndMarkAuthorizationCodeUsed(tokenRequest);
 
             OAuthTokenResponse response = new OAuthTokenResponse();
-            response.setAccessToken(generateAccessToken(session));
+            // Generate c_nonce
+            String cNonce = accessTokenJwtUtil.generateCNonce();
+            response.setAccessToken(generateAccessToken(session, cNonce));
             response.setTokenType(tokenType);
             response.setExpiresIn(tokenExpiresInSeconds);
             
@@ -198,9 +214,7 @@ public class IarServiceImpl implements IarService {
             if (session.getScope() != null && !session.getScope().isEmpty()) {
                 response.setScope(session.getScope());
             }
-            
-            // Extract c_nonce from the JWT access token and set in OAuth response
-            String cNonce = extractCNonceFromJwt(response.getAccessToken());
+
             if (cNonce != null) {
                 response.setCNonce(cNonce);
                 response.setCNonceExpiresIn(cNonceExpiresInSeconds);
@@ -432,13 +446,14 @@ public class IarServiceImpl implements IarService {
      * @param session The IAR session containing client and transaction information
      * @return Signed JWT access token string
      */
-    private String generateAccessToken(IarSession session) {
+    private String generateAccessToken(IarSession session, String cNonce) {
         try {
             String jwtToken = accessTokenJwtUtil.generateSignedJwt(
                 session, 
                 issuer,
                 audience,
-                tokenExpiresInSeconds
+                tokenExpiresInSeconds,
+                cNonce
             );
             log.debug("Generated JWT access token for client_id: {}, transaction_id: {}", 
                      session.getClientId(), session.getTransactionId());
