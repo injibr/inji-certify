@@ -40,7 +40,7 @@ public class CredentialConfigurationServiceImpl implements CredentialConfigurati
     @Autowired
     private CredentialConfigMapper credentialConfigMapper;
 
-    @Value("${mosip.certify.domain.url:}")
+    @Value("${mosip.certify.domain.url}")
     private String credentialIssuer;
 
     @Value("${mosip.certify.authorization.url}")
@@ -120,10 +120,8 @@ public class CredentialConfigurationServiceImpl implements CredentialConfigurati
             }
         } else {
             String qrSignatureAlgo = credentialConfig.getQrSignatureAlgo();
-            if(qrSignatureAlgo != null && !qrSignatureAlgo.isEmpty()) {
-                if(!keyAliasMapper.containsKey(qrSignatureAlgo)) {
-                    throw new CertifyException(ErrorConstants.INVALID_QR_SIGNING_ALGORITHM, "The algorithm " + qrSignatureAlgo + " is not supported for QR signing. The supported values are: " + keyAliasMapper.keySet());
-                }
+            if (qrSignatureAlgo != null && !qrSignatureAlgo.isEmpty() && !keyAliasMapper.containsKey(qrSignatureAlgo)) {
+                throw new CertifyException(ErrorConstants.INVALID_QR_SIGNING_ALGORITHM, "The algorithm " + qrSignatureAlgo + " is not supported for QR signing. The supported values are: " + keyAliasMapper.keySet());
             }
         }
 

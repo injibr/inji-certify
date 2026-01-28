@@ -8,6 +8,7 @@ import io.mosip.certify.core.spi.IarService;
 import io.mosip.certify.core.spi.JwksService;
 import io.mosip.certify.filter.AccessTokenValidationFilter;
 import io.mosip.certify.services.OAuthAuthorizationServerMetadataService;
+import io.mosip.certify.services.PreAuthorizedCodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,7 @@ class OAuthControllerTest {
     private MessageSource messageSource;
 
     @MockBean
-    private JwksService jwksService;
+    private PreAuthorizedCodeService preAuthorizedCodeService;
 
     @BeforeEach
     void setUp() {
@@ -123,7 +124,7 @@ class OAuthControllerTest {
     @Test
     void processInteractiveAuthorizationRequest_success_complete() throws Exception {
         // Arrange - Create a complete response (no interaction required)
-        IarResponse mockResponse = new IarResponse();
+        IarPresentationResponse mockResponse = new IarPresentationResponse();
         mockResponse.setStatus(IarStatus.OK);
         mockResponse.setAuthSession("test-session");
         // No type or openid4vp_request for complete responses
@@ -218,7 +219,7 @@ class OAuthControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value("interaction_required"))
-                .andExpect(jsonPath("$.error_description").value("interaction_required"));
+                .andExpect(jsonPath("$.error_description").value("Interaction required"));
 
         verify(iarService, times(1)).handleIarRequest(any(IarRequest.class));
     }
@@ -449,7 +450,7 @@ class OAuthControllerTest {
                 .param("redirect_uri", "https://test.com/callback")
                 .param("client_id", "invalid-client")
                 .param("code_verifier", "test-verifier"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnauthorized())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value("invalid_client"))
                 .andExpect(jsonPath("$.error_description").value("Client authentication failed"));
@@ -640,7 +641,7 @@ class OAuthControllerTest {
      * Helper method to create a mock IAR response
      */
     private IarResponse createMockIarResponse(IarStatus status) {
-        IarResponse response = new IarResponse();
+        IarPresentationResponse response = new IarPresentationResponse();
         response.setStatus(status);
         response.setAuthSession("test-session");
         

@@ -17,7 +17,6 @@ import io.mosip.certify.repository.IarSessionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -28,7 +27,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
-import jakarta.annotation.PostConstruct;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -41,19 +39,15 @@ import java.util.*;
  */
 @Slf4j
 @Service
-@ConditionalOnProperty(name = "mosip.certify.authorization-module", havingValue = "certify")
 public class IarPresentationService {
 
-    @Autowired
-    private IarSessionRepository iarSessionRepository;
+    private final IarSessionRepository iarSessionRepository;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-    @Value("${mosip.certify.verify.service.vp-result-endpoint:http://localhost:8080}")
+    @Value("${mosip.certify.verify.service.vp-result-endpoint:}")
     private String verifyServiceVpResultEndpoint;
 
     @Value("${mosip.certify.iar.authorization-code.length:24}")
@@ -62,15 +56,13 @@ public class IarPresentationService {
     @Value("#{'${mosip.certify.iar.identity-data:uin,vid,UIN,UID}'.split(',')}")
     private Set<String> identityKeys;
 
-    /**
-     * Validate required configuration properties at startup
-     */
-    @PostConstruct
-    public void validateConfiguration() {
-        if (!StringUtils.hasText(verifyServiceVpResultEndpoint)) {
-            throw new IllegalStateException("mosip.certify.verify.service.vp-result-endpoint must be configured");
-        }
-        log.info("IarPresentationService configuration validation successful");
+    @Autowired
+    public IarPresentationService(IarSessionRepository iarSessionRepository,
+                                 RestTemplate restTemplate,
+                                 ObjectMapper objectMapper) {
+        this.iarSessionRepository = iarSessionRepository;
+        this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -154,8 +146,8 @@ public class IarPresentationService {
             log.debug("Using requestId: {} for Verify service", requestId);
             
             String vpTokenJson;
-            if (vpTokenObj instanceof String) {
-                vpTokenJson = (String) vpTokenObj;
+            if (vpTokenObj instanceof String vpTokenString) {
+                vpTokenJson = vpTokenString;
                 log.debug("vp_token is a JWT string");
             } else {
                 vpTokenJson = objectMapper.writeValueAsString(vpTokenObj);
@@ -163,8 +155,8 @@ public class IarPresentationService {
             }
             
             String presentationSubmissionJson;
-            if (presentationSubmissionObj instanceof String) {
-                presentationSubmissionJson = (String) presentationSubmissionObj;
+            if (presentationSubmissionObj instanceof String presentationSubmissionString) {
+                presentationSubmissionJson = presentationSubmissionString;
             } else {
                 presentationSubmissionJson  = objectMapper.writeValueAsString(presentationSubmissionObj);
                 log.debug("presentation_submission serialized to JSON, length: {}", presentationSubmissionJson.length());
@@ -214,6 +206,9 @@ public class IarPresentationService {
      * Get VP verification result from verifier service
      */
     private VpVerificationResponse getVpVerificationResult(String transactionId) throws CertifyException {
+        if (!StringUtils.hasText(verifyServiceVpResultEndpoint)) {
+            throw new IllegalStateException("mosip.certify.verify.service.vp-result-endpoint must be configured");
+        }
         try {
             String vpResultUrl = verifyServiceVpResultEndpoint + "/" + transactionId;
             log.debug("Getting verification results from: {}", vpResultUrl);
@@ -366,7 +361,9 @@ public class IarPresentationService {
                 }
             }
 
-        } catch (Exception ignored) {}
+        } catch (Exception ex) {
+            log.warn("Failed to parse VC JSON for identity extraction", ex);
+        }
 
         return null;
     }
