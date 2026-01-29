@@ -1,12 +1,12 @@
-CreateOIDCClientV2VCIFormDocMDL:
-   InjiCertify_ESignet_CreateOIDCClientV2_Formdl_all_Valid_Smoke_sid:
+CreateOIDCClientV2VCIFormDoc:
+   InjiCertify_ESignet_CreateOIDCClientV2_Formdocvp_all_Valid_Smoke_sid:
       endPoint: $ESIGNETMOCKIDABASEURL$/v1/esignet/client-mgmt/oauth-client
-      uniqueIdentifier: TC_esignetDependent_CreateOidc_01      
+      uniqueIdentifier: TC_esignetDependent_CreateOidc_mdocvp_01      
       description: Create OIDC client      
       role: partner
       restMethod: post
-      inputTemplate: injicertify/mDocMDL/CreateOIDCClientV2FormDoc/CreateOIDCClientV2FormDoc
-      outputTemplate: injicertify/mDocMDL/CreateOIDCClientV2FormDoc/CreateOIDCClientV2FormDocResult
+      inputTemplate: injicertify/PresentationDuringIssuance/CreateOIDCClientV2FormDocvp/CreateOIDCClientV2FormDocvp
+      outputTemplate: injicertify/PresentationDuringIssuance/CreateOIDCClientV2FormDocvp/CreateOIDCClientV2FormDocvpResult
       input: '{
       	"requestTime": "$TIMESTAMP$",
       	"clientId": "$RANDOMID$V2S3",

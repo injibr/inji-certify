@@ -111,7 +111,7 @@ public class InjiCertifyUtil extends AdminTestUtil {
 		// For mock, mdoc and landregistry usecase also the OTP value is hard coded and not configurable.
 
 		if (currentUseCase != null && !currentUseCase.isEmpty() && (currentUseCase.equals("mock")
-				|| currentUseCase.equals("landregistry") || currentUseCase.equals("mdoc"))) {
+				|| currentUseCase.equals("landregistry") || currentUseCase.equals("mdl"))) {
 
 			Map<String, Object> additionalPropertiesMap = new HashMap<>();
 			additionalPropertiesMap.put(InjiCertifyConstants.USE_PRE_CONFIGURED_OTP_STRING,
@@ -880,12 +880,12 @@ public class InjiCertifyUtil extends AdminTestUtil {
 		} else if (testCaseName.contains("_GenerateToken_ForMockIDA")) {
 			tempURL = getValueFromEsignetWellKnownEndPoint("token_endpoint",
 					InjiCertifyConfigManager.getEsignetBaseUrl());
-		} else if (testCaseName.contains("_GenerateToken_ForLandRegistry")|| testCaseName.contains("_GenerateToken_FormDoc")) {
+		} else if (testCaseName.contains("_GenerateToken_ForLandRegistry")|| testCaseName.contains("_GenerateToken_Formdl")) {
 			tempURL = getValueFromEsignetWellKnownEndPoint("token_endpoint",
 					InjiCertifyConfigManager.getEsignetBaseUrl());
 		} else if (testCaseName.contains("_GetCredentialForMockIDA")) {
 			tempURL = getValueFromInjiCertifyWellKnownEndPoint("credential_issuer", baseURL);
-		} else if (testCaseName.contains("_GetCredentialForLandRegistry")|| testCaseName.contains("_GetCredentialFormDoc")) {
+		} else if (testCaseName.contains("_GetCredentialForLandRegistry")|| testCaseName.contains("_GetCredentialFormdl") || testCaseName.contains("_GetCredentialFormdocvp")) {
 			tempURL = getValueFromInjiCertifyWellKnownEndPoint("credential_issuer", baseURL);
 		}
 
@@ -1019,7 +1019,10 @@ public class InjiCertifyUtil extends AdminTestUtil {
 				throw new SkipException(GlobalConstants.FEATURE_NOT_SUPPORTED_MESSAGE);
 			}
 		}
-		if (currentUseCase.toLowerCase().equals("mdoc") && testCaseName.toLowerCase().contains("mdoc") == false) {
+		if (currentUseCase.toLowerCase().equals("mdl") && testCaseName.toLowerCase().contains("mdl") == false) {
+			throw new SkipException(GlobalConstants.FEATURE_NOT_SUPPORTED_MESSAGE);
+		}
+		if (currentUseCase.toLowerCase().equals("mdocvp") && testCaseName.toLowerCase().contains("mdocvp") == false) {
 			throw new SkipException(GlobalConstants.FEATURE_NOT_SUPPORTED_MESSAGE);
 		}
 		if (currentUseCase.toLowerCase().equals("credentialconfig") && testCaseName.toLowerCase().contains("credentialconfig") == false) {

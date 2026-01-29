@@ -1,5 +1,5 @@
 OAuthDetailsRequestFormDocMDL:
-   InjiCertify_ESignet_OAuthDetailsRequest_FormDoc_uin_all_Valid_Smoke_sid:
+   InjiCertify_ESignet_OAuthDetailsRequest_Formdl_uin_all_Valid_Smoke_sid:
       endPoint: $ESIGNETMOCKIDABASEURL$/v1/esignet/authorization/v2/oauth-details
       uniqueIdentifier: TC_esignetDependent_OAuthdetailsRequest_04      
       description: OAuth details request      
@@ -10,7 +10,7 @@ OAuthDetailsRequestFormDocMDL:
       outputTemplate: injicertify/mDocMDL/OAuthDetailsRequestFormDoc/OAuthDetailsRequestFormDocResult
       input: '{
       	"requestTime": "$TIMESTAMP$",
-      	"clientId": "$ID:ESignet_CreateOIDCClientV2_FormDoc_all_Valid_Smoke_sid_clientId$",
+      	"clientId": "$ID:ESignet_CreateOIDCClientV2_Formdl_all_Valid_Smoke_sid_clientId$",
       	"scope": "sample_vc_mdoc",
       	"responseType": "code",
       	"redirectUri": "$IDPREDIRECTURI$",

@@ -1337,4 +1337,55 @@
 			<class name="io.mosip.testrig.apirig.injicertify.testscripts.DeleteWithParam" />
 		</classes>
 	</test>
+	<test name="WellKnownEndpointPDI">
+		<parameter name="ymlFile"
+			value="injicertify/PresentationDuringIssuance/DiscoveryEndpoints/IssuerMetadata/CredentialMetadata.yml" />
+		<classes>
+			<class name="io.inji.testrig.apirig.injicertify.testscripts.GetWithParamForAutoGenId" />
+		</classes>
+	</test>
+	<test name="oauthServerMetadataPDI">
+		<parameter name="ymlFile"
+			value="injicertify/PresentationDuringIssuance/DiscoveryEndpoints/oauthServerMetadata/oauthAuthorizationServer.yml" />
+		<classes>
+			<class name="io.inji.testrig.apirig.injicertify.testscripts.GetWithParamForAutoGenId" />
+		</classes>
+	</test>
+	<test name="IARInitialRequest">
+		<parameter name="ymlFile"
+			value="injicertify/PresentationDuringIssuance/IARInitialRequest/IAR.yml"/>
+		<parameter name="idKeyName" value="auth_session" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenIdForUrlEncoded" />
+		</classes>
+	</test>
+	<test name="IARwithVPTokenRequest">
+		<parameter name="ymlFile"
+			value="injicertify/PresentationDuringIssuance/IARWithVP/IARVP.yml"/>
+		<parameter name="idKeyName" value="code" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.inji.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenIdForUrlEncoded" />
+		</classes>
+	</test>
+	<test name="OauthTokenPresentationDuringIssuance">
+		<parameter name="ymlFile"
+			value="injicertify/PresentationDuringIssuance/oAuthToken/oAuthToken.yml" />
+		<parameter name="idKeyName" value="access_token" />
+		<classes>
+			<class
+				name="io.inji.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenIdForUrlEncoded" />
+		</classes>
+	</test>
+	<test name="GetCredentialPresentationDuringIssuance">
+		<parameter name="ymlFile"
+			value="injicertify/PresentationDuringIssuance/GetCredential/GetCredential.yml" />
+		<classes>
+			<class
+				name="io.inji.testrig.apirig.injicertify.testscripts.SimplePost" />
+		</classes>
+	</test>		
 </suite>

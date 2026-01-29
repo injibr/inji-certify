@@ -166,7 +166,7 @@ WellKnownEndpoint:
 }'
       output: '{
 }'
-   InjiCertify_WellKnownEndpoint_mDoc_all_Valid_Smoke:
+   InjiCertify_WellKnownEndpoint_mdl_all_Valid_Smoke:
       endPoint: $INJICERTIFYBASEURL$/v1/certify/.well-known/openid-credential-issuer?version=latest
       uniqueIdentifier: TC_InjiCertify_WellKnownEndpoint_mDoc_01
       description: WellKnownEndpoint for mDoc with all valid details
@@ -180,7 +180,7 @@ WellKnownEndpoint:
       output: '{
 }'
 
-   InjiCertify_WellKnownEndpoint_VD11_mDoc_all_Valid_Smoke:
+   InjiCertify_WellKnownEndpoint_VD11_mdl_all_Valid_Smoke:
       endPoint: $INJICERTIFYBASEURL$/v1/certify/.well-known/openid-credential-issuer?version=vd11
       uniqueIdentifier: TC_InjiCertify_WellKnownEndpoint_mDoc_02
       description: WellKnownEndpoint VD11 for mDoc with all valid details
@@ -194,7 +194,7 @@ WellKnownEndpoint:
       output: '{
 }'
 
-   InjiCertify_WellKnownEndpoint_VD12_mDoc_all_Valid_Smoke:
+   InjiCertify_WellKnownEndpoint_VD12_mdl_all_Valid_Smoke:
       endPoint: $INJICERTIFYBASEURL$/v1/certify/.well-known/openid-credential-issuer?version=vd12
       uniqueIdentifier: TC_InjiCertify_WellKnownEndpoint_mDoc_03
       description: WellKnownEndpoint VD12 for mDoc with all valid details
@@ -203,6 +203,20 @@ WellKnownEndpoint:
       restMethod: get
       inputTemplate: injicertify/WellKnownEndpoint/WellKnownEndpoint
       outputTemplate: injicertify/WellKnownEndpoint/WellKnownEndpointResult
+      input: '{
+}'
+      output: '{
+}'
+
+   InjiCertify_WellKnownEndpoint_mdocvp_all_Valid_Smoke:
+      endPoint: $INJICERTIFYBASEURL$/v1/certify/.well-known/openid-credential-issuer
+      uniqueIdentifier: TC_InjiCertify_WellKnownEndpoint_mdocvp_01
+      description: Get Credential Metadata from Well Known Endpoint
+      role: resident
+      checkErrorsOnlyInResponse: true
+      restMethod: get
+      inputTemplate: injicertify/PresentationDuringIssuance/DiscoveryEndpoints/IssuerMetadata/CredentialMetadata
+      outputTemplate: injicertify/PresentationDuringIssuance/DiscoveryEndpoints/IssuerMetadata/CredentialMetadataResult
       input: '{
 }'
       output: '{
