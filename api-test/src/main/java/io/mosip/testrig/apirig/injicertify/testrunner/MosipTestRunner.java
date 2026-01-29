@@ -1,4 +1,4 @@
-package io.inji.testrig.apirig.injicertify.testrunner;
+package io.mosip.testrig.apirig.injicertify.testrunner;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,10 +21,10 @@ import org.testng.TestNG;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 
-import io.inji.testrig.apirig.injicertify.utils.InjiCertifyConfigManager;
-import io.inji.testrig.apirig.injicertify.utils.InjiCertifyUtil;
 import io.mosip.testrig.apirig.dataprovider.BiometricDataProvider;
 import io.mosip.testrig.apirig.dbaccess.DBManager;
+import io.mosip.testrig.apirig.injicertify.utils.InjiCertifyConfigManager;
+import io.mosip.testrig.apirig.injicertify.utils.InjiCertifyUtil;
 import io.mosip.testrig.apirig.testrunner.BaseTestCase;
 import io.mosip.testrig.apirig.testrunner.ExtractResource;
 import io.mosip.testrig.apirig.testrunner.HealthChecker;
@@ -50,11 +50,11 @@ import io.mosip.testrig.apirig.utils.SkipTestCaseHandler;
  * @author Vignesh
  *
  */
-public class InjiTestRunner {
-	private static final Logger LOGGER = Logger.getLogger(InjiTestRunner.class);
+public class MosipTestRunner {
+	private static final Logger LOGGER = Logger.getLogger(MosipTestRunner.class);
 	private static String cachedPath = null;
 
-	public static String jarUrl = InjiTestRunner.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+	public static String jarUrl = MosipTestRunner.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 	public static List<String> languageList = new ArrayList<>();
 	public static boolean skipAll = false;
 	private static String useCaseToExecute = "";
@@ -270,7 +270,7 @@ public class InjiTestRunner {
 		if (getRunType().equalsIgnoreCase("JAR")) {
 			path = new File(jarUrl).getParentFile().getAbsolutePath() + "/MosipTestResource/MosipTemporaryTestResource";
 		} else if (getRunType().equalsIgnoreCase("IDE")) {
-			path = new File(InjiTestRunner.class.getClassLoader().getResource("").getPath()).getAbsolutePath()
+			path = new File(MosipTestRunner.class.getClassLoader().getResource("").getPath()).getAbsolutePath()
 					+ "/MosipTestResource/MosipTemporaryTestResource";
 			if (path.contains(GlobalConstants.TESTCLASSES))
 				path = path.replace(GlobalConstants.TESTCLASSES, "classes");
@@ -380,7 +380,7 @@ public class InjiTestRunner {
 	 * @return
 	 */
 	public static String getRunType() {
-		if (InjiTestRunner.class.getResource("InjiTestRunner.class").getPath().contains(".jar"))
+		if (MosipTestRunner.class.getResource("MosipTestRunner.class").getPath().contains(".jar"))
 			return "JAR";
 		else
 			return "IDE";

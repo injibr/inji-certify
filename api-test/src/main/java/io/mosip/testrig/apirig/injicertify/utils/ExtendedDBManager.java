@@ -1,4 +1,4 @@
-package io.inji.testrig.apirig.injicertify.utils;
+package io.mosip.testrig.apirig.injicertify.utils;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
