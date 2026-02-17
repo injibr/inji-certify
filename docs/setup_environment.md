@@ -100,23 +100,16 @@ Expected output summary:
 
 ### 3. PKCS12 Keystore
 
-The application needs a PKCS12 keystore containing the private key used to sign Verifiable Credentials.
-
-> **Security note:** PFX/P12 files contain private keys and must **never** be committed to git. They are excluded via `.gitignore`. Anyone with this file and its password can forge signed credentials.
-
-Generate a local-only keystore for development:
+The application needs a PKCS12 keystore containing the private key used to sign Verifiable Credentials. The MOSIP keymanager **auto-generates** the p12 file on first startup — you only need to create the directory:
 
 ```bash
 cd certify-service
 mkdir -p CERTIFY_PKCS12
-keytool -genkeypair -alias certify-local \
-  -keyalg RSA -keysize 2048 -validity 365 \
-  -storetype PKCS12 -keystore CERTIFY_PKCS12/local.p12 \
-  -storepass local -keypass local \
-  -dname "CN=localhost, OU=Dev, O=Certify, L=Local, ST=Dev, C=BR"
 ```
 
-Then update `application-local.properties` to point to it:
+> **Important:** Do NOT create the p12 file yourself (e.g., with `keytool`). The keymanager uses its own internal format and will fail with `keystore password was incorrect` if it finds a file it didn't create.
+
+Verify that `application-local.properties` has:
 
 ```properties
 mosip.kernel.keymanager.hsm.config-path=CERTIFY_PKCS12/local.p12
@@ -124,7 +117,7 @@ mosip.kernel.keymanager.hsm.keystore-type=PKCS12
 mosip.kernel.keymanager.hsm.keystore-pass=local
 ```
 
-> The default `application-local.properties` may still reference a legacy `468111_MGI.pfx` file that was removed from the repo for security reasons. Replace it with the path above.
+> **Security note:** PFX/P12 files contain private keys and must **never** be committed to git. They are excluded via `.gitignore`. Anyone with this file and its password can forge signed credentials.
 
 ### 4. Start the Service
 
