@@ -50,7 +50,7 @@ public class EcaDataProvider implements DataProviderService {
         }
 
         JSONObject ecaData = new JSONObject(response);
-        String dataNascimento = ecaData.getString("DataNascimento");
+        String dataNascimento = ecaData.getString("dataNascimento");
         boolean is18orOlder = isAdult(dataNascimento);
         log.info("CPF {} - DataNascimento: {}, is18orOlder: {}", cpfNumber, dataNascimento, is18orOlder);
 
