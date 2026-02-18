@@ -1,6 +1,6 @@
 # Local Development Environment Setup
 
-This guide walks you through setting up Inji Certify for local development and testing the credential issuance flow with the Brazilian data providers (CAR, CAF, CCIR).
+This guide walks you through setting up Inji Certify for local development and testing the credential issuance flow with the Brazilian data providers (CAR, CAF, CCIR, ECA).
 
 ## Prerequisites
 
@@ -76,6 +76,7 @@ WHERE table_schema='certify'
 ORDER BY table_name;
 
 -- 2. Issuer metadata (expect MGI, INCRA, MDA)
+-- Note: ECACredential is inside MGI, not a separate issuer
 SELECT config_key AS issuer FROM certify.certify_keys;
 
 -- 3. Credential templates (expect 7+ rows)
@@ -95,7 +96,7 @@ Expected output summary:
 |-------|----------|
 | Tables | `ca_cert_store`, `certify_keys`, `credential_template`, `key_alias`, `key_policy_def`, `key_store`, `rendering_template` |
 | Issuers | `MGI`, `INCRA`, `MDA` |
-| Credential templates | `CARDocument`, `CARReceipt`, `CARReceiptAST`, `CARReceiptPCT`, `CAFCredential`, `CCIRCredential`, `FarmerCredential` (each with `VerifiableCredential`) |
+| Credential templates | `CARDocument`, `CARReceipt`, `CARReceiptAST`, `CARReceiptPCT`, `CAFCredential`, `CCIRCredential`, `ECACredential`, `FarmerCredential` (each with `VerifiableCredential`) |
 | Key policies | `CERTIFY_SERVICE` (1095 days), `ROOT` (2920 days) |
 
 ### 3. PKCS12 Keystore
@@ -155,7 +156,7 @@ Expected output:
 
 ```
 {"status":"DOWN"}
-MGI: CARReceipt, CARDocument
+MGI: CARReceipt, CARDocument, ECACredential
 INCRA: CCIRCredential
 MDA: CAFCredential
 DID: did:web:...
@@ -171,17 +172,17 @@ curl -s "http://localhost:8090/v1/certify/issuance/.well-known/openid-credential
 
 | Issuer ID | Credential Types | Backend API |
 |-----------|-----------------|-------------|
-| **MGI** | `CARDocument`, `CARReceipt` | SICAR (CAR registry) |
+| **MGI** | `CARDocument`, `CARReceipt`, `ECACredential` | SICAR (CAR registry), Dataprev (ECA age verification) |
 | **INCRA** | `CCIRCredential` | SERPRO/Dataprev (CCIR land certificate) |
 | **MDA** | `CAFCredential` | CAF (family farming registry) |
 
 ### Key Configuration (application-local.properties)
 
-The local profile points the data provider APIs to a **WireMock server** at `http://43.204.212.203:8086`:
+The local profile points the CAR/CAF data provider APIs to a **WireMock server** at `http://43.204.212.203:8086`. ECA connects to the real Dataprev APIs using credentials from environment variables.
 
 ```properties
-# WireMock enabled for local testing
-wiremock.enabled=true
+# WireMock (used by CAR/CAF token clients)
+wiremock.enabled=false
 
 # CAR APIs
 car.token.url=http://43.204.212.203:8086/oauth2/token
@@ -193,12 +194,24 @@ car.registration.number.url=http://43.204.212.203:8086/sicar/cpfcnpj/1.0/%s
 caf.token.url=http://43.204.212.203:8086/oauth2/token
 caf.api.url=http://43.204.212.203:8086/prod-api-caf-mir/api/consulta-externa/mir/pessoa-fisica/%s
 
+# ECA APIs (real Dataprev — credentials via environment variables)
+eca.token.url=https://hisrj.dataprev.gov.br/oauth2/token
+eca.api.url=https://hapirj.dataprev.gov.br/cpfrfb/1.0.0/v1/cpf/%s
+eca.client.id=${ECA_CLIENT_ID}
+eca.client.secret=${ECA_CLIENT_SECRET}
+
 # Authorization service
 mosip.certify.authorization.url=https://sso.staging.acesso.gov.br
 mosip.certify.authn.jwk-set-uri=https://sso.staging.acesso.gov.br/jwk.json
 ```
 
-Make sure the WireMock server (`43.204.212.203:8086`) is reachable from your machine. If not, credential issuance calls will fail at the token/data fetch step.
+Before starting the service, export the ECA credentials:
+```bash
+export ECA_CLIENT_ID=your_client_id
+export ECA_CLIENT_SECRET=your_client_secret
+```
+
+Make sure the WireMock server (`43.204.212.203:8086`) is reachable for CAR/CAF testing. If not, those credential types will fail at the token/data fetch step.
 
 ---
 
@@ -273,6 +286,7 @@ The `type` array determines which data provider is called:
 - `["VerifiableCredential", "CARReceipt"]` → `CARReceiptDataProvider`
 - `["VerifiableCredential", "CAFCredential"]` → `CAFDataProvider`
 - `["VerifiableCredential", "CCIRCredential"]` → `CCIRDataProvider`
+- `["VerifiableCredential", "ECACredential"]` → `EcaDataProvider` (returns `is18orOlder` boolean)
 
 ### Step 3: Using Postman Collections
 
@@ -317,6 +331,16 @@ Expected in local development. The `application-local.properties` provides all c
 ### WireMock server unreachable
 
 If credential issuance fails with connection errors to `43.204.212.203:8086`, the WireMock server may be down or unreachable from your network. Contact the team to verify its status.
+
+### ECA credential issuance fails with 401/connection error
+
+Verify the environment variables are set before starting the service:
+```bash
+echo $ECA_CLIENT_ID
+echo $ECA_CLIENT_SECRET
+```
+
+If empty, export them and restart the service.
 
 ### Port 8090 already in use
 
