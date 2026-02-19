@@ -510,6 +510,11 @@ def do_sso_login(client_id, client_secret):
     server = http.server.HTTPServer(("localhost", REDIRECT_PORT), RedirectHandler)
 
     print(f"\nStarting local server on port {REDIRECT_PORT}...")
+    print(f"Logging out of previous Gov.br session...")
+    # Open the logout URL first to clear any existing session cookie,
+    # so the user gets a fresh login page and can use a different account.
+    webbrowser.open(f"{SSO_URL}/logout?post_logout_redirect_uri={urllib.parse.quote(authorize_url)}")
+    time.sleep(2)  # Give the browser time to process the logout
     print(f"Opening browser for Gov.br login...\n")
     webbrowser.open(authorize_url)
 
