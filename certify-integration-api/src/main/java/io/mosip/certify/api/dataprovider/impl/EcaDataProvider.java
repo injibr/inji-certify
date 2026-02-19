@@ -50,18 +50,21 @@ public class EcaDataProvider implements DataProviderService {
         }
 
         JSONObject ecaData = new JSONObject(response);
-        String dataNascimento = ecaData.getString("DataNascimento");
-        boolean is18orOlder = isAdult(dataNascimento);
-        log.info("CPF {} - DataNascimento: {}, is18orOlder: {}", cpfNumber, dataNascimento, is18orOlder);
+        String dataNascimento = ecaData.getString("dataNascimento");
+        int age = getAge(dataNascimento);
+        log.info("CPF {} - dataNascimento: {}, age: {}", cpfNumber, dataNascimento, age);
 
         JSONObject result = new JSONObject();
-        result.put("is18orOlder", is18orOlder);
+        result.put("isOver12", age >= 12);
+        result.put("isOver14", age >= 14);
+        result.put("isOver16", age >= 16);
+        result.put("isOver18", age >= 18);
         return result;
     }
 
-    private boolean isAdult(String dataNascimento) {
+    private int getAge(String dataNascimento) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate birthDate = LocalDate.parse(dataNascimento, formatter);
-        return Period.between(birthDate, LocalDate.now()).getYears() >= 18;
+        return Period.between(birthDate, LocalDate.now()).getYears();
     }
 }

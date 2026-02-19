@@ -286,7 +286,7 @@ The `type` array determines which data provider is called:
 - `["VerifiableCredential", "CARReceipt"]` → `CARReceiptDataProvider`
 - `["VerifiableCredential", "CAFCredential"]` → `CAFDataProvider`
 - `["VerifiableCredential", "CCIRCredential"]` → `CCIRDataProvider`
-- `["VerifiableCredential", "ECACredential"]` → `EcaDataProvider` (returns `is18orOlder` boolean)
+- `["VerifiableCredential", "ECACredential"]` → `EcaDataProvider` (returns `isOver12`, `isOver14`, `isOver16`, `isOver18` booleans)
 
 ### Step 3: Using Postman Collections
 
