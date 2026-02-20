@@ -35,7 +35,7 @@ public class EcaDataProvider implements DataProviderService {
     }
 
     @Override
-    public JSONObject getData(String cpfNumber) throws Exception {
+    public JSONObject getData(String cpfNumber) throws JSONException {
         String accessToken = ecaTokenClient.getAccessToken();
 
         String response = webClient.get()
