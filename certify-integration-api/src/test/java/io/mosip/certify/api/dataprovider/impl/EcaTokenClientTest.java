@@ -22,7 +22,6 @@ public class EcaTokenClientTest {
                 "https://hisrj.dataprev.gov.br/oauth2/token",
                 clientId,
                 clientSecret,
-                false
         );
 
         String token = client.getAccessToken();
