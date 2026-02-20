@@ -2,6 +2,7 @@ package io.mosip.certify.api.dataprovider.impl;
 
 import io.mosip.certify.api.dataprovider.DataProviderService;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
