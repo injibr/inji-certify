@@ -8,6 +8,6 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 public class AuditConfig {
 
-    @Value("${audit.enabled:true}")
+    @Value("${audit.enabled:false}")
     private boolean auditEnabled;
 }
