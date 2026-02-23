@@ -2,6 +2,7 @@ package io.mosip.certify.api.dataprovider.impl;
 
 import io.mosip.certify.api.dataprovider.DataProviderService;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public class EcaDataProvider implements DataProviderService {
     }
 
     @Override
-    public JSONObject getData(String cpfNumber) throws Exception {
+    public JSONObject getData(String cpfNumber) throws JSONException {
         String accessToken = ecaTokenClient.getAccessToken();
 
         String response = webClient.get()
