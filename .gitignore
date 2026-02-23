@@ -23,6 +23,7 @@ hs_err_pid*
 target/
 .idea/
 *.p12
+*.pfx
 *.iml
 .settings/
 .setting/
@@ -30,3 +31,4 @@ target/
 .project/
 helm/*/Chart.lock
 helm/*/charts/
+.envrc
