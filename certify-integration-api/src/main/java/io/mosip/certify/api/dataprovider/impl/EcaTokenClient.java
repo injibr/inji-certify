@@ -59,7 +59,7 @@ public class EcaTokenClient {
             throw new RuntimeException("Failed to retrieve ECA access token");
         }
 
-        log.info("ECAtokenResponse: {}", this.tokenResponse);
+        log.info("ECAtokenResponse: {}", tokenResponse);
 
         return (String) tokenResponse.get("access_token");
     }
