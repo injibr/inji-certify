@@ -38,7 +38,6 @@ public class EcaDataProvider implements DataProviderService {
     @Override
     public JSONObject getData(String cpfNumber) throws JSONException {
         String accessToken = ecaTokenClient.getAccessToken();
-        log.info("Chamando API ECA ...");
 
         String response = webClient.get()
                 .uri(String.format(apiUrl, cpfNumber))
@@ -47,13 +46,9 @@ public class EcaDataProvider implements DataProviderService {
                 .bodyToMono(String.class)
                 .block();
 
-        log.info("Response API ECA: {}", response);
-
         if (response == null) {
             throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "No data found for ECA for CPF: " + cpfNumber);
         }
-
-        
 
         JSONObject ecaData = new JSONObject(response);
         String dataNascimento = ecaData.getString("dataNascimento");

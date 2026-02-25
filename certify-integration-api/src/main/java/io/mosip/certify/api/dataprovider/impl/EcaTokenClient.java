@@ -1,5 +1,5 @@
 package io.mosip.certify.api.dataprovider.impl;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -7,7 +7,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Map;
 
-@Slf4j
 @Component
 public class EcaTokenClient {
     private final WebClient webClient;
@@ -35,15 +34,7 @@ public class EcaTokenClient {
      * @return The access token as a String.
      * @throws RuntimeException if the token cannot be retrieved.
      */
-
-  
     public String getAccessToken() {
-        log.info("Entrando no getAccessToken .. ");
-        log.info("TokenUrl: ",tokenUrl);
-        log.info("ClientID: ",clientId);
-        log.info("ClienteSecret: ",clientSecret);
-
-
         Map tokenResponse = webClient.post()
                 .uri(tokenUrl)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -54,8 +45,6 @@ public class EcaTokenClient {
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
-
-        log.info("ECAtokenResponse: {}", tokenResponse);
 
         if (tokenResponse == null || tokenResponse.get("access_token") == null) {
             throw new RuntimeException("Failed to retrieve ECA access token");
