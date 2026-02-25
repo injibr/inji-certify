@@ -24,7 +24,7 @@ Sequence diagram:
      |-------------->|------------->|              |              |
      |               |  redirect    |              |              |
      |               |  ?code=XXX   |              |              |
-     |               |----------------------------->|              |
+     |               |---------------------------->|              |
      |               |              |  exchange    |              |
      |               |              |  code+PKCE   |              |
      |               |              |<-------------|              |
@@ -47,6 +47,7 @@ Environment variables:
     SSO_CLIENT_SECRET  (required) OAuth2 client secret
     ACCESS_TOKEN       (optional) Pre-existing access token (with --skip-login)
     CERTIFY_URL        (optional) Certify base URL (default: http://localhost:8090/v1/certify)
+    --no-cache         Ignore cached tokens and force a fresh SSO login
 
 Dependencies:
     - Python 3.8+ (standard library only for the SSO flow)
@@ -451,7 +452,10 @@ def request_credential(certify_url, access_token, proof_jwt, doc_type="ECACreden
         with urllib.request.urlopen(req) as resp:
             return json.loads(resp.read()), resp.status
     except urllib.error.HTTPError as e:
-        return json.loads(e.read().decode()), e.code
+        body = e.read().decode()
+        if body:
+            return json.loads(body), e.code
+        return {"error": f"HTTP {e.code}", "detail": e.reason, "body": ""}, e.code
 
 
 # =============================================================================
@@ -539,11 +543,53 @@ def do_sso_login(client_id, client_secret):
 
 
 # =============================================================================
+# Token Cache
+# =============================================================================
+#
+# To avoid opening the browser for SSO login on every run, tokens are cached
+# in a .token_cache.json file next to this script. The cache includes the
+# access_token and its expiration time. On subsequent runs, if the cached
+# token is still valid (with a 60-second safety margin), it is reused.
+#
+# Use --no-cache to force a fresh login.
+# =============================================================================
+
+TOKEN_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".token_cache.json")
+
+
+def load_cached_tokens():
+    """Load tokens from cache file if it exists and the access_token is not expired."""
+    try:
+        with open(TOKEN_CACHE_FILE, "r") as f:
+            cache = json.load(f)
+        access_token = cache.get("access_token", "")
+        if not access_token:
+            return None
+        claims = decode_jwt_payload(access_token)
+        exp = claims.get("exp", 0)
+        # 60-second safety margin to avoid using a token that's about to expire
+        if time.time() < exp - 60:
+            return cache
+        print("Cached token expired, will re-authenticate.")
+        return None
+    except (FileNotFoundError, json.JSONDecodeError, Exception):
+        return None
+
+
+def save_tokens_to_cache(tokens):
+    """Save tokens to cache file."""
+    with open(TOKEN_CACHE_FILE, "w") as f:
+        json.dump(tokens, f, indent=2)
+    print(f"  Tokens cached to {TOKEN_CACHE_FILE}")
+
+
+# =============================================================================
 # Main: Orchestrates all three phases
 # =============================================================================
 
 def main():
     skip_login = "--skip-login" in sys.argv
+    no_cache = "--no-cache" in sys.argv
     certify_url = os.environ.get("CERTIFY_URL", "http://localhost:8090/v1/certify")
 
     client_id = os.environ.get("SSO_CLIENT_ID")
@@ -554,16 +600,38 @@ def main():
         sys.exit(1)
 
     # --- Phase 1: Authenticate the citizen via Gov.br SSO ---
+    access_token = None
+    id_token = ""
+
     if skip_login:
         access_token = os.environ.get("ACCESS_TOKEN")
         if not access_token:
             print("ERROR: Set ACCESS_TOKEN environment variable when using --skip-login")
             sys.exit(1)
         print("Using ACCESS_TOKEN from environment")
-    else:
+
+    # Try loading from cache (unless --skip-login or --no-cache)
+    if not access_token and not no_cache:
+        cached = load_cached_tokens()
+        if cached:
+            access_token = cached["access_token"]
+            id_token = cached.get("id_token", "")
+            print("Using cached tokens (still valid)")
+            print("\n" + "=" * 60)
+            print("TOKENS (cached)")
+            print("=" * 60)
+            if id_token:
+                claims = decode_jwt_payload(id_token)
+                print(f"  CPF (sub): {claims.get('sub')}")
+                print(f"  Name:      {claims.get('name')}")
+                print(f"  Email:     {claims.get('email')}")
+
+    # Fall back to SSO login if we still don't have a token
+    if not access_token:
         tokens = do_sso_login(client_id, client_secret)
         access_token = tokens["access_token"]
         id_token = tokens.get("id_token", "")
+        save_tokens_to_cache(tokens)
 
         print("\n" + "=" * 60)
         print("TOKENS RECEIVED")
@@ -583,8 +651,21 @@ def main():
 
     # --- Phase 2: Generate the wallet's proof of key possession ---
     # The certify_identifier must match `mosip.certify.identifier` in
-    # application-local.properties. It's the audience (aud) of the proof JWT.
-    certify_identifier = "https://vcdemo.crabdance.com/certify"
+    # the server's properties. It's the audience (aud) of the proof JWT.
+    # Fetch it from the well-known endpoint, or fall back to env var / default.
+    certify_identifier = os.environ.get("CERTIFY_IDENTIFIER", "")
+    if not certify_identifier:
+        try:
+            wk_url = f"{certify_url}/issuance/.well-known/openid-credential-issuer?issuer_id=MGI"
+            wk_req = urllib.request.Request(wk_url, headers={"Accept": "application/json"})
+            with urllib.request.urlopen(wk_req) as wk_resp:
+                wk_data = json.loads(wk_resp.read())
+                certify_identifier = wk_data.get("credential_issuer", "")
+                print(f"\n  Fetched certify identifier from well-known: {certify_identifier}")
+        except Exception as e:
+            print(f"\n  WARNING: Could not fetch well-known metadata: {e}")
+            certify_identifier = "https://vcdemo.crabdance.com/certify"
+            print(f"  Falling back to default: {certify_identifier}")
     print(f"\nGenerating wallet proof JWT...")
     print(f"  aud (certify identifier): {certify_identifier}")
     proof_jwt, wallet_jwk = make_proof_jwt(certify_identifier, at_claims.get("aud", ""))
