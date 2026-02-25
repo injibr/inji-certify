@@ -35,6 +35,12 @@ public class EcaTokenClient {
      * @throws RuntimeException if the token cannot be retrieved.
      */
     public String getAccessToken() {
+        log.info("Entrando no getAccessToken .. ");
+        log.info("TokenUrl: {} ",this.tokenUrl);
+        log.info("ClientID: {}",this.clientId);
+        log.info("ClienteSecret: {}",this.clientSecret);
+
+
         Map tokenResponse = webClient.post()
                 .uri(tokenUrl)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -46,9 +52,13 @@ public class EcaTokenClient {
                 .bodyToMono(Map.class)
                 .block();
 
+        
+
         if (tokenResponse == null || tokenResponse.get("access_token") == null) {
             throw new RuntimeException("Failed to retrieve ECA access token");
         }
+
+        log.info("ECAtokenResponse: {}", this.tokenResponse);
 
         return (String) tokenResponse.get("access_token");
     }
