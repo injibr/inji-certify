@@ -111,6 +111,15 @@ CREATE TABLE certify.certify_keys (
 	config_value text NULL
 );
 
+CREATE TABLE certify.certify_audit (
+    id UUID PRIMARY KEY,
+    vc_type VARCHAR(255) NOT NULL,
+    vc_issued BOOLEAN NOT NULL,
+    issued_by VARCHAR(255) NOT NULL,
+    created_date TIMESTAMP,
+    issued_date TIMESTAMP
+);
+
 INSERT INTO certify.credential_template (context, credential_type, template, cr_dtimes, upd_dtimes) VALUES ('https://www.w3.org/2018/credentials/v1', 'FarmerCredential,VerifiableCredential', '{
      "@context": [
          "https://www.w3.org/2018/credentials/v1",
