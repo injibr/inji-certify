@@ -6,12 +6,12 @@
     <parent>
         <groupId>io.mosip.certify</groupId>
         <artifactId>certify-parent</artifactId>
-        <version>4.1.0</version>
+        <version>4.1.3</version>
     </parent>
 
     <groupId>io.mosip.certify</groupId>
     <artifactId>certify-integration-api</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.3</version>
     <name>certify-integration-api</name>
     <description>Certify Integration Library</description>
 
