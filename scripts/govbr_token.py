@@ -71,7 +71,6 @@ REDIRECT_PORT = 3004
 REDIRECT_URI = f"http://localhost:{REDIRECT_PORT}/redirect"
 
 
-
 # =============================================================================
 # Phase 1: Citizen Authentication (OAuth2 Authorization Code + PKCE)
 # =============================================================================
@@ -145,7 +144,7 @@ def exchange_code(code, code_verifier, client_id, client_secret):
 
     This is the second leg of the Authorization Code flow. After the citizen
     logs in and Gov.br redirects back with a `code`, we POST to the /token
-    e with:
+    endpoint with:
     - grant_type=authorization_code : Standard OAuth2 grant
     - code                          : The authorization code from the redirect
     - redirect_uri                  : Must match the one used in /authorize
@@ -428,8 +427,6 @@ def request_credential(certify_url, access_token, proof_jwt, doc_type="ECACreden
     On success (200), response_json contains a "credential" key with the
     signed Verifiable Credential in JSON-LD format.
     """
-   
-    #print("token: ",access_token)
     url = f"{certify_url}/issuance/credential"
     body = json.dumps({
         "format": "ldp_vc",
@@ -449,8 +446,6 @@ def request_credential(certify_url, access_token, proof_jwt, doc_type="ECACreden
         "Content-Type": "application/json",
         "Authorization": f"Bearer {access_token}",
     })
-
-    
 
     try:
         with urllib.request.urlopen(req) as resp:
@@ -549,7 +544,7 @@ def do_sso_login(client_id, client_secret):
 
 def main():
     skip_login = "--skip-login" in sys.argv
-    certify_url = "https://injicertify.credenciaisverificaveis-hml.dataprev.gov.br/v1/certify"
+    certify_url = os.environ.get("CERTIFY_URL", "http://localhost:8090/v1/certify")
 
     client_id = os.environ.get("SSO_CLIENT_ID")
     client_secret = os.environ.get("SSO_CLIENT_SECRET")
@@ -589,7 +584,7 @@ def main():
     # --- Phase 2: Generate the wallet's proof of key possession ---
     # The certify_identifier must match `mosip.certify.identifier` in
     # application-local.properties. It's the audience (aud) of the proof JWT.
-    certify_identifier = "https://injicertify.credenciaisverificaveis-hml.dataprev.gov.br"
+    certify_identifier = "https://vcdemo.crabdance.com/certify"
     print(f"\nGenerating wallet proof JWT...")
     print(f"  aud (certify identifier): {certify_identifier}")
     proof_jwt, wallet_jwk = make_proof_jwt(certify_identifier, at_claims.get("aud", ""))
