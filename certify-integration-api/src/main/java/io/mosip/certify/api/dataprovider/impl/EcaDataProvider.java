@@ -38,7 +38,6 @@ public class EcaDataProvider implements DataProviderService {
     @Override
     public JSONObject getData(String cpfNumber) throws JSONException {
         String accessToken = ecaTokenClient.getAccessToken();
-        log.info("Chamando API ECA ...");
 
         String response = webClient.get()
                 .uri(String.format(apiUrl, cpfNumber))
