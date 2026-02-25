@@ -1,5 +1,5 @@
 package io.mosip.certify.api.dataprovider.impl;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Map;
 
+@Slf4j
 @Component
 public class EcaTokenClient {
     private final WebClient webClient;
