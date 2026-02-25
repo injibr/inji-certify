@@ -18,13 +18,13 @@
       "protocol": "OpenId4VCI",
       "client_id": "h-credenciaisverificaveis-dev.dataprev.gov.br",
       "client_alias": "h-credenciaisverificaveis-dev.dataprev.gov.br",
-      "wellknown_endpoint": "http://localhost:3001/v1/certify/issuance/.well-known/openid-credential-issuer?issuer_id=INCRA",
+      "wellknown_endpoint": "http://certify:8090/v1/certify/issuance/.well-known/openid-credential-issuer?issuer_id=INCRA",
       "redirect_uri": "io.mosip.residentapp.inji://oauthredirect",
       "authorization_audience": "https://sso.staging.acesso.gov.br/token",
       "token_endpoint": "http://localhost:3001/v1/mimoto/get-token/INCRA",
       "proxy_token_endpoint": "https://sso.staging.acesso.gov.br/token",
       "qr_code_type": "OnlineSharing",
-      "credential_issuer_host": "http://localhost:3001/v1/certify/issuance",
+      "credential_issuer_host": "http://certify:8090/v1/certify/issuance",
       "enabled": "true"
     },
     {
@@ -45,13 +45,13 @@
       "protocol": "OpenId4VCI",
       "client_id": "h-credenciaisverificaveis-dev.dataprev.gov.br",
       "client_alias": "h-credenciaisverificaveis-dev.dataprev.gov.br",
-      "wellknown_endpoint": "http://localhost:3001/v1/certify/issuance/.well-known/openid-credential-issuer?issuer_id=MGI",
+      "wellknown_endpoint": "http://certify:8090/v1/certify/issuance/.well-known/openid-credential-issuer?issuer_id=MGI",
       "redirect_uri": "io.mosip.residentapp.inji://oauthredirect",
       "authorization_audience": "https://sso.staging.acesso.gov.br/token",
       "token_endpoint": "http://localhost:3001/v1/mimoto/get-token/MGI",
       "proxy_token_endpoint": "https://sso.staging.acesso.gov.br/token",
       "qr_code_type": "OnlineSharing",
-      "credential_issuer_host": "http://localhost:3001/v1/certify/issuance",
+      "credential_issuer_host": "http://certify:8090/v1/certify/issuance",
       "enabled": "true"
     },
     {
@@ -72,13 +72,13 @@
       "protocol": "OpenId4VCI",
       "client_id": "h-credenciaisverificaveis-dev.dataprev.gov.br",
       "client_alias": "h-credenciaisverificaveis-dev.dataprev.gov.br",
-      "wellknown_endpoint": "http://localhost:3001/v1/certify/issuance/.well-known/openid-credential-issuer?issuer_id=MDA",
+      "wellknown_endpoint": "http://certify:8090/v1/certify/issuance/.well-known/openid-credential-issuer?issuer_id=MDA",
       "redirect_uri": "io.mosip.residentapp.inji://oauthredirect",
       "authorization_audience": "https://sso.staging.acesso.gov.br/token",
       "token_endpoint": "http://localhost:3001/v1/mimoto/get-token/MDA",
       "proxy_token_endpoint": "https://sso.staging.acesso.gov.br/token",
       "qr_code_type": "OnlineSharing",
-      "credential_issuer_host": "http://localhost:3001/v1/certify/issuance",
+      "credential_issuer_host": "http://certify:8090/v1/certify/issuance",
       "enabled": "true"
     }
   ]

@@ -32,5 +32,6 @@ target/
 helm/*/Chart.lock
 helm/*/charts/
 .envrc
+.env
 node_modules
 scripts/.token_cache.json
