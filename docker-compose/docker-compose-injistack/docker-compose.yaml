@@ -31,12 +31,15 @@ services:
       - enable_certify_artifactory=false
       - download_hsm_client=false
       - mosipbox_public_url=http://certify:8090
+      - ECA_CLIENT_ID=${ECA_CLIENT_ID}
+      - ECA_CLIENT_SECRET=${ECA_CLIENT_SECRET}
+      - JAVA_TOOL_OPTIONS=-Djava.security.properties=/home/mosip/config/java-security-override.properties
     volumes:
       - ./config/certify-default.properties:/home/mosip/config/certify-default.properties
       - ./config/certify-csvdp-farmer.properties:/home/mosip/config/certify-csvdp-farmer.properties
-      - ./config/certify-mock-mdl.properties:/home/mosip/config/certify-mock-mdl.properties
       - ./data/CERTIFY_PKCS12:/home/mosip/CERTIFY_PKCS12
       - ./loader_path/certify/:/home/mosip/additional_jars/
+      - ./config/java-security-override.properties:/home/mosip/config/java-security-override.properties
       # modify the below file to change the identity fields in the VC
       - ./config/farmer_identity_data.csv:/home/mosip/config/farmer_identity_data.csv
     networks:
@@ -84,6 +87,7 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - mimoto-service
+      - certify
     networks:
       - network
 

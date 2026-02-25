@@ -166,7 +166,30 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
         HashMap<String, Object> credentialIssuerMetadata = issuerMetadata.get(issuerId);
         if (credentialIssuerMetadata != null)
             return credentialIssuerMetadata;
+        if ("latest".equals(issuerId)) {
+            return getMergedIssuerMetadata();
+        }
         throw new InvalidRequestException(ErrorConstants.UNSUPPORTED_OPENID_VERSION);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getMergedIssuerMetadata() {
+        LinkedHashMap<String, Object> merged = null;
+        LinkedHashMap<String, Object> mergedCredentials = new LinkedHashMap<>();
+        for (LinkedHashMap<String, Object> entry : issuerMetadata.values()) {
+            if (merged == null) {
+                merged = new LinkedHashMap<>(entry);
+            }
+            Object ccs = entry.get("credential_configurations_supported");
+            if (ccs instanceof Map) {
+                mergedCredentials.putAll((Map<String, Object>) ccs);
+            }
+        }
+        if (merged == null) {
+            throw new InvalidRequestException(ErrorConstants.UNSUPPORTED_OPENID_VERSION);
+        }
+        merged.put("credential_configurations_supported", mergedCredentials);
+        return merged;
     }
 
 
