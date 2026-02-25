@@ -12,9 +12,15 @@ services:
       - network
     ports:
       - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 35s
 
   certify:
-    image: mosipid/inji-certify:0.10.2
+    image: inji-certify:local
     user: root
     ports:
       - 8090:8090
@@ -25,7 +31,9 @@ services:
       - SPRING_CONFIG_LOCATION=/home/mosip/config/
       - enable_certify_artifactory=false
       - download_hsm_client=false
-      - mosipbox_public_url=http://certify:8090
+      - mosipbox_public_url=http://localhost:8090
+      - ECA_CLIENT_ID=${ECA_CLIENT_ID}
+      - ECA_CLIENT_SECRET=${ECA_CLIENT_SECRET}
     volumes:
       - ./config/certify-default.properties:/home/mosip/config/certify-default.properties
       - ./config/certify-csvdp-farmer.properties:/home/mosip/config/certify-csvdp-farmer.properties
@@ -37,7 +45,8 @@ services:
     networks:
       - network
     depends_on:
-      - database
+      database:
+        condition: service_healthy
 
   mimoto-service:
     container_name: 'Mimoto-Service'
