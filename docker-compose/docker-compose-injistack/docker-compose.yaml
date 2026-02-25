@@ -11,10 +11,15 @@ services:
     networks:
       - network
     ports:
-      - "5433:5432"
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   certify:
-    image: mosipid/inji-certify:0.10.2
+    image: inji-certify:local
     user: root
     ports:
       - 8090:8090
@@ -37,7 +42,8 @@ services:
     networks:
       - network
     depends_on:
-      - database
+      database:
+        condition: service_healthy
 
   mimoto-service:
     container_name: 'Mimoto-Service'
@@ -65,7 +71,7 @@ services:
       - '3001:3004'
     environment:
       - DEFAULT_LANG=en
-      - MIMOTO_HOST=https://vcdemo.crabdance.com/v1/mimoto
+      - MIMOTO_HOST=http://localhost:3001/v1/mimoto
     volumes:
       - ./config/mimoto-default.properties:/home/mosip/mimoto-default.properties
       - ./config/mimoto-issuers-config.json:/home/mosip/mimoto-issuers-config.json

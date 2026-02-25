@@ -24,7 +24,7 @@ Sequence diagram:
      |-------------->|------------->|              |              |
      |               |  redirect    |              |              |
      |               |  ?code=XXX   |              |              |
-     |               |----------------------------->|              |
+     |               |---------------------------->|              |
      |               |              |  exchange    |              |
      |               |              |  code+PKCE   |              |
      |               |              |<-------------|              |
@@ -583,8 +583,21 @@ def main():
 
     # --- Phase 2: Generate the wallet's proof of key possession ---
     # The certify_identifier must match `mosip.certify.identifier` in
-    # application-local.properties. It's the audience (aud) of the proof JWT.
-    certify_identifier = "https://vcdemo.crabdance.com/certify"
+    # the server's properties. It's the audience (aud) of the proof JWT.
+    # Fetch it from the well-known endpoint, or fall back to env var / default.
+    certify_identifier = os.environ.get("CERTIFY_IDENTIFIER", "")
+    if not certify_identifier:
+        try:
+            wk_url = f"{certify_url}/issuance/.well-known/openid-credential-issuer?issuer_id=MGI"
+            wk_req = urllib.request.Request(wk_url, headers={"Accept": "application/json"})
+            with urllib.request.urlopen(wk_req) as wk_resp:
+                wk_data = json.loads(wk_resp.read())
+                certify_identifier = wk_data.get("credential_issuer", "")
+                print(f"\n  Fetched certify identifier from well-known: {certify_identifier}")
+        except Exception as e:
+            print(f"\n  WARNING: Could not fetch well-known metadata: {e}")
+            certify_identifier = "https://vcdemo.crabdance.com/certify"
+            print(f"  Falling back to default: {certify_identifier}")
     print(f"\nGenerating wallet proof JWT...")
     print(f"  aud (certify identifier): {certify_identifier}")
     proof_jwt, wallet_jwk = make_proof_jwt(certify_identifier, at_claims.get("aud", ""))
