@@ -9,12 +9,12 @@
     <parent>
         <groupId>io.mosip.certify</groupId>
         <artifactId>certify-parent</artifactId>
-        <version>4.1.0</version>
+        <version>4.1.3</version>
     </parent>
 
     <groupId>io.mosip.certify</groupId>
     <artifactId>certify-core</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.3</version>
     <name>certify-core</name>
     <description>Certify Core Library</description>
 
