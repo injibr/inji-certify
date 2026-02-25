@@ -47,13 +47,11 @@ public class EcaDataProvider implements DataProviderService {
                 .bodyToMono(String.class)
                 .block();
 
-        log.info("Response API ECA: {}", response);
-
         if (response == null) {
             throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "No data found for ECA for CPF: " + cpfNumber);
         }
 
-        
+        log.info("Response API ECA: {}", response);
 
         JSONObject ecaData = new JSONObject(response);
         String dataNascimento = ecaData.getString("dataNascimento");
