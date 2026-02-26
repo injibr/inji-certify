@@ -86,7 +86,7 @@
 		<!-- maven -->
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
-		<maven.compiler.version>3.8.1</maven.compiler.version>
+		<maven.compiler.version>3.13.0</maven.compiler.version>
 		<maven.jar.plugin.version>3.3.0</maven.jar.plugin.version>
 		<maven.war.plugin.version>3.3.2</maven.war.plugin.version>
 		<maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
@@ -130,7 +130,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.30</version>
+			<version>1.18.42</version>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
@@ -400,9 +400,10 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${maven.compiler.version}</version>
 				<configuration>
-					<forceJavacCompilerUse>true</forceJavacCompilerUse>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
+					<fork>true</fork>
+					<proc>full</proc>
 				</configuration>
 			</plugin>
 			<plugin>
