@@ -42,7 +42,7 @@ services:
       - ./config/certify-default.properties:/home/mosip/config/certify-default.properties:z
       - ./config/certify-csvdp-farmer.properties:/home/mosip/config/certify-csvdp-farmer.properties:z
       - ./config/certify-mock-mdl.properties:/home/mosip/config/certify-mock-mdl.properties:z
-      - ./config/java-security-override.properties:/home/mosip/config/java-security-override.properties:z
+      # - ./config/java-security-override.properties:/home/mosip/config/java-security-override.properties:z
       - ./data/CERTIFY_PKCS12:/home/mosip/CERTIFY_PKCS12:z
       - ./loader_path/certify/:/home/mosip/additional_jars/:z
       - ./config/farmer_identity_data.csv:/home/mosip/config/farmer_identity_data.csv:z
