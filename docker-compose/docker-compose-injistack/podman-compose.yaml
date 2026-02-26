@@ -1,0 +1,104 @@
+services:
+  database:
+    image: 'postgres:latest'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./certify_init.sql:/docker-entrypoint-initdb.d/certify_init.sql:z
+    networks:
+      - network
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 35s
+
+  certify:
+    image: inji-certify:local
+    user: root
+    ports:
+      - 8090:8090
+    environment:
+      - container_user=mosip
+      - active_profile_env=default,csvdp-farmer
+      - SPRING_CONFIG_NAME=certify
+      - SPRING_CONFIG_LOCATION=/home/mosip/config/
+      - enable_certify_artifactory=false
+      - download_hsm_client=false
+      - mosipbox_public_url=http://localhost:8090
+      - ECA_CLIENT_ID=${ECA_CLIENT_ID}
+      - ECA_CLIENT_SECRET=${ECA_CLIENT_SECRET}
+      - JAVA_TOOL_OPTIONS=-Djava.security.properties=/home/mosip/config/java-security-override.properties
+      # Explicit env var so Spring resolves the @ComponentScan placeholder even when
+      # bootstrap context loads before the external config files are available.
+      # Spring Boot relaxed binding maps MOSIP_CERTIFY_INTEGRATION_SCAN_BASE_PACKAGE
+      # → mosip.certify.integration.scan-base-package
+      - MOSIP_CERTIFY_INTEGRATION_SCAN_BASE_PACKAGE=io.mosip.certify.api.dataprovider
+    volumes:
+      - ./config/certify-default.properties:/home/mosip/config/certify-default.properties:z
+      - ./config/certify-csvdp-farmer.properties:/home/mosip/config/certify-csvdp-farmer.properties:z
+      - ./config/certify-mock-mdl.properties:/home/mosip/config/certify-mock-mdl.properties:z
+      - ./config/java-security-override.properties:/home/mosip/config/java-security-override.properties:z
+      - ./data/CERTIFY_PKCS12:/home/mosip/CERTIFY_PKCS12:z
+      - ./loader_path/certify/:/home/mosip/additional_jars/:z
+      - ./config/farmer_identity_data.csv:/home/mosip/config/farmer_identity_data.csv:z
+    networks:
+      - network
+    depends_on:
+      database:
+        condition: service_healthy
+
+  mimoto-service:
+    container_name: 'Mimoto-Service'
+    image: mosipid/mimoto:0.17.1
+    user: root
+    ports:
+      - '8099:8099'
+    environment:
+      - container_user=mosip
+      - active_profile_env=default
+      - SPRING_CONFIG_NAME=mimoto
+      - SPRING_CONFIG_LOCATION=/home/mosip/
+      # Spring Boot relaxed binding maps MOSIP_AUTH_ADAPTER_IMPL_BASEPACKAGE
+      # → mosip.auth.adapter.impl.basepackage
+      - MOSIP_AUTH_ADAPTER_IMPL_BASEPACKAGE=io.mosip.kernel.auth.defaultadapter
+    networks:
+      - network
+    volumes:
+      - ./config/mimoto-default.properties:/home/mosip/mimoto-default.properties:z
+      - ./config/mimoto-issuers-config.json:/home/mosip/mimoto-issuers-config.json:z
+      - ./config/mimoto-trusted-verifiers.json:/home/mosip/mimoto-trusted-verifiers.json:z
+      - ./certs/oidckeystore.p12:/home/mosip/certs/oidckeystore.p12:z
+
+  inji-web:
+    container_name: 'inji-web'
+    image: mosipid/inji-web:0.11.0
+    user: root
+    ports:
+      - '3001:3004'
+    environment:
+      - DEFAULT_LANG=en
+      - MIMOTO_HOST=https://vcdemo.crabdance.com/v1/mimoto
+    volumes:
+      - ./config/mimoto-default.properties:/home/mosip/mimoto-default.properties:z
+      - ./config/mimoto-issuers-config.json:/home/mosip/mimoto-issuers-config.json:z
+      - ./config/mimoto-trusted-verifiers.json:/home/mosip/mimoto-trusted-verifiers.json:z
+      - ./config/credential-template.html:/home/mosip/credential-template.html:z
+      - ./config/INCRA-CCIRCredential-template.html:/home/mosip/INCRA-CCIRCredential-template.html:z
+      - ./config/MGI-CARReceipt-template.html:/home/mosip/MGI-CARReceipt-template.html:z
+      - ./config/MGI-CARDocument-template.html:/home/mosip/MGI-CARDocument-template.html:z
+      - ./config/MDA-CAFCredential-template.html:/home/mosip/MDA-CAFCredential-template.html:z
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:z
+    depends_on:
+      - mimoto-service
+    networks:
+      - network
+
+networks:
+  network:
+    name: mosip_network
+    external: true
