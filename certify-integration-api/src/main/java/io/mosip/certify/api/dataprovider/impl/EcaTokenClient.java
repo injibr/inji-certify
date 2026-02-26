@@ -38,10 +38,6 @@ public class EcaTokenClient {
         Map tokenResponse = webClient.post()
                 .uri(tokenUrl)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                // 1. header
-                // .headers(headers -> headers.setBasicAuth(clientId, clientSecret))
-                // 2. body value (não funcionam simultaneamente)
-                // .bodyValue("grant_type=client_credentials&scope=default")    
                 .bodyValue("grant_type=client_credentials" +
                         "&client_id=" + clientId +
                         "&client_secret=" + clientSecret +
