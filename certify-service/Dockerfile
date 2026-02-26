@@ -95,6 +95,27 @@ RUN chmod a-w /home/${container_user}/configure_start.sh
 
 COPY ./certify-service/target/certify-service-*.jar certify-service.jar
 
+# Bake config files into the image (for homolog environments without docker-compose)
+RUN mkdir -p /home/${container_user}/config
+COPY ./docker-compose/docker-compose-injistack/config/certify-default.properties /home/${container_user}/config/
+COPY ./docker-compose/docker-compose-injistack/config/certify-csvdp-farmer.properties /home/${container_user}/config/
+COPY ./docker-compose/docker-compose-injistack/config/java-security-override.properties /home/${container_user}/config/
+COPY ./docker-compose/docker-compose-injistack/config/farmer_identity_data.csv /home/${container_user}/config/
+
+# PKCS12 keystore
+COPY ./docker-compose/docker-compose-injistack/data/CERTIFY_PKCS12 /home/${container_user}/CERTIFY_PKCS12
+
+# Plugin JAR
+COPY ./docker-compose/docker-compose-injistack/loader_path/certify/ /home/${container_user}/additional_jars/
+
+# Runtime defaults for homolog (ECA_CLIENT_ID and ECA_CLIENT_SECRET must be passed at runtime)
+ENV active_profile_env="default, csvdp-farmer"
+ENV SPRING_CONFIG_NAME=certify
+ENV SPRING_CONFIG_LOCATION=/home/${container_user}/config/
+ENV enable_certify_artifactory=false
+ENV download_hsm_client=false
+ENV JAVA_TOOL_OPTIONS="-Djava.security.properties=/home/${container_user}/config/java-security-override.properties"
+
 # change permissions of file inside working dir
 RUN chown -R ${container_user}:${container_user} /home/${container_user}
 
