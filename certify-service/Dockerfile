@@ -95,6 +95,9 @@ RUN chmod a-w /home/${container_user}/configure_start.sh
 
 COPY ./certify-service/target/certify-service-*.jar certify-service.jar
 
+RUN mkdir -p /home/${container_user}/config
+COPY ./docker-compose/docker-compose-injistack/config/java-security-override.properties /home/${container_user}/config/java-security-override.properties
+
 # change permissions of file inside working dir
 RUN chown -R ${container_user}:${container_user} /home/${container_user}
 
