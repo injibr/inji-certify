@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -14,6 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(value = "mosip.certify.dataprovider.enabled", havingValue = "true", matchIfMissing = false)
 public class SicarCpfCnpjClient {
     private final WebClient webClient;
     private final String url;
