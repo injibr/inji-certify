@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
@@ -13,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Map;
 
 @Component
+@ConditionalOnProperty(value = "mosip.certify.dataprovider.enabled", havingValue = "true", matchIfMissing = false)
 public class CCIRDataProvider implements DataProviderService {
     private final WebClient webClient;
 

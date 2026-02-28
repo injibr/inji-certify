@@ -6,24 +6,16 @@ import io.mosip.certify.core.constants.VCDM2Constants;
 import io.mosip.certify.core.constants.VCDMConstants;
 import io.mosip.certify.core.exception.CertifyException;
 import io.mosip.certify.core.exception.RenderingTemplateException;
-import io.mosip.certify.core.spi.RenderingTemplateService;
-import io.mosip.certify.entity.CredentialTemplate;
-import io.mosip.certify.repository.CredentialTemplateRepository;
 import io.mosip.certify.services.CredentialUtils;
-import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.EscapeTool;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
@@ -37,39 +29,19 @@ import java.util.*;
 
 @Slf4j
 @Service("velocityEngineEca")
-public class EcaVelocityTemplatingEngineImpl implements VCFormatter {
-    VelocityEngine engine;
-    public static final String DELIMITER = ":";
-    public static final String TEMPLATE_CACHE = "templatecache";
-    @Autowired
-    CredentialTemplateRepository credentialTemplateRepository;
-    @Autowired
-    RenderingTemplateService renderingTemplateService;
-
-    @Value("${mosip.certify.data-provider-plugin.vc-expiry-duration:P730d}")
-    String defaultExpiryDuration;
-
-    @Value("${mosip.certify.data-provider-plugin.id-field-prefix-uri:}")
-    String idPrefix;
-
-    @PostConstruct
-    public void initialize() {
-        engine = new VelocityEngine();
-        engine.setProperty(RuntimeConstants.INPUT_ENCODING, "UTF-8");
-        engine.setProperty(RuntimeConstants.OUTPUT_ENCODING, "UTF-8");
-        engine.init();
-    }
+public class EcaVelocityTemplatingEngineImpl extends VelocityTemplatingEngineImpl {
 
     @SneakyThrows
     @Override
     public String format(JSONObject valueMap, Map<String, Object> templateSettings) {
         String templateName = templateSettings.get(Constants.TEMPLATE_NAME).toString();
-        String template = getTemplate(templateName);
-        if (template == null) {
-            log.error("Template {} not found", templateName);
+        String vcTemplateString = getCachedCredentialConfig(templateName).getVcTemplate();
+        if (vcTemplateString == null) {
+            log.error("Template {} not found (vcTemplate is null)", templateName);
             throw new CertifyException(ErrorConstants.EXPECTED_TEMPLATE_NOT_FOUND);
         }
-        String issuer = templateSettings.get(Constants.ISSUER_URI).toString();
+        vcTemplateString = new String(Base64.decodeBase64(vcTemplateString));
+        String issuer = templateSettings.get(Constants.DID_URL).toString();
         StringWriter writer = new StringWriter();
         Map<String, Object> finalTemplate = new HashMap<>();
         Iterator<String> keys = valueMap.keys();
@@ -131,13 +103,13 @@ public class EcaVelocityTemplatingEngineImpl implements VCFormatter {
         if (templateSettings.containsKey(Constants.RENDERING_TEMPLATE_ID) && templateName.contains(VCDM2Constants.URL)) {
             try {
                 finalTemplate.put("_renderMethodSVGdigest",
-                        CredentialUtils.getDigestMultibase(renderingTemplateService.getSvgTemplate(
+                        CredentialUtils.getDigestMultibase(renderingTemplateService.getTemplate(
                                 (String) templateSettings.get(Constants.RENDERING_TEMPLATE_ID)).getTemplate()));
             } catch (RenderingTemplateException e) {
                 log.error("SVG Template: " + templateSettings.get(Constants.RENDERING_TEMPLATE_ID) + " not available in DB", e);
             }
         }
-        if (!valueMap.has(VCDM2Constants.VALID_UNITL) && StringUtils.isNotEmpty(defaultExpiryDuration)) {
+        if (!valueMap.has(VCDM2Constants.VALID_UNTIL) && StringUtils.isNotEmpty(defaultExpiryDuration)) {
             Duration duration;
             try {
                 duration = Duration.parse(defaultExpiryDuration);
@@ -145,32 +117,18 @@ public class EcaVelocityTemplatingEngineImpl implements VCFormatter {
                 duration = Duration.parse("P730D");
             }
             String expiryTime = ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(duration.getSeconds()).format(DateTimeFormatter.ofPattern(Constants.UTC_DATETIME_PATTERN));
-            finalTemplate.put(VCDM2Constants.VALID_UNITL, expiryTime);
+            finalTemplate.put(VCDM2Constants.VALID_UNTIL, expiryTime);
         }
         if (!valueMap.has(VCDM2Constants.VALID_FROM)) {
             finalTemplate.put(VCDM2Constants.VALID_FROM, ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(Constants.UTC_DATETIME_PATTERN)));
         }
         VelocityContext context = new VelocityContext(finalTemplate);
-        engine.evaluate(context, writer, templateName, template.toString());
+        engine.evaluate(context, writer, templateName, vcTemplateString);
         if (StringUtils.isNotEmpty(idPrefix)) {
             JSONObject j = new JSONObject(writer.toString());
             j.put(VCDMConstants.ID, idPrefix + UUID.randomUUID());
             return j.toString();
         }
         return writer.toString();
-    }
-
-    @Cacheable(cacheNames = TEMPLATE_CACHE, key = "#key")
-    public String getTemplate(String key) {
-        if (!key.contains(DELIMITER)) {
-            return null;
-        }
-        String credentialType = key.split(DELIMITER)[0];
-        String context = key.split(DELIMITER, 2)[1];
-        CredentialTemplate template = credentialTemplateRepository.findByCredentialTypeAndContext(credentialType, context).orElse(null);
-        if (template != null) {
-            return template.getTemplate();
-        } else
-            return null;
     }
 }

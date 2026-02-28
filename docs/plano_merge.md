@@ -1,52 +1,56 @@
-# Plano de Merge: injibr/inji-certify com upstream mosip/inji-certify
+# Merge Plan: injibr/inji-certify with upstream mosip/inji-certify
 
-**Data:** 2026-02-28
-**Branch de trabalho:** `master-updated`
-**Branch de backup:** `master-backup`
+**Date:** 2025-02-28
+**Working branch:** `master-updated`
+**Backup branch:** `master-backup`
 
-## Contexto
+---
 
-O repositorio `injibr/inji-certify` foi criado copiando o codigo do `mosip/inji-certify`
-(nao via GitHub Fork). Por isso, os commits possuem **hashes diferentes** mesmo quando
-o conteudo e identico. O Git nao reconhece ancestral comum entre os dois repositorios
+## Context
+
+The `injibr/inji-certify` repository was created by copying the code from `mosip/inji-certify`
+(not via GitHub Fork). As a result, commits have **different hashes** even when the content is
+identical — Git does not recognize a common ancestor between the two repositories
 ("unrelated histories").
 
-- **Fork (injibr):** 294 commits no master, parado na versao **0.11.x**
-- **Upstream (mosip):** 461 commits no master, atualmente na versao **0.13.x**
-- **Branch fix_424:** ~125 commits a frente do master do fork, contendo todas as
-  customizacoes brasileiras
+- **Fork (injibr):** 294 commits on master, frozen at version **0.11.x**
+- **Upstream (mosip):** 461 commits on master, currently at version **0.13.x**
+- **Branch fix_424:** ~125 commits ahead of the fork's master, containing all Brazilian customizations
 
-## Por que nao funciona um merge direto?
+## Why a direct merge doesn't work
 
 ```
 $ git merge upstream/master
 fatal: refusing to merge unrelated histories
 ```
 
-O Git trata os repositorios como completamente independentes. Usar
-`--allow-unrelated-histories` geraria conflitos em praticamente todos os arquivos,
-tornando a resolucao impraticavel.
+Git treats the two repositories as completely independent. Using `--allow-unrelated-histories`
+would generate conflicts in virtually every file, making resolution impractical.
 
-## Estrategia adotada
+---
 
-### Abordagem: "Novo branch a partir do upstream + reaplicacao das customizacoes"
+## Adopted Strategy
 
-1. Criar branch `master-updated` a partir de `upstream/master` (base limpa e atualizada)
-2. Reaplicar apenas os commits/mudancas exclusivos do fork brasileiro
-3. Ignorar commits de ruido (testes de CI, iteracoes de Jenkinsfile, bumps de versao ja superados)
-4. Validar com build (`mvn clean install`)
+### Approach: "New branch from upstream + re-apply customizations"
 
-### Por que essa abordagem?
+1. Create branch `master-updated` from `upstream/master` (clean, up-to-date base)
+2. Re-apply only the commits/changes exclusive to the Brazilian fork
+3. Skip noise commits (CI iterations, Dockerfile tests, superseded version bumps)
+4. Validate with a build (`mvn clean install`)
 
-- Garante que o codigo base esta 100% atualizado com o upstream
-- Evita arrastar commits de versao/release antigos que nao fazem mais sentido
-- Permite revisar cada customizacao antes de reaplicar
-- Resultado: historico limpo com upstream atual + customizacoes brasileiras
+### Why this approach?
 
-## Inventario de customizacoes do fork (commits exclusivos)
+- Guarantees the codebase is 100% up-to-date with upstream
+- Avoids dragging in old version/release commits that no longer make sense
+- Allows each customization to be reviewed before re-applying
+- Result: clean history with current upstream + Brazilian customizations
 
-### 1. Data Providers brasileiros (core business)
-Arquivos novos criados pelo fork para integracao com servicos brasileiros:
+---
+
+## Inventory of Fork Customizations (exclusive commits)
+
+### 1. Brazilian Data Providers (core business)
+New files created by the fork for integration with Brazilian government services:
 
 - `certify-integration-api/src/main/java/.../dataprovider/DataProviderService.java`
 - `certify-integration-api/src/main/java/.../dataprovider/impl/DataProviderPluginImpl.java`
@@ -59,17 +63,16 @@ Arquivos novos criados pelo fork para integracao com servicos brasileiros:
 - `certify-integration-api/src/main/java/.../dataprovider/impl/SicarCpfCnpjClient.java`
 - `certify-integration-api/src/main/java/.../dataprovider/impl/EcaDataProvider.java`
 - `certify-integration-api/src/main/java/.../dataprovider/impl/EcaTokenClient.java`
-- `certify-integration-api/src/test/java/.../EcaTokenClientTest.java`
 - `certify-integration-api/src/main/java/.../config/WebClientConfig.java`
 
-### 2. Velocity Template Engines customizados
+### 2. Custom Velocity Template Engines
 - `certify-service/src/main/java/.../vcformatters/CafVelocityTemplatingEngineImpl.java`
 - `certify-service/src/main/java/.../vcformatters/CarDocumentVelocityTemplatingEngineImpl.java`
 - `certify-service/src/main/java/.../vcformatters/CarVelocityTemplatingEngineImpl.java`
 - `certify-service/src/main/java/.../vcformatters/EcaVelocityTemplatingEngineImpl.java`
 - `certify-service/src/main/java/.../vcformatters/VelocityTemplatingEngineFactory.java`
 
-### 3. Funcionalidade de Auditoria
+### 3. Audit Trail
 - `certify-service/src/main/java/.../aspect/ControllerAuditAspect.java`
 - `certify-service/src/main/java/.../config/AuditConfig.java`
 - `certify-service/src/main/java/.../entity/CertifyAudit.java`
@@ -77,55 +80,88 @@ Arquivos novos criados pelo fork para integracao com servicos brasileiros:
 - `certify-service/src/main/java/.../services/CertifyAuditService.java`
 - `certify-service/src/main/java/.../services/CertifyAuditServiceImpl.java`
 
-### 4. Configuracao e Docker
-- `certify-service/Dockerfile` (customizacoes)
+### 4. Configuration and Docker
+- `certify-service/Dockerfile` (customizations)
 - `certify-service/configure_start.sh`
-- `docker-compose/docker-compose-injistack/` (configuracoes locais)
+- `docker-compose/docker-compose-injistack/` (local configurations)
 - `certify-service/src/main/resources/application-local.properties`
 
-### 5. Scripts e documentacao
-- `scripts/govbr_token.py` - script de teste OID4VCI com Gov.br
+### 5. Scripts and Documentation
+- `scripts/govbr_token.py` — OID4VCI test script with Gov.br
 - `scripts/.gitignore`
-- `update_script.sh` - script de atualizacao de versao nos POMs
-- `docs/setup_environment.md` - guia de setup
-- `Jenkinsfile` - pipeline CI
+- `update_script.sh` — version update script for POMs
+- `docs/setup_environment.md` — setup guide
+- `docs/customizations.md` — customization reference
+- `Jenkinsfile` — CI pipeline
 - `README_update_script_bash.md`
 
-### 6. Modificacoes em arquivos existentes do upstream
-Estes precisam de atencao especial pois podem conflitar:
-- `certify-service/src/main/java/.../services/CertifyIssuanceServiceImpl.java`
-- `certify-service/src/main/java/.../services/VCIssuanceServiceImpl.java`
-- `certify-service/src/main/java/.../services/CertifyKeysService.java`
-- `certify-service/src/main/java/.../controller/VCIssuanceController.java`
-- `certify-service/src/main/java/.../filter/AccessTokenValidationFilter.java`
-- `certify-service/src/main/java/.../proof/JwtProofValidator.java`
-- `certify-core/src/main/java/.../core/constants/Constants.java`
-- `pom.xml`, `certify-core/pom.xml`, `certify-service/pom.xml`
-- `.gitignore`
+### 6. Modifications to Existing Upstream Files
+These required special attention as they could conflict:
 
-## Commits ignorados (ruido)
+- `certify-service/src/main/java/.../vcformatters/VelocityTemplatingEngineImpl.java` — added `@Primary`
+- `pom.xml`, `certify-integration-api/pom.xml`, `certify-service/pom.xml` — Lombok + compiler plugin
 
-Os seguintes tipos de commits NAO serao reaplicados:
-- ~30 commits de iteracao do Jenkinsfile (`test: jenkinsfile`, `fix jenkinsfile`, etc.)
-- ~15 commits de teste de Dockerfile (`test dockerfile`, `ajuste dockerfile p teste`, etc.)
-- ~10 commits de bump de versao superados (`update version`, `new version 3.0.0`, etc.)
-- Commits de merge internos do fork
-- Commits que espelhavam releases upstream (0.10.0, 0.10.1, 0.10.2, 0.11.0)
+---
 
-## Passos de execucao
+## Upstream API Changes (0.11.x → 0.13.x)
 
-1. [x] Adicionar remote upstream: `git remote add upstream https://github.com/mosip/inji-certify.git`
-2. [x] Fetch upstream: `git fetch upstream`
-3. [x] Criar backup: `git branch master-backup master`
-4. [ ] Criar branch `master-updated` a partir de `upstream/master`
-5. [ ] Copiar arquivos novos (data providers, audit, templates, scripts)
-6. [ ] Aplicar modificacoes nos arquivos existentes do upstream
-7. [ ] Ajustar POMs e configuracoes
-8. [ ] Testar build: `mvn clean install -Dgpg.skip=true -Dmaven.javadoc.skip=true`
-9. [ ] Resolver eventuais erros de compilacao
-10. [ ] Quando estavel, substituir master
+The upstream 0.13.x restructured the template/VC layer. All custom Velocity engines were
+adapted accordingly:
+
+| Fork (0.11.x)                        | Upstream (0.13.x)                      | Status |
+|--------------------------------------|----------------------------------------|--------|
+| `CredentialTemplateRepository`       | `CredentialConfigRepository`           | ✅ Done |
+| `CredentialTemplate`                 | `CredentialConfig`                     | ✅ Done |
+| `Constants.ISSUER_URI`               | `Constants.DID_URL`                    | ✅ Done |
+| `VCDM2Constants.VALID_UNITL` (typo)  | `VCDM2Constants.VALID_UNTIL`           | ✅ Done |
+| `getSvgTemplate()`                   | `getTemplate()`                        | ✅ Done |
+| N/A                                  | `getCredentialStatusPurpose()` (new)   | ✅ Done |
+| N/A                                  | `getSignatureCryptoSuite()` (new)      | ✅ Done |
+| Template read directly from field    | Template decoded from Base64           | ✅ Done |
+| Lookup by credentialType + context   | Lookup by format + type + context      | ✅ Done |
+
+---
+
+## Execution Steps
+
+| # | Step | Status |
+|---|------|--------|
+| 1 | Add upstream remote: `git remote add upstream https://github.com/mosip/inji-certify.git` | ✅ Done |
+| 2 | Fetch upstream: `git fetch upstream` | ✅ Done |
+| 3 | Create backup: `git branch master-backup master` | ✅ Done |
+| 4 | Create branch `master-updated` from `upstream/master` | ✅ Done |
+| 5 | Copy new files (data providers, audit, templates, scripts) | ✅ Done |
+| 6 | Upgrade Lombok `1.18.30` → `1.18.42` (incompatible with JDK 21) | ✅ Done |
+| 7 | Upgrade `maven-compiler-plugin` `3.8.1` → `3.11.0` with `annotationProcessorPaths` | ✅ Done |
+| 8 | Adapt Velocity template engines to new upstream API (see table above) | ✅ Done |
+| 9 | Adapt `CertifyKeysService` to new upstream | ✅ Done |
+| 10 | Verify build: `JAVA_HOME=$(java_home -v 21) mvn clean install -Dgpg.skip=true -Dmaven.javadoc.skip=true` → **BUILD SUCCESS** (341 tests, 0 failures) | ✅ Done |
+| 11 | Commit all changes on `master-updated` | ✅ Done |
+| 12 | Replace `master` with `master-updated` | ✅ Done |
+
+---
+
+## Skipped Commits (noise)
+
+The following commit types were **not** re-applied:
+
+- ~30 Jenkinsfile iteration commits (`test: jenkinsfile`, `fix jenkinsfile`, etc.)
+- ~15 Dockerfile test commits (`test dockerfile`, `ajuste dockerfile p teste`, etc.)
+- ~10 superseded version bump commits (`update version`, `new version 3.0.0`, etc.)
+- Internal fork merge commits
+- Commits mirroring upstream releases (0.10.0, 0.10.1, 0.10.2, 0.11.0)
+
+---
 
 ## Rollback
 
-Se algo der errado, o branch `master-backup` contem o estado original do master do fork.
-O branch `fix_424` permanece intacto como referencia das customizacoes.
+If anything goes wrong, branch `master-backup` holds the original state of the fork's master.
+Branch `fix_424` remains intact as a reference for all Brazilian customizations.
+
+---
+
+## Known Remaining Issues
+
+1. `CCIRDataProvider` is partially implemented — stub with a hardcoded trial token and URL.
+2. `CredentialTemplate` / `CredentialTemplateRepository` may be legacy code — upstream 0.13.x uses `CredentialConfig`.
+3. `.envrc` contains real credentials in plain text and should be added to `.gitignore`.

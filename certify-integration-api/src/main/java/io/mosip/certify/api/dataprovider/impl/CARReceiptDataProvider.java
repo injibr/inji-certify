@@ -5,12 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @Component
+@ConditionalOnProperty(value = "mosip.certify.dataprovider.enabled", havingValue = "true", matchIfMissing = false)
 public class CARReceiptDataProvider implements DataProviderService {
 
     private final SicarCpfCnpjClient sicarCpfCnpjClient;

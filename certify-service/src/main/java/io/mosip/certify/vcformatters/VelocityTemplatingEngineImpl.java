@@ -55,6 +55,7 @@ import static io.mosip.certify.core.constants.Constants.*;
 
 @Slf4j
 @Service
+@org.springframework.context.annotation.Primary
 public class VelocityTemplatingEngineImpl implements VCFormatter {
     VelocityEngine engine;
 
