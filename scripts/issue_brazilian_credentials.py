@@ -37,11 +37,19 @@ Sequence diagram:
      |               |              |              |    VC (JSON) |
      |               |              |              |<-------------|
 
-Credentials Requested:
+Credentials Available:
     - ECACredential  : Estatuto da Criança e do Adolescente (age verification)
+                       Uses real Dataprev API - RECOMMENDED for testing
     - CARReceipt     : Cadastro Ambiental Rural receipt
+                       Uses WireMock server (may be unavailable)
     - CARDocument    : Cadastro Ambiental Rural document
+                       Uses WireMock server (may be unavailable)
     - CAFCredential  : Cadastro da Agricultura Familiar
+                       Uses WireMock server (may be unavailable)
+
+Note: CAR and CAF credentials require a WireMock server at 43.204.212.203:8086
+      which may not be accessible. ECA credential uses the real Dataprev API
+      and is the most reliable option for testing the OID4VCI flow.
 
 Usage:
     python3 scripts/issue_brazilian_credentials.py [OPTIONS]
@@ -52,8 +60,9 @@ Options:
     --no-cache         Ignore cached tokens and force a fresh SSO login
     --credentials TYPE Request specific credential types (comma-separated)
                        Available: eca, car-receipt, car-doc, caf, all
-                       Default: eca (fastest, uses Dataprev API)
+                       Default: eca (recommended - uses real Dataprev API)
                        Example: --credentials eca,caf
+                       Note: car-* and caf require WireMock server access
     --timeout SECONDS  Timeout for each credential request (default: 30)
 
 Environment variables:
@@ -845,6 +854,12 @@ def main():
             print(f"  ✗ FAILED")
             print(f"  Error: {result.get('error', 'unknown')}")
             print(f"  Details: {result.get('error_description', result.get('detail', 'N/A'))}")
+
+            # Provide helpful hint for CAR/CAF failures
+            if doc_type in ["CARReceipt", "CARDocument", "CAFCredential"] and (status == 0 or status >= 500):
+                print(f"  Note: {doc_type} requires WireMock server at 43.204.212.203:8086")
+                print(f"        This server may be down or inaccessible from your network.")
+                print(f"        Consider using --credentials eca for testing (uses real Dataprev API)")
 
     # --- Display Summary ---
     print(f"\n{'=' * 60}")
