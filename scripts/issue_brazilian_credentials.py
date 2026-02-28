@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-Gov.br SSO Login + Inji Certify Credential Issuance Test Script
-================================================================
+Brazilian Credentials Issuance via Gov.br SSO + Inji Certify
+=============================================================
 
 This script automates the full OpenID for Verifiable Credential Issuance
 (OID4VCI) flow against a local Inji Certify instance, using Gov.br SSO
-as the Authorization Server. It simulates what a wallet app (e.g., Inji
-Wallet) does to obtain a Verifiable Credential.
+as the Authorization Server. It requests multiple Brazilian government
+credentials (ECA, CAR, CAF) in a single session, simulating what a wallet
+app (e.g., Inji Wallet) does to obtain Verifiable Credentials.
 
 The flow has three main phases:
 
@@ -36,18 +37,30 @@ Sequence diagram:
      |               |              |              |    VC (JSON) |
      |               |              |              |<-------------|
 
-Usage:
-    python3 scripts/govbr_token.py [--skip-login]
+Credentials Requested:
+    - ECACredential  : Estatuto da Criança e do Adolescente (age verification)
+    - CARReceipt     : Cadastro Ambiental Rural receipt
+    - CARDocument    : Cadastro Ambiental Rural document
+    - CAFCredential  : Cadastro da Agricultura Familiar
 
-    --skip-login  Skip the SSO login flow and reuse an existing token
-                  from the ACCESS_TOKEN environment variable.
+Usage:
+    python3 scripts/issue_brazilian_credentials.py [OPTIONS]
+
+Options:
+    --skip-login       Skip the SSO login flow and reuse an existing token
+                       from the ACCESS_TOKEN environment variable.
+    --no-cache         Ignore cached tokens and force a fresh SSO login
+    --credentials TYPE Request specific credential types (comma-separated)
+                       Available: eca, car-receipt, car-doc, caf, all
+                       Default: eca (fastest, uses Dataprev API)
+                       Example: --credentials eca,caf
+    --timeout SECONDS  Timeout for each credential request (default: 30)
 
 Environment variables:
     SSO_CLIENT_ID      (required) OAuth2 client ID registered with Gov.br SSO
     SSO_CLIENT_SECRET  (required) OAuth2 client secret
     ACCESS_TOKEN       (optional) Pre-existing access token (with --skip-login)
     CERTIFY_URL        (optional) Certify base URL (default: http://localhost:8090/v1/certify)
-    --no-cache         Ignore cached tokens and force a fresh SSO login
 
 Dependencies:
     - Python 3.8+ (standard library only for the SSO flow)
@@ -490,7 +503,7 @@ def _post_credential(certify_url, access_token, proof_jwt, doc_type):
 
 
 def request_credential(certify_url, access_token, certify_identifier, client_id,
-                       doc_type="ECACredential"):
+                       doc_type="ECACredential", timeout=30):
     """
     Request a Verifiable Credential from the Certify issuance endpoint,
     automatically handling the OID4VCI c_nonce challenge-response flow.
@@ -512,28 +525,41 @@ def request_credential(certify_url, access_token, certify_identifier, client_id,
                    anonymous wallets (Gov.br flow omits it, so proof JWT also
                    omits the `iss` claim per spec).
         doc_type: The credential type to request (e.g. "ECACredential").
+        timeout: Timeout in seconds for each HTTP request (default: 30).
 
     Returns:
         A tuple of (response_json, http_status_code). On success (200),
         response_json contains a "credential" key with the signed VC.
     """
-    # --- Round 1: initial request, no nonce ---
-    print("  Round 1: sending credential request (no nonce)...")
-    proof_jwt, _ = make_proof_jwt(certify_identifier, client_id)
-    result, status = _post_credential(certify_url, access_token, proof_jwt, doc_type)
+    import socket
 
-    if status == 400 and "c_nonce" in result:
-        # Certify issued a challenge — extract the nonce and retry
-        c_nonce = result["c_nonce"]
-        c_nonce_expires_in = result.get("c_nonce_expires_in", "?")
-        print(f"  Got c_nonce challenge: {c_nonce!r} (expires in {c_nonce_expires_in}s)")
+    # Set socket timeout for urllib
+    default_timeout = socket.getdefaulttimeout()
+    socket.setdefaulttimeout(timeout)
 
-        # --- Round 2: re-sign proof JWT with the nonce, re-submit ---
-        print("  Round 2: re-submitting with nonce-bound proof JWT...")
-        proof_jwt, _ = make_proof_jwt(certify_identifier, client_id, nonce=c_nonce)
+    try:
+        # --- Round 1: initial request, no nonce ---
+        print("  Round 1: sending credential request (no nonce)...")
+        proof_jwt, _ = make_proof_jwt(certify_identifier, client_id)
         result, status = _post_credential(certify_url, access_token, proof_jwt, doc_type)
 
-    return result, status
+        if status == 400 and "c_nonce" in result:
+            # Certify issued a challenge — extract the nonce and retry
+            c_nonce = result["c_nonce"]
+            c_nonce_expires_in = result.get("c_nonce_expires_in", "?")
+            print(f"  Got c_nonce challenge: {c_nonce!r} (expires in {c_nonce_expires_in}s)")
+
+            # --- Round 2: re-sign proof JWT with the nonce, re-submit ---
+            print("  Round 2: re-submitting with nonce-bound proof JWT...")
+            proof_jwt, _ = make_proof_jwt(certify_identifier, client_id, nonce=c_nonce)
+            result, status = _post_credential(certify_url, access_token, proof_jwt, doc_type)
+
+        return result, status
+    except Exception as e:
+        print(f"  ✗ Request failed: {str(e)}")
+        return {"error": "timeout", "error_description": str(e)}, 0
+    finally:
+        socket.setdefaulttimeout(default_timeout)
 
 
 # =============================================================================
@@ -666,10 +692,25 @@ def save_tokens_to_cache(tokens):
 # =============================================================================
 
 def main():
+    # Parse command-line arguments
     skip_login = "--skip-login" in sys.argv
     no_cache = "--no-cache" in sys.argv
-    certify_url = os.environ.get("CERTIFY_URL", "http://localhost:8090/v1/certify")
 
+    # Parse credential selection
+    requested_creds = ["eca"]  # Default to ECA only (fastest)
+    timeout = 30
+
+    for i, arg in enumerate(sys.argv):
+        if arg == "--credentials" and i + 1 < len(sys.argv):
+            cred_arg = sys.argv[i + 1].lower()
+            if cred_arg == "all":
+                requested_creds = ["eca", "car-receipt", "car-doc", "caf"]
+            else:
+                requested_creds = [c.strip() for c in cred_arg.split(",")]
+        elif arg == "--timeout" and i + 1 < len(sys.argv):
+            timeout = int(sys.argv[i + 1])
+
+    certify_url = os.environ.get("CERTIFY_URL", "http://localhost:8090/v1/certify")
     client_id = os.environ.get("SSO_CLIENT_ID")
     client_secret = os.environ.get("SSO_CLIENT_SECRET")
 
@@ -750,29 +791,87 @@ def main():
     wallet_client_id = at_claims.get("client_id", "")
     print(f"  client_id for proof JWT: {wallet_client_id!r} (empty → iss omitted per OID4VCI §7.2.1.1)")
 
-    # --- Phase 3: Request the Verifiable Credential from Certify ---
+    # --- Phase 3: Request Verifiable Credentials from Certify ---
     print(f"\n{'=' * 60}")
-    print("REQUESTING CREDENTIAL")
+    print("REQUESTING CREDENTIALS")
     print(f"{'=' * 60}")
     print(f"  Certify URL: {certify_url}")
-    print(f"  Issuer: MGI")
-    print(f"  Credential: ECACredential")
 
-    result, status = request_credential(
-        certify_url,
-        access_token,
-        certify_identifier,
-        wallet_client_id,
-        doc_type="ECACredential",
-    )
+    # Define all available credentials
+    all_credentials = {
+        "eca": ("ECACredential", "MGI", "Estatuto da Criança e do Adolescente"),
+        "car-receipt": ("CARReceipt", "MGI", "CAR Receipt (Cadastro Ambiental Rural)"),
+        "car-doc": ("CARDocument", "MGI", "CAR Document"),
+        "caf": ("CAFCredential", "MDA", "CAF (Cadastro da Agricultura Familiar)"),
+    }
 
-    print(f"\n  HTTP Status: {status}")
-    print(f"\nResponse:")
-    print(json.dumps(result, indent=2, ensure_ascii=False))
+    # Build list of credentials to request based on user selection
+    credentials_to_request = []
+    for cred_key in requested_creds:
+        if cred_key in all_credentials:
+            credentials_to_request.append(all_credentials[cred_key])
+        else:
+            print(f"WARNING: Unknown credential type '{cred_key}', skipping")
 
-    if "credential" in result:
-        print(f"\n{'=' * 60}")
-        print("CREDENTIAL ISSUED SUCCESSFULLY!")
+    if not credentials_to_request:
+        print("ERROR: No valid credentials selected")
+        sys.exit(1)
+
+    print(f"  Selected credentials: {', '.join([c[2] for c in credentials_to_request])}")
+    print(f"  Request timeout: {timeout}s per credential")
+
+    results = []
+    for doc_type, issuer, description in credentials_to_request:
+        print(f"\n{'─' * 60}")
+        print(f"Requesting: {description}")
+        print(f"  Issuer: {issuer}")
+        print(f"  Credential Type: {doc_type}")
+
+        result, status = request_credential(
+            certify_url,
+            access_token,
+            certify_identifier,
+            wallet_client_id,
+            doc_type=doc_type,
+            timeout=timeout,
+        )
+
+        print(f"  HTTP Status: {status}")
+
+        if status == 200 and "credential" in result:
+            print(f"  ✓ SUCCESS")
+            results.append((doc_type, description, result, status))
+        else:
+            print(f"  ✗ FAILED")
+            print(f"  Error: {result.get('error', 'unknown')}")
+            print(f"  Details: {result.get('error_description', result.get('detail', 'N/A'))}")
+
+    # --- Display Summary ---
+    print(f"\n{'=' * 60}")
+    print("ISSUANCE SUMMARY")
+    print(f"{'=' * 60}")
+    print(f"Successfully issued: {len(results)}/{len(credentials_to_request)} credentials\n")
+
+    for doc_type, description, result, status in results:
+        credential = result.get("credential", {})
+        cred_subject = credential.get("credentialSubject", {})
+
+        print(f"✓ {description} ({doc_type})")
+        print(f"  Credential ID: {credential.get('id', 'N/A')}")
+        print(f"  Issuance Date: {credential.get('issuanceDate', 'N/A')}")
+        print(f"  Expiration Date: {credential.get('expirationDate', 'N/A')}")
+
+        # Show key claims from credentialSubject
+        if cred_subject:
+            print(f"  Claims:")
+            for key, value in cred_subject.items():
+                if key != "id":  # Skip the DID
+                    print(f"    - {key}: {value}")
+        print()
+
+    if len(results) == len(credentials_to_request):
+        print(f"{'=' * 60}")
+        print("ALL CREDENTIALS ISSUED SUCCESSFULLY!")
         print(f"{'=' * 60}")
 
 
