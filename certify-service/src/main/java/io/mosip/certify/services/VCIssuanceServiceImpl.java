@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -80,7 +81,11 @@ public class VCIssuanceServiceImpl implements VCIssuanceService {
         if(!parsedAccessToken.isActive())
             throw new NotAuthenticatedException();
 
-        String scopeClaim = (String) parsedAccessToken.getClaims().getOrDefault("scope", "");
+        // scope may be a space-separated String (eSignet) or a List<String> (Gov.br)
+        Object scopeObj = parsedAccessToken.getClaims().getOrDefault("scope", "");
+        String scopeClaim = (scopeObj instanceof List)
+                ? String.join(" ", (List<String>) scopeObj)
+                : String.valueOf(scopeObj);
         CredentialMetadata credentialMetadata = null;
         for(String scope : scopeClaim.split(Constants.SPACE)) {
             Optional<CredentialMetadata> result = VCIssuanceUtil.getScopeCredentialMapping(scope, credentialRequest.getFormat(), credentialConfigurationService.fetchCredentialIssuerMetadata("latest"), credentialRequest);

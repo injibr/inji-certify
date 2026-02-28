@@ -72,26 +72,33 @@ public class JwtProofValidator implements ProofValidator {
 
     @Override
     public void validateCNonce(String cNonce, int cNonceExpireSeconds, ParsedAccessToken parsedAccessToken, CredentialRequest credentialRequest) {
-        // No specific validation for CNonce in JWT proof, as it is not part of the JWT structure.
-        // CNonce validation is typically handled at the request level before the proof validation.
-        if (parsedAccessToken.getClaims().containsKey(Constants.C_NONCE)
-                && credentialRequest.getProof().getJwt() != null) {
-            // issue a c_nonce and return the error
-            try {
-                SignedJWT proofJwt = SignedJWT.parse(credentialRequest.getProof().getJwt());
-                String proofJwtNonce = Optional.ofNullable(proofJwt.getJWTClaimsSet().getStringClaim("nonce")).orElse("");
-                String authZServerNonce = Optional.ofNullable(parsedAccessToken.getClaims().get(Constants.C_NONCE)).map(Object::toString).orElse("");
+        if (credentialRequest.getProof().getJwt() == null) {
+            throw new CertifyException(ErrorConstants.INVALID_PROOF, "missing proof jwt");
+        }
+        try {
+            SignedJWT proofJwt = SignedJWT.parse(credentialRequest.getProof().getJwt());
+            String proofJwtNonce = Optional.ofNullable(proofJwt.getJWTClaimsSet().getStringClaim("nonce")).orElse("");
+
+            if (parsedAccessToken.getClaims().containsKey(Constants.C_NONCE)) {
+                // The authorization server (e.g. eSignet / MOSIP) embedded c_nonce directly in
+                // the access token. In this case cNonce was derived from that claim, so we also
+                // verify the AT claim is non-empty as a defence-in-depth check.
+                String authZServerNonce = Optional.ofNullable(parsedAccessToken.getClaims().get(Constants.C_NONCE))
+                        .map(Object::toString).orElse("");
                 if (authZServerNonce.equals(StringUtils.EMPTY) || !cNonce.equals(proofJwtNonce)) {
-                    // AuthZ server didn't give in a protected c_nonce
-                    //  and c_nonce given in proofJwt doesn't match Certify generated c_nonce
                     throw new InvalidNonceException(cNonce, cNonceExpireSeconds);
                 }
-            } catch (ParseException e) {
-                // check iff specific error exists for invalid holderKey
-                throw new CertifyException(ErrorConstants.INVALID_PROOF, "error parsing proof jwt");
+            } else {
+                // The authorization server (e.g. Gov.br) does NOT embed c_nonce in the access
+                // token. Certify generated the nonce itself and stored it in the VCI cache
+                // (Redis) keyed by the access-token hash. We only need to check that the nonce
+                // in the proof JWT matches the one Certify issued.
+                if (!cNonce.equals(proofJwtNonce)) {
+                    throw new InvalidNonceException(cNonce, cNonceExpireSeconds);
+                }
             }
-        } else {
-            throw new InvalidNonceException(cNonce, cNonceExpireSeconds);
+        } catch (ParseException e) {
+            throw new CertifyException(ErrorConstants.INVALID_PROOF, "error parsing proof jwt");
         }
     }
 
