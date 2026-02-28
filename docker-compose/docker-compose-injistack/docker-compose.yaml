@@ -1,8 +1,8 @@
-version: '3.8'
+version: "3.8"
 
 services:
   database:
-    image: 'postgres:latest'
+    image: "postgres:latest"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -22,7 +22,7 @@ services:
       - redis-data:/data
 
   certify:
-    image: mosipid/inji-certify-with-plugins:0.13.1
+    image: inji-certify-br:master-updated
     user: root
     ports:
       - 8090:8090
@@ -34,13 +34,17 @@ services:
       - enable_certify_artifactory=false
       - download_hsm_client=false
       - mosip_certify_domain_url=http://certify-nginx:80
+      - ECA_CLIENT_ID=${ECA_CLIENT_ID}
+      - ECA_CLIENT_SECRET=${ECA_CLIENT_SECRET}
+      - JAVA_TOOL_OPTIONS=-Djava.security.properties=/home/mosip/config/java-security-override.properties
     volumes:
       - ./config/certify-default.properties:/home/mosip/config/certify-default.properties
       - ./config/certify-csvdp-farmer.properties:/home/mosip/config/certify-csvdp-farmer.properties
       - ./config/certify-mock-mdl.properties:/home/mosip/config/certify-mock-mdl.properties
+      - ./config/java-security-override.properties:/home/mosip/config/java-security-override.properties
       - ./data/CERTIFY_PKCS12:/home/mosip/CERTIFY_PKCS12
       # This can be disabled if one uses plugins included in inji-certify-with-plugins docker image.
-#      - ./loader_path/certify/:/home/mosip/additional_jars/
+      #      - ./loader_path/certify/:/home/mosip/additional_jars/
       # modify the below file to change the identity fields in the VC
       - ./config/farmer_identity_data.csv:/home/mosip/config/farmer_identity_data.csv
     networks:
@@ -59,13 +63,12 @@ services:
     depends_on:
       - certify
 
-
   mimoto-service:
-    container_name: 'Mimoto-Service'
+    container_name: "Mimoto-Service"
     image: mosipid/mimoto:0.19.2
     user: root
     ports:
-      - '8099:8099'
+      - "8099:8099"
     environment:
       - container_user=mosip
       - active_profile_env=default
@@ -93,10 +96,10 @@ services:
       - redis
 
   inji-web:
-    container_name: 'inji-web'
+    container_name: "inji-web"
     image: mosipid/inji-web:0.14.1
     ports:
-      - '3001:3004'
+      - "3001:3004"
     environment:
       - DEFAULT_LANG=en
       - MIMOTO_URL=http://localhost:3001/v1/mimoto

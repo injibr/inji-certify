@@ -134,7 +134,11 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
         if(!parsedAccessToken.isActive())
             throw new NotAuthenticatedException();
         // 2. Scope Validation
-        String scopeClaim = (String) parsedAccessToken.getClaims().getOrDefault("scope", "");
+        // scope may be a space-separated String (eSignet) or a List<String> (Gov.br)
+        Object scopeObj = parsedAccessToken.getClaims().getOrDefault("scope", "");
+        String scopeClaim = (scopeObj instanceof List)
+                ? String.join(Constants.SPACE, (List<String>) scopeObj)
+                : String.valueOf(scopeObj);
         CredentialMetadata credentialMetadata = null;
         for(String scope : scopeClaim.split(Constants.SPACE)) {
             Optional<CredentialMetadata> result = getScopeCredentialMapping(scope, credentialRequest.getFormat(), credentialConfigurationService.fetchCredentialIssuerMetadata("latest"), credentialRequest);
@@ -175,6 +179,7 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
 
     private VCResult<?> getVerifiableCredential(CredentialRequest credentialRequest, CredentialMetadata credentialMetadata, String holderId) {
         parsedAccessToken.getClaims().put("accessTokenHash", parsedAccessToken.getAccessTokenHash());
+        parsedAccessToken.getClaims().put("docType", credentialRequest.getDoctype());
         VCRequestDto vcRequestDto = new VCRequestDto();
         vcRequestDto.setFormat(credentialRequest.getFormat());
 

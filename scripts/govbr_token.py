@@ -229,13 +229,21 @@ def b64url(data):
     return base64.urlsafe_b64encode(data).rstrip(b"=").decode()
 
 
-def generate_rsa_key_and_proof(certify_identifier, client_id):
+def generate_rsa_key_and_proof(certify_identifier, client_id, nonce=None):
     """
     Generate an ephemeral RSA-2048 key pair and build a signed OID4VCI proof JWT.
     Uses the `cryptography` library (preferred method).
 
     In a real wallet, this key pair would be persistent and stored securely.
     For testing, we generate a throwaway key each time.
+
+    Args:
+        certify_identifier: The credential issuer URL (used as JWT `aud`).
+        client_id: OAuth2 client_id; if non-empty, added as JWT `iss`.
+        nonce: Optional c_nonce from Certify's challenge response. When
+               provided it is included in the JWT payload as `nonce`,
+               which satisfies the OID4VCI §7.2.1.1 proof-of-possession
+               requirement.
     """
     from cryptography.hazmat.primitives.asymmetric import rsa, padding
     from cryptography.hazmat.primitives import hashes
@@ -267,13 +275,18 @@ def generate_rsa_key_and_proof(certify_identifier, client_id):
     }
 
     # JWT payload: standard claims for audience, issuer, and timestamps
+    # iss is ONLY included when a registered client_id is known (OID4VCI §7.2.1.1).
+    # Anonymous wallets (no client registration, as in the Gov.br flow) must omit iss.
     now = int(time.time())
     payload = {
-        "iss": client_id,             # the OAuth2 client requesting the credential
         "aud": certify_identifier,    # must match mosip.certify.identifier
         "iat": now,
         "exp": now + 300,             # 5 minute validity
     }
+    if client_id:
+        payload["iss"] = client_id
+    if nonce:
+        payload["nonce"] = nonce
 
     # Sign: encode header and payload, then sign with the private key
     signing_input = f"{b64url(json.dumps(header))}.{b64url(json.dumps(payload))}"
@@ -287,11 +300,17 @@ def generate_rsa_key_and_proof(certify_identifier, client_id):
     return proof_jwt, jwk
 
 
-def generate_rsa_key_and_proof_stdlib(certify_identifier, client_id):
+def generate_rsa_key_and_proof_stdlib(certify_identifier, client_id, nonce=None):
     """
     Fallback proof JWT generation using the openssl CLI.
     Used when the `cryptography` Python library is not installed.
     Functionally identical to generate_rsa_key_and_proof().
+
+    Args:
+        certify_identifier: The credential issuer URL (used as JWT `aud`).
+        client_id: OAuth2 client_id; if non-empty, added as JWT `iss`.
+        nonce: Optional c_nonce from Certify's challenge response. When
+               provided it is included in the JWT payload as `nonce`.
     """
     import subprocess
     import tempfile
@@ -347,13 +366,17 @@ def generate_rsa_key_and_proof_stdlib(certify_identifier, client_id):
         "jwk": jwk,
     }
 
+    # iss is only included when a registered client_id is known (OID4VCI §7.2.1.1).
     now = int(time.time())
     payload = {
-        "iss": client_id,
         "aud": certify_identifier,
         "iat": now,
         "exp": now + 300,
     }
+    if client_id:
+        payload["iss"] = client_id
+    if nonce:
+        payload["nonce"] = nonce
 
     signing_input = f"{b64url(json.dumps(header))}.{b64url(json.dumps(payload))}"
 
@@ -374,14 +397,21 @@ def generate_rsa_key_and_proof_stdlib(certify_identifier, client_id):
     return proof_jwt, jwk
 
 
-def make_proof_jwt(certify_identifier, client_id):
-    """Try the cryptography library first, fall back to openssl CLI."""
+def make_proof_jwt(certify_identifier, client_id, nonce=None):
+    """
+    Try the cryptography library first, fall back to openssl CLI.
+
+    Args:
+        certify_identifier: The credential issuer URL (used as JWT `aud`).
+        client_id: OAuth2 client_id; if non-empty, added as JWT `iss`.
+        nonce: Optional c_nonce to embed in the proof JWT payload.
+    """
     try:
         from cryptography.hazmat.primitives.asymmetric import rsa  # noqa: F401
-        return generate_rsa_key_and_proof(certify_identifier, client_id)
+        return generate_rsa_key_and_proof(certify_identifier, client_id, nonce=nonce)
     except ImportError:
         print("  (cryptography library not found, using openssl CLI)")
-        return generate_rsa_key_and_proof_stdlib(certify_identifier, client_id)
+        return generate_rsa_key_and_proof_stdlib(certify_identifier, client_id, nonce=nonce)
 
 
 # =============================================================================
@@ -420,18 +450,16 @@ def make_proof_jwt(certify_identifier, client_id):
 #   8. Returning the signed Verifiable Credential
 # =============================================================================
 
-def request_credential(certify_url, access_token, proof_jwt, doc_type="ECACredential", issuer_id="MGI"):
+def _post_credential(certify_url, access_token, proof_jwt, doc_type):
     """
-    POST a credential request to the Certify issuance endpoint.
+    Send a single POST /issuance/credential request and return (response_json, status).
 
-    Returns a tuple of (response_json, http_status_code).
-    On success (200), response_json contains a "credential" key with the
-    signed Verifiable Credential in JSON-LD format.
+    This is an internal helper used by request_credential() to avoid duplicating
+    the HTTP POST logic across the initial attempt and the c_nonce retry.
     """
     url = f"{certify_url}/issuance/credential"
     body = json.dumps({
         "format": "ldp_vc",
-        "issuerId": issuer_id,
         "doctype": doc_type,
         "credential_definition": {
             "@context": ["https://www.w3.org/2018/credentials/v1"],
@@ -452,10 +480,60 @@ def request_credential(certify_url, access_token, proof_jwt, doc_type="ECACreden
         with urllib.request.urlopen(req) as resp:
             return json.loads(resp.read()), resp.status
     except urllib.error.HTTPError as e:
-        body = e.read().decode()
-        if body:
-            return json.loads(body), e.code
+        raw = e.read().decode()
+        if raw:
+            try:
+                return json.loads(raw), e.code
+            except json.JSONDecodeError:
+                return {"error": f"HTTP {e.code}", "detail": e.reason, "body": raw}, e.code
         return {"error": f"HTTP {e.code}", "detail": e.reason, "body": ""}, e.code
+
+
+def request_credential(certify_url, access_token, certify_identifier, client_id,
+                       doc_type="ECACredential"):
+    """
+    Request a Verifiable Credential from the Certify issuance endpoint,
+    automatically handling the OID4VCI c_nonce challenge-response flow.
+
+    OID4VCI §7.2.1.1 defines a two-round proof-of-possession protocol:
+      Round 1 — Send a credential request with a proof JWT that has no nonce.
+      Certify rejects it with HTTP 400, error="invalid_proof", and returns a
+      fresh c_nonce (a server-generated challenge).
+      Round 2 — Re-generate the proof JWT including "nonce": c_nonce, then
+      re-submit the credential request. Certify validates the nonce, verifies
+      the JWT signature, and issues the credential.
+
+    Args:
+        certify_url: Base URL of the Certify service.
+        access_token: Bearer token from Gov.br SSO (proves citizen identity).
+        certify_identifier: credential_issuer URL from the well-known endpoint
+                            (used as the `aud` claim in the proof JWT).
+        client_id: OAuth2 client_id from the access token; empty string for
+                   anonymous wallets (Gov.br flow omits it, so proof JWT also
+                   omits the `iss` claim per spec).
+        doc_type: The credential type to request (e.g. "ECACredential").
+
+    Returns:
+        A tuple of (response_json, http_status_code). On success (200),
+        response_json contains a "credential" key with the signed VC.
+    """
+    # --- Round 1: initial request, no nonce ---
+    print("  Round 1: sending credential request (no nonce)...")
+    proof_jwt, _ = make_proof_jwt(certify_identifier, client_id)
+    result, status = _post_credential(certify_url, access_token, proof_jwt, doc_type)
+
+    if status == 400 and "c_nonce" in result:
+        # Certify issued a challenge — extract the nonce and retry
+        c_nonce = result["c_nonce"]
+        c_nonce_expires_in = result.get("c_nonce_expires_in", "?")
+        print(f"  Got c_nonce challenge: {c_nonce!r} (expires in {c_nonce_expires_in}s)")
+
+        # --- Round 2: re-sign proof JWT with the nonce, re-submit ---
+        print("  Round 2: re-submitting with nonce-bound proof JWT...")
+        proof_jwt, _ = make_proof_jwt(certify_identifier, client_id, nonce=c_nonce)
+        result, status = _post_credential(certify_url, access_token, proof_jwt, doc_type)
+
+    return result, status
 
 
 # =============================================================================
@@ -668,8 +746,9 @@ def main():
             print(f"  Falling back to default: {certify_identifier}")
     print(f"\nGenerating wallet proof JWT...")
     print(f"  aud (certify identifier): {certify_identifier}")
-    proof_jwt, wallet_jwk = make_proof_jwt(certify_identifier, at_claims.get("aud", ""))
-    print(f"  Proof JWT generated (alg=RS256)")
+    # No client_id in Gov.br tokens — pass empty string so iss is omitted from proof JWT
+    wallet_client_id = at_claims.get("client_id", "")
+    print(f"  client_id for proof JWT: {wallet_client_id!r} (empty → iss omitted per OID4VCI §7.2.1.1)")
 
     # --- Phase 3: Request the Verifiable Credential from Certify ---
     print(f"\n{'=' * 60}")
@@ -679,7 +758,13 @@ def main():
     print(f"  Issuer: MGI")
     print(f"  Credential: ECACredential")
 
-    result, status = request_credential(certify_url, access_token, proof_jwt)
+    result, status = request_credential(
+        certify_url,
+        access_token,
+        certify_identifier,
+        wallet_client_id,
+        doc_type="ECACredential",
+    )
 
     print(f"\n  HTTP Status: {status}")
     print(f"\nResponse:")
