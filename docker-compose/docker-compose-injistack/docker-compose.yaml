@@ -1,20 +1,28 @@
-version: '3.8'
+version: "3.8"
 
 services:
   database:
-    image: 'postgres:latest'
+    image: "postgres:latest"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
       - ./certify_init.sql:/docker-entrypoint-initdb.d/certify_init.sql
+      - ./mimoto_init.sql:/docker-entrypoint-initdb.d/mimoto_init.sql
     networks:
       - network
     ports:
       - "5433:5432"
 
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
   certify:
-    image: mosipid/inji-certify-with-plugins:0.11.0
+    image: inji-certify-br:master-updated
     user: root
     ports:
       - 8090:8090
@@ -25,14 +33,18 @@ services:
       - SPRING_CONFIG_LOCATION=/home/mosip/config/
       - enable_certify_artifactory=false
       - download_hsm_client=false
-      - mosipbox_public_url=http://certify-nginx:80
+      - mosip_certify_domain_url=http://certify-nginx:80
+      - ECA_CLIENT_ID=${ECA_CLIENT_ID}
+      - ECA_CLIENT_SECRET=${ECA_CLIENT_SECRET}
+      - JAVA_TOOL_OPTIONS=-Djava.security.properties=/home/mosip/config/java-security-override.properties
     volumes:
       - ./config/certify-default.properties:/home/mosip/config/certify-default.properties
       - ./config/certify-csvdp-farmer.properties:/home/mosip/config/certify-csvdp-farmer.properties
       - ./config/certify-mock-mdl.properties:/home/mosip/config/certify-mock-mdl.properties
+      - ./config/java-security-override.properties:/home/mosip/config/java-security-override.properties
       - ./data/CERTIFY_PKCS12:/home/mosip/CERTIFY_PKCS12
       # This can be disabled if one uses plugins included in inji-certify-with-plugins docker image.
-      - ./loader_path/certify/:/home/mosip/additional_jars/
+      #      - ./loader_path/certify/:/home/mosip/additional_jars/
       # modify the below file to change the identity fields in the VC
       - ./config/farmer_identity_data.csv:/home/mosip/config/farmer_identity_data.csv
     networks:
@@ -51,18 +63,27 @@ services:
     depends_on:
       - certify
 
-
   mimoto-service:
-    container_name: 'Mimoto-Service'
-    image: mosipid/mimoto:0.15.0
+    container_name: "Mimoto-Service"
+    image: mosipid/mimoto:0.19.2
     user: root
     ports:
-      - '8099:8099'
+      - "8099:8099"
     environment:
       - container_user=mosip
       - active_profile_env=default
       - SPRING_CONFIG_NAME=mimoto
       - SPRING_CONFIG_LOCATION=/home/mosip/
+      - oidc_p12_password=dummypassword
+      - IDP_PARTNER_ENCRYPTION_KEY=dummyidppartnerencryptionkey
+      - WALLET_BINDING_PARTNER_API_KEY=dummywalletbindingpartnerapikey
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/inji_mimoto
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - GOOGLE_OAUTH_CLIENT_ID=clientId
+      - GOOGLE_OAUTH_CLIENT_SECRET=clientSecret
     networks:
       - network
     volumes:
@@ -70,15 +91,18 @@ services:
       - ./config/mimoto-issuers-config.json:/home/mosip/mimoto-issuers-config.json
       - ./config/mimoto-trusted-verifiers.json:/home/mosip/mimoto-trusted-verifiers.json
       - ./certs/oidckeystore.p12:/home/mosip/certs/oidckeystore.p12
+    depends_on:
+      - database
+      - redis
 
   inji-web:
-    container_name: 'inji-web'
-    image: mosipid/inji-web:0.11.0
+    container_name: "inji-web"
+    image: mosipid/inji-web:0.14.1
     ports:
-      - '3001:3004'
+      - "3001:3004"
     environment:
       - DEFAULT_LANG=en
-      - MIMOTO_HOST=http://localhost:3001/v1/mimoto
+      - MIMOTO_URL=http://localhost:3001/v1/mimoto
     volumes:
       - ./config/mimoto-default.properties:/home/mosip/mimoto-default.properties
       - ./config/mimoto-issuers-config.json:/home/mosip/mimoto-issuers-config.json
@@ -98,3 +122,5 @@ networks:
 volumes:
   cache:
     driver: local
+  postgres-data:
+  redis-data:

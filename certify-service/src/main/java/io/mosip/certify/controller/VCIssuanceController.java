@@ -5,19 +5,20 @@
  */
 package io.mosip.certify.controller;
 
-import io.mosip.certify.core.dto.CredentialRequest;
-import io.mosip.certify.core.dto.CredentialResponse;
-import io.mosip.certify.core.dto.VCError;
+import io.mosip.certify.core.dto.*;
 import io.mosip.certify.core.exception.CertifyException;
+import io.mosip.certify.core.spi.CredentialConfigurationService;
 import io.mosip.certify.core.spi.VCIssuanceService;
 import io.mosip.certify.exception.InvalidNonceException;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -28,6 +29,9 @@ public class VCIssuanceController {
 
     @Autowired
     private VCIssuanceService vcIssuanceService;
+
+    @Autowired
+    private CredentialConfigurationService credentialConfigurationService;
 
     @Autowired
     MessageSource messageSource;
@@ -42,7 +46,6 @@ public class VCIssuanceController {
     public CredentialResponse getCredential(@Valid @RequestBody CredentialRequest credentialRequest) throws CertifyException {
         return vcIssuanceService.getCredential(credentialRequest);
     }
-
 
     /**
      * 1. The credential Endpoint MUST accept Access Tokens
@@ -74,12 +77,14 @@ public class VCIssuanceController {
      * Open endpoint to provide VC issuer's metadata
      * @return
      */
+    @Deprecated
     @GetMapping(value = "/.well-known/openid-credential-issuer",produces = "application/json")
-    public Map<String, Object> getMetadata(
+    public CredentialIssuerMetadataDTO getMetadata(
             @RequestParam(name = "version", required = false, defaultValue = "latest") String version) {
-        return vcIssuanceService.getCredentialIssuerMetadata(version);
+        return credentialConfigurationService.fetchCredentialIssuerMetadata(version);
     }
 
+    @Deprecated
     @GetMapping(value = "/.well-known/did.json")
     public Map<String, Object> getDIDDocument() {
        return vcIssuanceService.getDIDDocument();

@@ -1,8 +1,11 @@
 createPartnerSelfRegistration:
    InjiCertify_PartnerSelfRegistration_MOSIPID_All_Valid_Smoke_sid:
       endPoint: /v1/partnermanager/partners
+      uniqueIdentifier: TC_pms_dependency_03      
+      description: Create partner      
       role: partner
       restMethod: post
+      additionalDependencies: TC_pms_dependency_06
       inputTemplate: injicertify/PmsIntegration/CreatePartner/createPartner
       outputTemplate: injicertify/PmsIntegration/CreatePartner/createPartnerResult
       input: '{
@@ -16,6 +19,5 @@ createPartnerSelfRegistration:
     "requesttime": "$TIMESTAMP$"
   }'
       output: ' {
-        "partnerId": "$IGNORE$",
         "status": "InProgress"
 }'

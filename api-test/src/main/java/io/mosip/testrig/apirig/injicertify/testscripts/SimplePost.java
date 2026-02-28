@@ -33,6 +33,7 @@ import io.mosip.testrig.apirig.utils.AuthenticationTestException;
 import io.mosip.testrig.apirig.utils.GlobalConstants;
 import io.mosip.testrig.apirig.utils.OutputValidationUtil;
 import io.mosip.testrig.apirig.utils.ReportUtil;
+import io.mosip.testrig.apirig.utils.SecurityXSSException;
 import io.restassured.response.Response;
 
 public class SimplePost extends InjiCertifyUtil implements ITest {
@@ -81,7 +82,7 @@ public class SimplePost extends InjiCertifyUtil implements ITest {
 	 * @throws AdminTestException
 	 */
 	@Test(dataProvider = "testcaselist")
-	public void test(TestCaseDTO testCaseDTO) throws AuthenticationTestException, AdminTestException {
+	public void test(TestCaseDTO testCaseDTO) throws AuthenticationTestException, AdminTestException, SecurityXSSException {
 		testCaseName = testCaseDTO.getTestCaseName();
 		testCaseDTO = InjiCertifyUtil.isTestCaseValidForExecution(testCaseDTO);
 		auditLogCheck = testCaseDTO.isAuditLogCheck();
@@ -120,7 +121,7 @@ public class SimplePost extends InjiCertifyUtil implements ITest {
 		}
 
 		else {
-			inputJson = InjiCertifyUtil.inputStringKeyWordHandeler(inputJson, testCaseName);
+			inputJson = inputStringKeyWordHandeler(inputJson, testCaseName);
 			String tempUrl = InjiCertifyConfigManager.getEsignetBaseUrl();
 			if (testCaseName.contains("ESignet_") || testCaseName.contains("InjiCertify")) {
 
@@ -166,6 +167,8 @@ public class SimplePost extends InjiCertifyUtil implements ITest {
 			}
 
 		}
+
+	
 
 	/**
 	 * The method ser current test name to result

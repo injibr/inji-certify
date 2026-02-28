@@ -6,16 +6,25 @@
     <parent>
         <groupId>io.mosip.certify</groupId>
         <artifactId>certify-parent</artifactId>
-        <version>0.11.0</version>
+        <version>0.13.1</version>
     </parent>
 
     <groupId>io.mosip.certify</groupId>
     <artifactId>certify-integration-api</artifactId>
-    <version>${project.parent.version}</version>
+    <version>0.13.1</version>
     <name>certify-integration-api</name>
     <description>Certify Integration Library</description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>decentralized-identity</groupId>
             <artifactId>jsonld-common-java</artifactId>
@@ -23,5 +32,23 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.42</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

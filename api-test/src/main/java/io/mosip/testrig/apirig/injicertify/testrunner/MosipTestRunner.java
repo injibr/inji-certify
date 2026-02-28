@@ -11,7 +11,6 @@ import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Level;
@@ -33,6 +32,7 @@ import io.mosip.testrig.apirig.testrunner.OTPListener;
 import io.mosip.testrig.apirig.utils.AdminTestUtil;
 import io.mosip.testrig.apirig.utils.AuthTestsUtil;
 import io.mosip.testrig.apirig.utils.CertsUtil;
+import io.mosip.testrig.apirig.utils.DependencyResolver;
 import io.mosip.testrig.apirig.utils.GlobalConstants;
 import io.mosip.testrig.apirig.utils.GlobalMethods;
 import io.mosip.testrig.apirig.utils.JWKKeyUtil;
@@ -81,8 +81,9 @@ public class MosipTestRunner {
 			suiteSetup(getRunType());
 			SkipTestCaseHandler.loadTestcaseToBeSkippedList("testCaseSkippedList.txt");
 			GlobalMethods.setModuleNameAndReCompilePattern(InjiCertifyConfigManager.getproperty("moduleNamePattern"));
+			GlobalMethods.reportCaptchaStatus(GlobalConstants.CAPTCHA_ENABLED, false);
 			setLogLevels();
-			
+
 			useCaseToExecute = InjiCertifyConfigManager.getproperty("useCaseToExecute");
 
 			HealthChecker healthcheck = new HealthChecker();
@@ -98,6 +99,10 @@ public class MosipTestRunner {
 			BaseTestCase.getLanguageList();
 			InjiCertifyUtil.getSupportedCredentialSigningAlg();
 
+			InjiCertifyUtil.configureOtp();
+
+			String testCasesToExecuteString = InjiCertifyConfigManager.getproperty("testCasesToExecute");
+
 			if (useCaseToExecute.equalsIgnoreCase("mosipid")) {
 
 				InjiCertifyUtil.dBCleanup();
@@ -107,23 +112,61 @@ public class MosipTestRunner {
 				AdminTestUtil.createAndPublishPolicy();
 				AdminTestUtil.createEditAndPublishPolicy();
 				PartnerRegistration.deviceGeneration();
-
+				
+				// Generating biometric details with mock MDS
+				BaseTestCase.domain=".mosip.net";
 				BiometricDataProvider.generateBiometricTestData("Registration");
+				BaseTestCase.domain = System.getProperty("env.endpoint", "localhost").replaceFirst("^https?://", "").replaceAll("/$", "");
+
+				// Used for loading dependency from dependency json, When generating the
+				// dependency json file comment it out
+
+				DependencyResolver.loadDependencies(
+						getGlobalResourcePath() + "/config/testCaseInterDependency_" + useCaseToExecute + ".json");
+				if (!testCasesToExecuteString.isBlank()) {
+					InjiCertifyUtil.testCasesInRunScope = DependencyResolver.getDependencies(testCasesToExecuteString);
+				}
 
 				startTestRunner();
+				
+				// Used for generating the test case interdependency JSON file
+				// Comment it out after generating the file
+				// After generating copy the dependency json file from
+				// api-test\target\classes\MosipTestResource\MosipTemporaryTestResource\config
+				// Paste it in config
+//				AdminTestUtil.generateTestCaseInterDependencies(
+//						getGlobalResourcePath() + "/config/testCaseInterDependency_" + useCaseToExecute + ".json");
 
 				InjiCertifyUtil.dBCleanup();
 			} else {
+
+				// Used for loading dependency from dependency json, When generating the
+				// dependency json file comment it out
+
+				DependencyResolver.loadDependencies(
+						getGlobalResourcePath() + "/config/testCaseInterDependency_" + useCaseToExecute + ".json");
+				if (!testCasesToExecuteString.isBlank()) {
+					InjiCertifyUtil.testCasesInRunScope = DependencyResolver.getDependencies(testCasesToExecuteString);
+				}
+
 				startTestRunner();
+				
+				// Used for generating the test case interdependency JSON file
+				// Comment it out after generating the file
+				// After generating copy the dependency json file from
+				// api-test\target\classes\MosipTestResource\MosipTemporaryTestResource\config
+				// Paste it in config
+//				AdminTestUtil.generateTestCaseInterDependencies(
+//						getGlobalResourcePath() + "/config/testCaseInterDependency_" + useCaseToExecute + ".json");
 			}
 		} catch (Exception e) {
 			LOGGER.error("Exception " + e.getMessage());
 		}
-		
+
 		if (useCaseToExecute.equalsIgnoreCase("landregistry")) {
 			InjiCertifyUtil.landRegistryDBCleanup();
 		}
-		
+
 		KeycloakUserManager.removeUser();
 		KeycloakUserManager.closeKeycloakInstance();
 
@@ -134,7 +177,7 @@ public class MosipTestRunner {
 		System.exit(0);
 
 	}
-	
+
 	public static void suiteSetup(String runType) {
 		if (InjiCertifyConfigManager.IsDebugEnabled())
 			LOGGER.setLevel(Level.ALL);

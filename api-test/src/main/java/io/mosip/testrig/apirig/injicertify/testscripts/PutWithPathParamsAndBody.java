@@ -2,6 +2,7 @@ package io.mosip.testrig.apirig.injicertify.testscripts;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import io.mosip.testrig.apirig.utils.AuthenticationTestException;
 import io.mosip.testrig.apirig.utils.GlobalConstants;
 import io.mosip.testrig.apirig.utils.OutputValidationUtil;
 import io.mosip.testrig.apirig.utils.ReportUtil;
+import io.mosip.testrig.apirig.utils.SecurityXSSException;
 import io.restassured.response.Response;
 
 public class PutWithPathParamsAndBody extends InjiCertifyUtil implements ITest {
@@ -80,7 +82,7 @@ public class PutWithPathParamsAndBody extends InjiCertifyUtil implements ITest {
 	 * @throws AdminTestException
 	 */
 	@Test(dataProvider = "testcaselist")
-	public void test(TestCaseDTO testCaseDTO) throws AuthenticationTestException, AdminTestException {
+	public void test(TestCaseDTO testCaseDTO) throws AuthenticationTestException, AdminTestException, SecurityXSSException {
 		testCaseName = testCaseDTO.getTestCaseName();
 		testCaseDTO = InjiCertifyUtil.isTestCaseValidForExecution(testCaseDTO);
 		String[] templateFields = testCaseDTO.getTemplateFields();
@@ -97,7 +99,14 @@ public class PutWithPathParamsAndBody extends InjiCertifyUtil implements ITest {
 		}
 		testCaseDTO = AdminTestUtil.filterHbs(testCaseDTO);
 		String inputJson = filterInputHbs(testCaseDTO);
-		inputJson = InjiCertifyUtil.inputStringKeyWordHandeler(inputJson, testCaseName);
+		inputJson = inputStringKeyWordHandeler(inputJson, testCaseName);
+
+		JSONObject requestJson = new JSONObject(inputJson);
+		// Check and encode vcTemplate
+		if (requestJson.has("vcTemplate") && requestJson.get("vcTemplate") instanceof JSONObject) {
+
+			inputJson = extractAndEncodeVcTemplate(requestJson.toString());
+		}
 
 		if (testCaseDTO.getTemplateFields() != null && templateFields.length > 0) {
 			ArrayList<JSONObject> inputtestCases = AdminTestUtil.getInputTestCase(testCaseDTO);
@@ -123,8 +132,20 @@ public class PutWithPathParamsAndBody extends InjiCertifyUtil implements ITest {
 				String tempUrl = InjiCertifyConfigManager.getEsignetBaseUrl();
 				response = putWithPathParamsBodyAndBearerToken(tempUrl + testCaseDTO.getEndPoint(), inputJson,
 						COOKIENAME, testCaseDTO.getRole(), testCaseDTO.getTestCaseName(), pathParams);
-			} else {
-				response = putWithPathParamsBodyAndCookie(ApplnURI + testCaseDTO.getEndPoint(), inputJson, COOKIENAME,
+			} else 
+			{
+				String tempUrl = ApplnURI;
+				String endPointKeyWord = "";
+
+				if (testCaseDTO.getEndPoint().contains("BASEURL$")) {
+					tempUrl = InjiCertifyUtil.getTempURL(testCaseDTO);
+					endPointKeyWord = InjiCertifyUtil.getKeyWordFromEndPoint(testCaseDTO.getEndPoint());
+
+					if (!(endPointKeyWord.isBlank()) && testCaseDTO.getEndPoint().startsWith(endPointKeyWord)) {
+						testCaseDTO.setEndPoint(testCaseDTO.getEndPoint().replace(endPointKeyWord, ""));
+					}
+				}			
+				response = putWithPathParamsBodyAndCookie(tempUrl + testCaseDTO.getEndPoint(), inputJson, COOKIENAME,
 						testCaseDTO.getRole(), testCaseDTO.getTestCaseName(), pathParams);
 			}
 			Map<String, List<OutputValidationDto>> ouputValid = null;

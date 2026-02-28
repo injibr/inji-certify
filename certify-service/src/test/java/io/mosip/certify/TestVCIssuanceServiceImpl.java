@@ -23,11 +23,6 @@ public class TestVCIssuanceServiceImpl implements VCIssuanceService {
     }
 
     @Override
-    public Map<String, Object> getCredentialIssuerMetadata(String version) {
-        return Map.of();
-    }
-
-    @Override
     public Map<String, Object> getDIDDocument() {
         throw new InvalidRequestException(ErrorConstants.UNSUPPORTED_IN_CURRENT_PLUGIN_MODE);
     }

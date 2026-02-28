@@ -1,6 +1,8 @@
 AuthenticateUserVCIForMockIDA:
    InjiCertify_ESignet_AuthenticateUserVCI_ForMockIDA_uin_Otp_Valid_Smoke:
       endPoint: $ESIGNETMOCKIDABASEURL$/v1/esignet/authorization/authenticate
+      uniqueIdentifier: TC_esignetDependent_AuthenticateUser_22      
+      description: Authenticate User for mockida      
       role: resident
       restMethod: post
       checkErrorsOnlyInResponse: true
@@ -13,7 +15,7 @@ AuthenticateUserVCIForMockIDA:
       	"transactionId": "$ID:ESignet_OAuthDetailsRequest_ForMockIDA_uin_all_Valid_Smoke_sid_transactionId$",
       	"individualId": "$ID:AddIdentity_For_Mock_Valid_smoke_Pos_UIN$",
       	"authFactorType" : "OTP",
-      	"challenge" : "111111",
+      	"challenge" : "$ID:AddIdentity_For_Mock_Valid_smoke_Pos_EMAIL$",
         "format": "alpha-numeric",
         "sendOtp":{
     "encodedHash": "$ID:ESignet_OAuthDetailsRequest_ForMockIDA_uin_all_Valid_Smoke_sid_encodedResp$",
@@ -27,8 +29,6 @@ AuthenticateUserVCIForMockIDA:
     }'
       output: '{
   "sendOtpResp":{
-        "maskedMobile": "$IGNORE$",
-        "sendOtpResTemplate":"injicertify/SendOtp/SendOtpResult",
-        "maskedEmail": "$IGNORE$"
+        "sendOtpResTemplate":"injicertify/SendOtp/SendOtpResult"
     }
 }'

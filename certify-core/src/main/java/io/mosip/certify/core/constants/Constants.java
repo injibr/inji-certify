@@ -12,6 +12,8 @@ public class Constants {
     public static final String APPLICATION_ID = "applicationId";
     public static final String REFERENCE_ID = "referenceId";
 
+    // NOTE: This is how the nonce is set in the accessToken from the AuthZ server, in the proofJwt this is set as "nonce"
+    // ref: https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-8.2.1.1 (draft-15 reference)
     public static final String C_NONCE = "c_nonce";
     public static final String C_NONCE_EXPIRES_IN = "c_nonce_expires_in";
     public static final String CLIENT_ID = "client_id";
@@ -23,8 +25,18 @@ public class Constants {
     public static final String EMPTY_REF_ID = "";
     public static final String ED25519_REF_ID = "ED25519_SIGN";
     public static final String TEMPLATE_NAME = "templateName";
-    public static final String ISSUER_URI = "issuerURI";
+    public static final String DID_URL = "didUrl";
     public static final String RENDERING_TEMPLATE_ID = "renderingTemplateId";
     public static final String CERTIFY_VC_SIGN_EC_K1 = "CERTIFY_VC_SIGN_EC_K1";
+    public static final String CERTIFY_VC_SIGN_EC_R1 = "CERTIFY_VC_SIGN_EC_R1";
     public static final String EC_SECP256K1_SIGN = "EC_SECP256K1_SIGN";
+    public static final String EC_SECP256R1_SIGN = "EC_SECP256R1_SIGN";
+    public static final String ACTIVE = "active";
+    public static final String INACTIVE = "inactive";
+    public static final String DELIMITER = "::";  // delimiter is ::  its not used by url or within any context of VC name and is distinct
+    public  static final String SIGNATURE_CRYPTO_SUITE = "SIGNATURE_CRYPTO_SUITE";
+    public  static final String VCTYPE = "vct";
+    public  static final String CONFIRMATION = "cnf";
+    public  static final String ISSUER = "iss";
+    public static final String TYPE = "type";
 }

@@ -1,6 +1,8 @@
 AuthenticateUserVCIForMockIDA:
    InjiCertify_ESignet_AuthenticateUserVCI_ForMockIDA_Vd12_uin_Otp_Valid_Smoke:
       endPoint: $ESIGNETMOCKIDABASEURL$/v1/esignet/authorization/authenticate
+      uniqueIdentifier: TC_esignetDependent_AuthenticateUser_vd12_24      
+      description: Authenticate User for mock ida vd12  
       role: resident
       restMethod: post
       checkErrorsOnlyInResponse: true
@@ -27,8 +29,6 @@ AuthenticateUserVCIForMockIDA:
     }'
       output: '{
   "sendOtpResp":{
-        "maskedMobile": "$IGNORE$",
-        "sendOtpResTemplate":"injicertify/SendOtp/SendOtpResult",
-        "maskedEmail": "$IGNORE$"
+        "sendOtpResTemplate":"injicertify/SendOtp/SendOtpResult"
     }
 }'

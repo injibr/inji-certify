@@ -6,6 +6,11 @@
 package io.mosip.certify.proof;
 
 import io.mosip.certify.core.dto.CredentialProof;
+import io.mosip.certify.core.dto.CredentialRequest;
+import io.mosip.certify.core.dto.ParsedAccessToken;
+
+import java.util.List;
+import java.util.Map;
 
 public interface ProofValidator {
 
@@ -22,7 +27,7 @@ public interface ProofValidator {
      * @param credentialProof proof from the credential request.
      * @return true if proof passes all the validation else false
      */
-    boolean validate(String clientId, String cNonce, CredentialProof credentialProof);
+    boolean validate(String clientId, String cNonce, CredentialProof credentialProof, Map<String, Object> proofConfiguration);
 
     /**
      * Extracts the holders public key for VC cryptographic binding from the proof header
@@ -30,4 +35,6 @@ public interface ProofValidator {
      * @return public key as did:jwk equivalent
      */
     String getKeyMaterial(CredentialProof credentialProof);
+
+    void validateCNonce(String cNonce, int cNonceExpireSeconds, ParsedAccessToken parsedAccessToken, CredentialRequest credentialRequest);
 }
