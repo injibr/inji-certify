@@ -72,6 +72,7 @@ REDIRECT_PORT = 3004
 REDIRECT_URI = f"http://localhost:{REDIRECT_PORT}/redirect"
 
 
+
 # =============================================================================
 # Phase 1: Citizen Authentication (OAuth2 Authorization Code + PKCE)
 # =============================================================================
@@ -145,7 +146,7 @@ def exchange_code(code, code_verifier, client_id, client_secret):
 
     This is the second leg of the Authorization Code flow. After the citizen
     logs in and Gov.br redirects back with a `code`, we POST to the /token
-    endpoint with:
+    e with:
     - grant_type=authorization_code : Standard OAuth2 grant
     - code                          : The authorization code from the redirect
     - redirect_uri                  : Must match the one used in /authorize
@@ -428,6 +429,8 @@ def request_credential(certify_url, access_token, proof_jwt, doc_type="ECACreden
     On success (200), response_json contains a "credential" key with the
     signed Verifiable Credential in JSON-LD format.
     """
+   
+    #print("token: ",access_token)
     url = f"{certify_url}/issuance/credential"
     body = json.dumps({
         "format": "ldp_vc",
@@ -447,6 +450,8 @@ def request_credential(certify_url, access_token, proof_jwt, doc_type="ECACreden
         "Content-Type": "application/json",
         "Authorization": f"Bearer {access_token}",
     })
+
+    
 
     try:
         with urllib.request.urlopen(req) as resp:
