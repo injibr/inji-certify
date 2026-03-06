@@ -15,7 +15,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.mosip.certify</groupId>
 	<artifactId>certify-parent</artifactId>
+<<<<<<< HEAD
 	<version>4.0.2</version>
+=======
+	<version>4.1.6</version>
+>>>>>>> entrega
     <packaging>pom</packaging>
     <name>certify</name>
 	<description>Parent project for MOSIP certify</description>
