@@ -1,4 +1,4 @@
-package io.mosip.certify.api.dataprovider.impl;
+package io.mosip.certify.eca;
 
 import io.mosip.certify.api.spi.DataProviderPlugin;
 import io.mosip.certify.api.exception.DataProviderExchangeException;
@@ -6,10 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.Period;

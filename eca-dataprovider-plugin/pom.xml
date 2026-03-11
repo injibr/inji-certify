@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.mosip.certify</groupId>
+        <artifactId>certify-parent</artifactId>
+        <version>0.13.1</version>
+    </parent>
+
+    <artifactId>eca-dataprovider-plugin</artifactId>
+    <version>0.13.1</version>
+    <name>eca-dataprovider-plugin</name>
+    <description>ECA Data Provider Plugin for Gov.br integration</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.mosip.certify</groupId>
+            <artifactId>certify-integration-api</artifactId>
+            <version>0.13.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor.netty</groupId>
+            <artifactId>reactor-netty-http</artifactId>
+        </dependency>
+    </dependencies>
+</project>

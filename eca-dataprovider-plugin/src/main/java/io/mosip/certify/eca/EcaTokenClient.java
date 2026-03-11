@@ -1,4 +1,4 @@
-package io.mosip.certify.api.dataprovider.impl;
+package io.mosip.certify.eca;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
