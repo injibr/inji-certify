@@ -53,4 +53,9 @@ public class CredentialRequest {
     private Map<String,Object> claims;
 
     String vct;
+
+    /**
+     * Issuer identifier to track the issuer of the credential (for Gov.br integration)
+     */
+    private String issuerId;
 }

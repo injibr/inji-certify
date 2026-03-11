@@ -78,6 +78,27 @@ public class AppConfig implements ApplicationRunner {
         return new RestTemplate(requestFactory);
     }
 
+    @Bean
+    public org.springframework.web.reactive.function.client.WebClient webClient() {
+        try {
+            // Allow TLS 1.1+ to support dev server; certificate validation remains enabled
+            io.netty.handler.ssl.SslContext sslContext = io.netty.handler.ssl.SslContextBuilder
+                    .forClient()
+                    .protocols("TLSv1.1", "TLSv1.2", "TLSv1.3")
+                    .build();
+
+            reactor.netty.http.client.HttpClient httpClient = reactor.netty.http.client.HttpClient.create()
+                    .secure(sslSpec -> sslSpec.sslContext(sslContext));
+
+            return org.springframework.web.reactive.function.client.WebClient.builder()
+                    .clientConnector(new org.springframework.http.client.reactive.ReactorClientHttpConnector(httpClient))
+                    .build();
+        } catch (Exception e) {
+            log.error("Failed to configure WebClient with SSL", e);
+            return org.springframework.web.reactive.function.client.WebClient.builder().build();
+        }
+    }
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
             initKeys();

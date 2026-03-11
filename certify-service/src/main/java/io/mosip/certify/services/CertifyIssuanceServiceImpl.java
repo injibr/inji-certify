@@ -18,6 +18,8 @@ import io.mosip.certify.core.dto.CredentialMetadata;
 import io.mosip.certify.core.dto.CredentialRequest;
 import io.mosip.certify.core.dto.CredentialResponse;
 import io.mosip.certify.core.dto.ParsedAccessToken;
+import io.mosip.certify.core.dto.CredentialIssuerMetadataDTO;
+import io.mosip.certify.core.dto.CredentialConfigurationSupportedDTO;
 import io.mosip.certify.core.exception.CertifyException;
 import io.mosip.certify.core.exception.InvalidRequestException;
 import io.mosip.certify.core.exception.NotAuthenticatedException;
@@ -60,6 +62,9 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
 
     @Value("${mosip.certify.cnonce-expire-seconds:300}")
     private int cNonceExpireSeconds;
+
+    @Value("${mosip.certify.skip-cnonce-validation:false}")
+    private boolean skipCnonceValidation;
 
     @Autowired
     private ParsedAccessToken parsedAccessToken;
@@ -133,34 +138,57 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
 
         if(!parsedAccessToken.isActive())
             throw new NotAuthenticatedException();
-        // 2. Scope Validation
-        String scopeClaim = (String) parsedAccessToken.getClaims().getOrDefault("scope", "");
+        
+        // Use doctype from request instead of OAuth2 scope for credential selection
+        String doctype = credentialRequest.getDoctype();
+        String issuerId = credentialRequest.getIssuerId() != null ? credentialRequest.getIssuerId() : "latest";
+        
         CredentialMetadata credentialMetadata = null;
-        for(String scope : scopeClaim.split(Constants.SPACE)) {
-            Optional<CredentialMetadata> result = getScopeCredentialMapping(scope, credentialRequest.getFormat(), credentialConfigurationService.fetchCredentialIssuerMetadata("latest"), credentialRequest);
-            if(result.isPresent()) {
-                credentialMetadata = result.get(); //considering only first credential scope
-                break;
+        if (doctype != null && !doctype.isEmpty()) {
+            // Doctype-based selection (Gov.br integration approach)
+            Optional<CredentialMetadata> result = getScopeCredentialMappingByDoctype(doctype, issuerId, credentialRequest.getFormat());
+            credentialMetadata = result.orElse(null);
+        } else {
+            // Fallback to scope-based selection for backward compatibility
+            Object scopeClaimObj = parsedAccessToken.getClaims().getOrDefault("scope", "");
+            String scopeClaim = "";
+            if (scopeClaimObj instanceof List) {
+                scopeClaim = String.join(" ", (List<String>) scopeClaimObj);
+            } else if (scopeClaimObj instanceof String) {
+                scopeClaim = (String) scopeClaimObj;
+            }
+            
+            for(String scope : scopeClaim.split(Constants.SPACE)) {
+                Optional<CredentialMetadata> result = getScopeCredentialMapping(scope, credentialRequest.getFormat(), credentialConfigurationService.fetchCredentialIssuerMetadata("latest"), credentialRequest);
+                if(result.isPresent()) {
+                    credentialMetadata = result.get();
+                    break;
+                }
             }
         }
 
         if(credentialMetadata == null) {
-            log.error("No credential mapping found for the provided scope {}", scopeClaim);
+            log.error("No credential mapping found for doctype: {}, issuerId: {}", doctype, issuerId);
             throw new CertifyException(ErrorConstants.INVALID_SCOPE);
         }
 
         // 3. Proof Validation
         ProofValidator proofValidator = proofValidatorFactory.getProofValidator(credentialRequest.getProof().getProof_type());
-        String validCNonce = VCIssuanceUtil.getValidClientNonce(vciCacheService, parsedAccessToken, cNonceExpireSeconds, securityHelperService, log);
-        proofValidator.validateCNonce(validCNonce, cNonceExpireSeconds, parsedAccessToken, credentialRequest);
-        if(!proofValidator.validate((String)parsedAccessToken.getClaims().get(Constants.CLIENT_ID), validCNonce,
-                credentialRequest.getProof(), credentialMetadata.getProofTypesSupported())) {
-            throw new CertifyException(ErrorConstants.INVALID_PROOF);
+        String keyMaterial = proofValidator.getKeyMaterial(credentialRequest.getProof());
+
+        if (!skipCnonceValidation) {
+            String validCNonce = VCIssuanceUtil.getValidClientNonce(vciCacheService, parsedAccessToken, cNonceExpireSeconds, securityHelperService, log);
+            proofValidator.validateCNonce(validCNonce, cNonceExpireSeconds, parsedAccessToken, credentialRequest);
+            if(!proofValidator.validate((String)parsedAccessToken.getClaims().get(Constants.CLIENT_ID), validCNonce,
+                    credentialRequest.getProof(), credentialMetadata.getProofTypesSupported())) {
+                throw new CertifyException(ErrorConstants.INVALID_PROOF);
+            }
+        } else {
+            log.warn("c_nonce validation is DISABLED (mosip.certify.skip-cnonce-validation=true). Do not use in production.");
         }
 
         // 4. Get VC from configured plugin implementation
-        VCResult<?> vcResult = getVerifiableCredential(credentialRequest, credentialMetadata,
-                proofValidator.getKeyMaterial(credentialRequest.getProof()));
+        VCResult<?> vcResult = getVerifiableCredential(credentialRequest, credentialMetadata, keyMaterial);
 
         auditWrapper.logAudit(Action.VC_ISSUANCE, ActionStatus.SUCCESS,
                 AuditHelper.buildAuditDto(parsedAccessToken.getAccessTokenHash(), "accessTokenHash"), null);
@@ -268,5 +296,29 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
             log.error(e.getMessage(), e);
             throw new CertifyException(ErrorConstants.UNKNOWN_ERROR);
         }
+    }
+
+    private Optional<CredentialMetadata> getScopeCredentialMappingByDoctype(String doctype, String issuerId, String format) {
+        CredentialIssuerMetadataDTO vciMetadata = credentialConfigurationService.fetchCredentialIssuerMetadata(issuerId);
+        Map<String, CredentialConfigurationSupportedDTO> supportedCredentials = vciMetadata.getCredentialConfigurationSupportedDTO();
+        
+        Optional<Map.Entry<String, CredentialConfigurationSupportedDTO>> result = supportedCredentials.entrySet().stream()
+                .filter(cm -> cm.getKey().equals(doctype))
+                .findFirst();
+
+        if(result.isPresent()) {
+            CredentialConfigurationSupportedDTO metadata = result.get().getValue();
+            CredentialMetadata credentialMetadata = new CredentialMetadata();
+            credentialMetadata.setFormat(metadata.getFormat());
+            credentialMetadata.setScope(metadata.getScope());
+            credentialMetadata.setId(result.get().getKey());
+            Map<String, Object> proofTypesSupported = metadata.getProofTypesSupported();
+            credentialMetadata.setProofTypesSupported(proofTypesSupported);
+            if(format.equals(VCFormats.LDP_VC)){
+                credentialMetadata.setTypes(metadata.getCredentialDefinition().getType());
+            }
+            return Optional.of(credentialMetadata);
+        }
+        return Optional.empty();
     }
 }
