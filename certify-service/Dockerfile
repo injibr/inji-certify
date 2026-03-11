@@ -71,13 +71,13 @@ RUN mkdir -p ${loader_path}
 
 ENV loader_path_env=${loader_path}
 
-ADD certify-service/configure_start.sh configure_start.sh
+ADD configure_start.sh configure_start.sh
 
 RUN chmod +x configure_start.sh
 
 RUN chmod a-w /home/${container_user}/configure_start.sh
 
-COPY certify-service/target/certify-service-*.jar certify-service.jar
+COPY ./target/certify-service-*.jar certify-service.jar
 
 # change permissions of file inside working dir
 RUN chown -R ${container_user}:${container_user} /home/${container_user}
