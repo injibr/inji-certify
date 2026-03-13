@@ -52,4 +52,34 @@ public class SicarCpfCnpjClient {
 
         return firstCodigoImovel.asText();
     }
+
+       /**
+     * Retrieves the registration number for a given CPF number.
+     *
+     * @param cpfNo the CPF number to look up
+     * @return the registration number associated with the CPF
+     */
+    public String getNextRegistrationNumber(String cpfNo, String accessToken, int index) {
+        log.info("Fetching next registration number for CPF: {}", cpfNo);
+        String response = webClient.get()
+                .uri(String.format(url, cpfNo))
+                .headers(headers -> headers.setBearerAuth(accessToken))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode;
+        try {
+            rootNode = mapper.readTree(response);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        JsonNode indexCodigoImovel = rootNode
+                .path("result")
+                .path(index-1)
+                .path("codigoImovel");
+
+        return indexCodigoImovel.asText();
+    }
+
 }
