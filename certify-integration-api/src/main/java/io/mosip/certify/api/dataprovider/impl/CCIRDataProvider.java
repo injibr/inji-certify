@@ -10,9 +10,11 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
+@Slf4j
 @Component
 public class CCIRDataProvider implements DataProviderService {
     private final SncrCpfCnpjClient sncrCpfCnpjClient;
@@ -27,7 +29,7 @@ public class CCIRDataProvider implements DataProviderService {
 
     public CCIRDataProvider(SncrCpfCnpjClient sncrCpfCnpjClient, WebClient webClient, @Value("${ccir.document.api.url}")String apiUrl, CCIRTokenClient ccirTokenClient) {
         this.webClient = webClient;
-        this.sncrCpfCnpjClient = SncrCpfCnpjClient;
+        this.sncrCpfCnpjClient = sncrCpfCnpjClient;
         this.apiUrl = apiUrl;
         this.ccirTokenClient = ccirTokenClient;
     }
