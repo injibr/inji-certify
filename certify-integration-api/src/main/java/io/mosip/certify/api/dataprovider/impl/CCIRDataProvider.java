@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 
+@Slf4j
 @Component
 public class CCIRDataProvider implements DataProviderService {
     private final SncrCpfCnpjClient sncrCpfCnpjClient;
@@ -27,7 +28,7 @@ public class CCIRDataProvider implements DataProviderService {
 
     public CCIRDataProvider(SncrCpfCnpjClient sncrCpfCnpjClient, WebClient webClient, @Value("${ccir.document.api.url}")String apiUrl, CCIRTokenClient ccirTokenClient) {
         this.webClient = webClient;
-        this.sncrCpfCnpjClient = SncrCpfCnpjClient;
+        this.sncrCpfCnpjClient = sncrCpfCnpjClient;
         this.apiUrl = apiUrl;
         this.ccirTokenClient = ccirTokenClient;
     }
