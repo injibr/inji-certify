@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Component
 public class CCIRDataProvider implements DataProviderService {
-    private final SicarCpfCnpjClient sicarCpfCnpjClient;
+    private final SncrCpfCnpjClient sncrCpfCnpjClient;
 
     private final WebClient webClient;
 
@@ -25,9 +25,9 @@ public class CCIRDataProvider implements DataProviderService {
 
     private final CCIRTokenClient ccirTokenClient;
 
-    public CCIRDataProvider(SicarCpfCnpjClient sicarCpfCnpjClient, WebClient webClient, @Value("${ccir.document.api.url}")String apiUrl, CCIRTokenClient ccirTokenClient) {
+    public CCIRDataProvider(SncrCpfCnpjClient sncrCpfCnpjClient, WebClient webClient, @Value("${ccir.document.api.url}")String apiUrl, CCIRTokenClient ccirTokenClient) {
         this.webClient = webClient;
-        this.sicarCpfCnpjClient = sicarCpfCnpjClient;
+        this.sncrCpfCnpjClient = SncrCpfCnpjClient;
         this.apiUrl = apiUrl;
         this.ccirTokenClient = ccirTokenClient;
     }
@@ -43,11 +43,11 @@ public class CCIRDataProvider implements DataProviderService {
     public JSONObject getData(String cpfNumber) throws JSONException {
     // Step 1: Get access token
         String accessToken = ccirTokenClient.getAccessToken();
-//        String registrationNumber = sicarCpfCnpjClient.getRegistrationNumber(cpfNumber, accessToken);
-//        log.info("Registration Number: {}", registrationNumber);
+        String registrationNumber = sncrCpfCnpjClient.getRegistrationNumber(cpfNumber, accessToken);
+        log.info("Registration Number: {}", registrationNumber);
         // Step 2: Call protected API with Bearer token
         String response =  webClient.get()
-                .uri(String.format(apiUrl, cpfNumber))
+                .uri(String.format(apiUrl, registrationNumber))
                 .headers(headers -> headers.setBearerAuth(accessToken))
                 .retrieve()
                 .bodyToMono(String.class)
