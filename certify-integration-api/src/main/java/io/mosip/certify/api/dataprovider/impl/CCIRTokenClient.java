@@ -44,7 +44,7 @@ public class CCIRTokenClient {
                 .uri(tokenUrl)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .headers(headers -> headers.setBasicAuth(clientId, clientSecret))
-                .bodyValue("grant_type=client_credentials" +"&scope=default")
+                .bodyValue("grant_type=client_credentials")
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
