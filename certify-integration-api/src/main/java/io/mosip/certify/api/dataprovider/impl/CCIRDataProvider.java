@@ -55,7 +55,7 @@ public class CCIRDataProvider implements DataProviderService {
                 .uri(String.format(apiUrl, registrationNumber))
                 .headers(headers -> {
                      headers.setBearerAuth(accessToken);
-                     headers.add("x-cpf-usuario", xcpf);
+                     headers.add("x-cpf-usuario", xcpfuser);
                  })
                 .retrieve()
                 .bodyToMono(String.class)
