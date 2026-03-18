@@ -25,13 +25,16 @@ public class CCIRDataProvider implements DataProviderService {
 
     private final String apiUrl;
 
+    private final String xcpfuser;
+
     private final CCIRTokenClient ccirTokenClient;
 
-    public CCIRDataProvider(SncrCpfCnpjClient sncrCpfCnpjClient, WebClient webClient, @Value("${ccir.document.api.url}")String apiUrl, CCIRTokenClient ccirTokenClient) {
+    public CCIRDataProvider(SncrCpfCnpjClient sncrCpfCnpjClient, WebClient webClient, @Value("${ccir.document.api.url}")String apiUrl,@Value("${ccir.xcpf.user}")String xcpfuser, CCIRTokenClient ccirTokenClient) {
         this.webClient = webClient;
         this.sncrCpfCnpjClient = sncrCpfCnpjClient;
         this.apiUrl = apiUrl;
         this.ccirTokenClient = ccirTokenClient;
+        this.xcpfuser = xcpfuser;
     }
 
 
@@ -45,12 +48,15 @@ public class CCIRDataProvider implements DataProviderService {
     public JSONObject getData(String cpfNumber) throws JSONException {
     // Step 1: Get access token
         String accessToken = ccirTokenClient.getAccessToken();
-        String registrationNumber = sncrCpfCnpjClient.getRegistrationNumber(cpfNumber, accessToken);
+        String registrationNumber = sncrCpfCnpjClient.getRegistrationNumber(cpfNumber, accessToken, xcpfuser);
         log.info("Registration Number: {}", registrationNumber);
         // Step 2: Call protected API with Bearer token
         String response =  webClient.get()
                 .uri(String.format(apiUrl, registrationNumber))
-                .headers(headers -> headers.setBearerAuth(accessToken))
+                .headers(headers -> {
+                     headers.setBearerAuth(accessToken);
+                     headers.add("x-cpf-usuario", xcpf);
+                 })
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
