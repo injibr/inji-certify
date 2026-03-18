@@ -30,11 +30,14 @@ public class SncrCpfCnpjClient {
      * @param cpfNo the CPF number to look up
      * @return the registration number associated with the CPF
      */
-    public String getRegistrationNumber(String cpfNo, String accessToken) {
+    public String getRegistrationNumber(String cpfNo, String accessToken,String xcpf) {
         log.info("Fetching registration number for CPF: {}", cpfNo);
         String response = webClient.get()
                 .uri(String.format(url, cpfNo))
-                .headers(headers -> headers.setBearerAuth(accessToken))
+                .headers(headers -> {
+                     headers.setBearerAuth(accessToken);
+                     headers.add("x-cpf-usuario", xcpf);
+                 })
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
