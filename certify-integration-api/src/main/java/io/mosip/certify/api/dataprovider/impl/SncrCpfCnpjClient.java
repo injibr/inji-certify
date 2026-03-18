@@ -49,7 +49,6 @@ public class SncrCpfCnpjClient {
             throw new RuntimeException(e);
         }
         JsonNode firstCodigoImovel = rootNode
-                .path("result")
                 .path(0)
                 .path("codigoImovel");
 
@@ -78,7 +77,6 @@ public class SncrCpfCnpjClient {
             throw new RuntimeException(e);
         }
         JsonNode indexCodigoImovel = rootNode
-                .path("result")
                 .path(index-1)
                 .path("codigoImovel");
 
