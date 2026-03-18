@@ -43,18 +43,12 @@ public class CCIRTokenClient {
         Map tokenResponse = webClient.post()
                 .uri(tokenUrl)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .headers(headers -> {
-                    if (wireMockEnabled) {
-                        headers.add(HttpHeaders.AUTHORIZATION, "Basic Og==");
-                    }
-                })
-                .bodyValue("grant_type=client_credentials" +
-                        "&client_id=" + clientId +
-                        "&client_secret=" + clientSecret +
-                        "&scope=default" )
+                .headers(headers -> headers.setBasicAuth(clientId, clientSecret))
+                .bodyValue("grant_type=client_credentials" +"&scope=default")
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
+
 
         if (tokenResponse == null || tokenResponse.get("access_token") == null) {
             throw new RuntimeException("Failed to retrieve access token");
