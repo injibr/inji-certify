@@ -46,7 +46,7 @@ public class EcaVelocityTemplatingEngineImpl implements VCFormatter {
     @Autowired
     RenderingTemplateService renderingTemplateService;
 
-    @Value("${mosip.certify.data-provider-plugin.vc-expiry-duration:P730d}")
+    @Value("${mosip.certify.data-provider-plugin.vc-expiry-duration:P90d}")
     String defaultExpiryDuration;
 
     @Value("${mosip.certify.data-provider-plugin.id-field-prefix-uri:}")
@@ -142,7 +142,7 @@ public class EcaVelocityTemplatingEngineImpl implements VCFormatter {
             try {
                 duration = Duration.parse(defaultExpiryDuration);
             } catch (DateTimeParseException e) {
-                duration = Duration.parse("P730D");
+                duration = Duration.parse("P90D");
             }
             String expiryTime = ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(duration.getSeconds()).format(DateTimeFormatter.ofPattern(Constants.UTC_DATETIME_PATTERN));
             finalTemplate.put(VCDM2Constants.VALID_UNITL, expiryTime);
