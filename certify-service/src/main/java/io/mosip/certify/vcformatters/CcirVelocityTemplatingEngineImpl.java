@@ -55,29 +55,14 @@ public class CcirVelocityTemplatingEngineImpl  implements VCFormatter {
     @PostConstruct
     public void initialize() {
         engine = new VelocityEngine();
-        // TODO: The DataSourceResourceLoader can be used instead if there's a
-        //  single primary key column and the table has a last modified date.
         engine.setProperty(RuntimeConstants.INPUT_ENCODING, "UTF-8");
         engine.setProperty(RuntimeConstants.OUTPUT_ENCODING, "UTF-8");
         engine.init();
     }
 
-    // TODO: Add a public method for updating the Velocity template cache
-
-    /**
-     * performs the templating
-     * NOTE: the defaultSettings map should have the "templateName" key set to
-     *  "${sort(CREDENTIALTYPE1,CREDENTIALTYPE2,CREDENTIALTYPE3...)}:${sort(VC_CONTEXT1,VC_CONTENXT2,VC_CONTEXT3...)}"
-     *
-     * @param valueMap is the input from the DataProvider plugin
-     * @param templateSettings has some sensible defaults from Certify for
-     *                        internal work such as locating the appropriate template
-     * @return templated VC as a String
-     */
     @SneakyThrows
     @Override
     public String format(JSONObject valueMap, Map<String, Object> templateSettings) {
-        // TODO: Isn't template name becoming too complex with VC_CONTEXTS & CREDENTIAL_TYPES both?
         String templateName = templateSettings.get(Constants.TEMPLATE_NAME).toString();
         String template = getTemplate(templateName);
         if (template == null) {
@@ -86,8 +71,6 @@ public class CcirVelocityTemplatingEngineImpl  implements VCFormatter {
         }
         String issuer = templateSettings.get(Constants.ISSUER_URI).toString();
         StringWriter writer = new StringWriter();
-        // 1. Prepare map
-        // TODO: Eventually, the credentialSubject from the plugin will be templated as-is
         Map<String, Object> finalTemplate = new HashMap<>();
         Iterator<String> keys = valueMap.keys();
         while(keys.hasNext()) {
@@ -98,58 +81,17 @@ public class CcirVelocityTemplatingEngineImpl  implements VCFormatter {
             } else if (value.getClass().isArray()) {
                 finalTemplate.put(key, new JSONArray(List.of(value)));
             } else if (value instanceof Integer | value instanceof Float | value instanceof Long | value instanceof Double| value instanceof BigDecimal) {
-                // entities which don't need to be quoted
                 finalTemplate.put(key, value);
             } else if (value instanceof String){
-                // entities which need to be quoted
                 finalTemplate.put(key, JSONObject.wrap(value));
             } else if (value instanceof JSONObject) {
-                JSONObject jsonObject = (JSONObject)value;
-                Iterator<String> jsonKeys = jsonObject.keys();
-                while (jsonKeys.hasNext()){
-                    String jsonKey = jsonKeys.next();
-                    if (jsonObject.get(jsonKey) instanceof JSONObject) {
-                        JSONObject jsonObjectInner =  new JSONObject(jsonObject.getString(jsonKey));
-                        Iterator<String> jsonKeysInner = jsonObjectInner.keys();
-                        while (jsonKeysInner.hasNext()){
-                             String jsonKeyInner = jsonKeysInner.next();
-                            finalTemplate.put(jsonKeyInner, Objects.equals(jsonObjectInner.get(jsonKeyInner),null)?"":jsonObjectInner.get(jsonKeyInner));
-//        jsonObject.get(jsonKeyInner);
-                        }
-                    }else {
-                    finalTemplate.put(jsonKey, Objects.equals(jsonObject.get(jsonKey),null)?"":jsonObject.get(jsonKey));
-                    }
-                }
+                flattenJsonObject((JSONObject) value, finalTemplate);
             } else if(value instanceof JSONArray){
-                Map<String,String> allData = new HashMap<>();
-                List<String> allObjects = new ArrayList<>();
-                for (int i = 0; i < ((JSONArray) value).length(); i++) {
-                    Map<String,String> theObject = new HashMap<>();
-                    JSONObject jsonObject = (JSONObject) ((JSONArray) value).get(i);
-                    Iterator<String> jsonKeys = jsonObject.keys();
-                    while (jsonKeys.hasNext()){
-                        String jsonKey = jsonKeys.next();
-                        if (allData.containsKey(jsonKey)){
-                            String prevValue = Objects.equals(allData.get(jsonKey),null)?"":allData.get(jsonKey);
-                            String newValue = jsonObject.get(String.valueOf(jsonKey)).toString().equals("null")?"":jsonObject.get(String.valueOf(jsonKey)).toString();
-                            String combinedValue = prevValue +","+newValue;
-                            allData.put(jsonKey,combinedValue);
-                            theObject.put(jsonKey,newValue);
-                        }else {
-                            allData.put(jsonKey, jsonObject.get(jsonKey).toString());
-                            theObject.put(jsonKey,jsonObject.get(jsonKey).toString());
-                        }
-                    }
-                    allObjects.add(theObject.toString());
-                }
-                finalTemplate.put(key, allObjects.toString());
+                flattenJsonArray(key, (JSONArray) value, finalTemplate);
             }
         }
-        // Date: https://velocity.apache.org/tools/3.1/apidocs/org/apache/velocity/tools/generic/DateTool.html
         finalTemplate.put("_dateTool", new DateTool());
-        // Escape: https://velocity.apache.org/tools/3.1/apidocs/org/apache/velocity/tools/generic/EscapeTool.html
         finalTemplate.put("_esc", new EscapeTool());
-        // add the issuer value
         finalTemplate.put("_issuer", issuer);
         if (templateSettings.containsKey(Constants.RENDERING_TEMPLATE_ID) && templateName.contains(VCDM2Constants.URL)) {
             try {
@@ -165,7 +107,6 @@ public class CcirVelocityTemplatingEngineImpl  implements VCFormatter {
             try {
                 duration = Duration.parse(defaultExpiryDuration);
             } catch (DateTimeParseException e) {
-                // set 730days(~2Y) as default VC expiry
                 duration = Duration.parse("P730D");
             }
             String expiryTime = ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(duration.getSeconds()).format(DateTimeFormatter.ofPattern(Constants.UTC_DATETIME_PATTERN));
@@ -175,7 +116,7 @@ public class CcirVelocityTemplatingEngineImpl  implements VCFormatter {
             finalTemplate.put(VCDM2Constants.VALID_FROM, ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(Constants.UTC_DATETIME_PATTERN)));
         }
         VelocityContext context = new VelocityContext(finalTemplate);
-        engine.evaluate(context, writer, /*logTag */ templateName,template.toString());
+        engine.evaluate(context, writer, templateName, template);
         if (StringUtils.isNotEmpty(idPrefix)) {
             JSONObject j = new JSONObject(writer.toString());
             j.put(VCDMConstants.ID, idPrefix + UUID.randomUUID());
@@ -184,12 +125,94 @@ public class CcirVelocityTemplatingEngineImpl  implements VCFormatter {
         return writer.toString();
     }
 
-    /**
-     * getTemplate fetches the VelocityTemplate from the DB or Spring Cache
-     * @param key key is a combination of sorted credentialType & sorted
-     *            context separated by a ':'.
-     * @return
-     */
+    @SneakyThrows
+    private void flattenJsonObject(JSONObject jsonObject, Map<String, Object> finalTemplate) {
+        Iterator<String> jsonKeys = jsonObject.keys();
+        while (jsonKeys.hasNext()) {
+            String jsonKey = jsonKeys.next();
+            Object innerVal = jsonObject.get(jsonKey);
+            if (innerVal instanceof JSONObject) {
+                // Flatten nested JSONObject (e.g. dadosUltimoCcir)
+                JSONObject jsonObjectInner = new JSONObject(jsonObject.getString(jsonKey));
+                Iterator<String> jsonKeysInner = jsonObjectInner.keys();
+                while (jsonKeysInner.hasNext()) {
+                    String jsonKeyInner = jsonKeysInner.next();
+                    finalTemplate.put(jsonKeyInner, Objects.equals(jsonObjectInner.get(jsonKeyInner), null) ? "" : jsonObjectInner.get(jsonKeyInner));
+                }
+            } else if (innerVal instanceof JSONArray) {
+                // Nested JSONArray (e.g. ccir.titulares):
+                // 1. Extract declarante fields to root level
+                // 2. Put full array as string in the array key name
+                flattenNestedJsonArray(jsonKey, (JSONArray) innerVal, finalTemplate);
+            } else {
+                finalTemplate.put(jsonKey, Objects.equals(innerVal, null) ? "" : innerVal);
+            }
+        }
+    }
+
+    @SneakyThrows
+    private void flattenNestedJsonArray(String arrayKey, JSONArray array, Map<String, Object> finalTemplate) {
+        // Find the declarante element and extract its fields to root
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject arrObj = array.getJSONObject(i);
+            if ("S".equals(arrObj.optString("declarante")) || arrObj.optInt("declarante", 0) == 1) {
+                Iterator<String> arrKeys = arrObj.keys();
+                while (arrKeys.hasNext()) {
+                    String arrKey = arrKeys.next();
+                    Object val = arrObj.get(arrKey);
+                    String strVal = val == null || val.toString().equals("null") ? "" : val.toString();
+                    // For "declarante" field, use the nomeTitular instead of "S"/1
+                    if ("declarante".equals(arrKey)) {
+                        strVal = arrObj.optString("nomeTitular", strVal);
+                    }
+                    finalTemplate.put(arrKey, strVal);
+                }
+                break;
+            }
+        }
+        // Put the full array as string (without declarante/nacionalidade, keep cpfCnpj/nomeTitular/condicaoTitularidade/percentualDetencao)
+        List<String> allObjects = new ArrayList<>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject arrObj = array.getJSONObject(i);
+            Map<String, String> theObject = new LinkedHashMap<>();
+            Iterator<String> arrKeys = arrObj.keys();
+            while (arrKeys.hasNext()) {
+                String arrKey = arrKeys.next();
+                // Skip declarante and nacionalidade from the array string representation
+                if ("declarante".equals(arrKey) || "nacionalidade".equals(arrKey)) continue;
+                Object val = arrObj.get(arrKey);
+                theObject.put(arrKey, val == null || val.toString().equals("null") ? "" : val.toString());
+            }
+            allObjects.add(theObject.toString());
+        }
+        finalTemplate.put(arrayKey, allObjects.toString());
+    }
+
+    @SneakyThrows
+    private void flattenJsonArray(String key, JSONArray array, Map<String, Object> finalTemplate) {
+        Map<String, String> allData = new HashMap<>();
+        List<String> allObjects = new ArrayList<>();
+        for (int i = 0; i < array.length(); i++) {
+            Map<String, String> theObject = new HashMap<>();
+            JSONObject jsonObject = array.getJSONObject(i);
+            Iterator<String> jsonKeys = jsonObject.keys();
+            while (jsonKeys.hasNext()) {
+                String jsonKey = jsonKeys.next();
+                if (allData.containsKey(jsonKey)) {
+                    String prevValue = Objects.equals(allData.get(jsonKey), null) ? "" : allData.get(jsonKey);
+                    String newValue = jsonObject.get(String.valueOf(jsonKey)).toString().equals("null") ? "" : jsonObject.get(String.valueOf(jsonKey)).toString();
+                    allData.put(jsonKey, prevValue + "," + newValue);
+                    theObject.put(jsonKey, newValue);
+                } else {
+                    allData.put(jsonKey, jsonObject.get(jsonKey).toString());
+                    theObject.put(jsonKey, jsonObject.get(jsonKey).toString());
+                }
+            }
+            allObjects.add(theObject.toString());
+        }
+        finalTemplate.put(key, allObjects.toString());
+    }
+
     @Cacheable(cacheNames = TEMPLATE_CACHE, key = "#key")
     public String getTemplate(String key) {
         if (!key.contains(DELIMITER)) {
