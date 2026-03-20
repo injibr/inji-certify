@@ -63,7 +63,11 @@ public class CCIRDataProvider implements DataProviderService {
         if (response == null) {
             throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "No data found for CCIR for Cpf:"+cpfNumber);
         }
-        return new JSONObject(response);
+        JSONObject jsonResponse = new JSONObject(response);
+        if (jsonResponse.isNull("ccir")) {
+            throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "CCIR data is null for property code: " + registrationNumber + ". Property may be cancelled.");
+        }
+        return jsonResponse;
     }
 
 }
