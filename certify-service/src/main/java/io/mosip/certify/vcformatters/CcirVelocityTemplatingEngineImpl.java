@@ -170,47 +170,45 @@ public class CcirVelocityTemplatingEngineImpl  implements VCFormatter {
                 break;
             }
         }
-        // Put the full array as string (without declarante/nacionalidade, keep cpfCnpj/nomeTitular/condicaoTitularidade/percentualDetencao)
-        List<String> allObjects = new ArrayList<>();
+        // Put the full array as escaped JSON string (without declarante/nacionalidade)
+        JSONArray jsonArray = new JSONArray();
         for (int i = 0; i < array.length(); i++) {
             JSONObject arrObj = array.getJSONObject(i);
-            Map<String, String> theObject = new LinkedHashMap<>();
+            JSONObject filteredObj = new JSONObject();
             Iterator<String> arrKeys = arrObj.keys();
             while (arrKeys.hasNext()) {
                 String arrKey = arrKeys.next();
-                // Skip declarante and nacionalidade from the array string representation
                 if ("declarante".equals(arrKey) || "nacionalidade".equals(arrKey)) continue;
                 Object val = arrObj.get(arrKey);
-                theObject.put(arrKey, val == null || val.toString().equals("null") ? "" : val.toString());
+                filteredObj.put(arrKey, val == null || val.toString().equals("null") ? "" : val.toString());
             }
-            allObjects.add(theObject.toString());
+            jsonArray.put(filteredObj);
         }
-        finalTemplate.put(arrayKey, allObjects.toString());
+        finalTemplate.put(arrayKey, jsonArray.toString().replace("\"", "\\\""));
     }
 
     @SneakyThrows
     private void flattenJsonArray(String key, JSONArray array, Map<String, Object> finalTemplate) {
         Map<String, String> allData = new HashMap<>();
-        List<String> allObjects = new ArrayList<>();
+        JSONArray jsonArray = new JSONArray();
         for (int i = 0; i < array.length(); i++) {
-            Map<String, String> theObject = new HashMap<>();
+            JSONObject theObject = new JSONObject();
             JSONObject jsonObject = array.getJSONObject(i);
             Iterator<String> jsonKeys = jsonObject.keys();
             while (jsonKeys.hasNext()) {
                 String jsonKey = jsonKeys.next();
+                String newValue = jsonObject.get(jsonKey).toString().equals("null") ? "" : jsonObject.get(jsonKey).toString();
                 if (allData.containsKey(jsonKey)) {
                     String prevValue = Objects.equals(allData.get(jsonKey), null) ? "" : allData.get(jsonKey);
-                    String newValue = jsonObject.get(String.valueOf(jsonKey)).toString().equals("null") ? "" : jsonObject.get(String.valueOf(jsonKey)).toString();
                     allData.put(jsonKey, prevValue + "," + newValue);
-                    theObject.put(jsonKey, newValue);
                 } else {
-                    allData.put(jsonKey, jsonObject.get(jsonKey).toString());
-                    theObject.put(jsonKey, jsonObject.get(jsonKey).toString());
+                    allData.put(jsonKey, newValue);
                 }
+                theObject.put(jsonKey, newValue);
             }
-            allObjects.add(theObject.toString());
+            jsonArray.put(theObject);
         }
-        finalTemplate.put(key, allObjects.toString());
+        finalTemplate.put(key, jsonArray.toString().replace("\"", "\\\""));
     }
 
     @Cacheable(cacheNames = TEMPLATE_CACHE, key = "#key")
