@@ -46,7 +46,7 @@ public class EcaVelocityTemplatingEngineImpl implements VCFormatter {
     @Autowired
     RenderingTemplateService renderingTemplateService;
 
-    @Value("${mosip.certify.data-provider-plugin.vc-expiry-duration:P90d}")
+    @Value("${mosip.certify.data-provider-plugin.eca.vc-expiry-duration:P90d}")
     String defaultExpiryDuration;
 
     @Value("${mosip.certify.data-provider-plugin.id-field-prefix-uri:}")
