@@ -5,7 +5,9 @@ set -e
 download_and_extract() {
   local url=$1
   local dest_dir=$2
-  local temp_zip=$(mktemp)
+  local work_dir=/tmp/work
+  mkdir -p "$work_dir"
+  local temp_zip="$work_dir/temp_plugin.zip"
 
   wget -q "$url" -O "$temp_zip"
 
@@ -21,6 +23,7 @@ download_and_extract() {
   echo "Installation of plugins completed"
 
   rm -f "$temp_zip"
+  rm -rf "$work_dir"
 }
 
 if [ "$enable_certify_artifactory" = "true" ]; then
