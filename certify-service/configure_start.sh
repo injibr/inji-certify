@@ -37,7 +37,4 @@ if [ "${enable_certify_artifactory:-false}" = "true" ]; then
     "${loader_path_env}"
 fi
 
-# garante que está num diretório válido no final
-cd "$WORK_DIR"
-
 exec "$@"
