@@ -70,11 +70,9 @@ ENV hsm_local_dir_name=${hsm_local_dir}
 
 # install packages and create user
 RUN apt-get -y update \
-&& apt-get install -y unzip sudo\
+&& apt-get install -y unzip wget ca-certificates \
 && groupadd -g ${container_user_gid} ${container_user_group} \
-&& useradd -u ${container_user_uid} -g ${container_user_group} -s /bin/sh -m -l ${container_user} \
-&& usermod -aG sudo ${container_user} \
-&& echo "%sudo ALL=(ALL) NOPASSWD:/home/${container_user}/${hsm_local_dir}/install.sh" >> /etc/sudoers
+&& useradd -u ${container_user_uid} -g ${container_user_group} -s /bin/sh -m -l ${container_user}
 
 # set working directory for the user
 WORKDIR /home/${container_user}
@@ -109,7 +107,8 @@ ENV download_hsm_client="false"
 
 ADD certify-service/configure_start.sh configure_start.sh
 
-RUN chmod 0555 configure_start.sh
+RUN sed -i 's/\r$//' configure_start.sh \
+&& chmod 0555 configure_start.sh
 
 COPY ./certify-service/target/certify-service-*.jar certify-service.jar
 
@@ -125,7 +124,7 @@ USER ${container_user_uid}:${container_user_gid}
 EXPOSE 8090
 EXPOSE 9010
 
-ENTRYPOINT [ "./configure_start.sh" ]
+ENTRYPOINT [ "/home/mosip/configure_start.sh" ]
 
 CMD if [ "$is_glowroot_env" = "present" ]; then \
     wget -q "${artifactory_url_env}"/artifactory/libs-release-local/io/mosip/testing/glowroot.zip ; \
