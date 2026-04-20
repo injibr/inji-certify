@@ -1,35 +1,40 @@
 #!/bin/bash
+set -euo pipefail
 
-set -e
+# único diretório de trabalho
+WORK_DIR=/tmp/work
+mkdir -p "$WORK_DIR"
 
-#installs the pkcs11 libraries.
-if [ "$install_hsm_client" = "true" ]; then
-  set -e
-  FILE_NAME="client.zip"
+download_and_extract() {
+  local url="$1"
+  local dest_dir="$2"
+  local temp_zip="$WORK_DIR/temp_plugin.zip"
 
-  DIR_NAME=$hsm_local_dir_name
+  mkdir -p "$dest_dir"
 
-  has_parent=$(zipinfo -1 "$FILE_NAME" | awk '{split($NF,a,"/");print a[1]}' | sort -u | wc -l)
-  if test "$has_parent" -eq 1; then
-    echo "Zip has a parent directory inside"
-    dirname=$(zipinfo -1 "$FILE_NAME" | awk '{split($NF,a,"/");print a[1]}' | sort -u | head -n 1)
-    echo "Unzip directory"
-    unzip $FILE_NAME
-    echo "Renaming directory"
-    mv -v $dirname $DIR_NAME
-  else
-    echo "Zip has no parent directory inside"
-    echo "Creating destination directory"
-    mkdir "$DIR_NAME"
-    echo "Unzip to destination directory"
-    unzip -d "$DIR_NAME" $FILE_NAME
-  fi
+  wget -q "$url" -O "$temp_zip"
 
-  echo "Attempting to install"
-  cd ./$DIR_NAME && chmod +x install.sh && sudo ./install.sh
+  echo "Installation of plugins started"
 
-  echo "Installation complete"
+  local files
+  files=$(unzip -l "$temp_zip" | awk 'NR>3 {print $4}' | sed '$d')
+
+  unzip -o -j "$temp_zip" -d "$dest_dir"
+
+  for file in $files; do
+    echo "Extracted file $file"
+  done
+
+  echo "Installation of plugins completed"
+
+  rm -f "$temp_zip"
+}
+
+# plugin continua funcionando
+if [ "${enable_certify_artifactory:-false}" = "true" ]; then
+  download_and_extract \
+    "${artifactory_url_env}/artifactory/libs-release-local/certify/certify-plugin.zip" \
+    "${loader_path_env}"
 fi
-cd $work_dir
 
 exec "$@"

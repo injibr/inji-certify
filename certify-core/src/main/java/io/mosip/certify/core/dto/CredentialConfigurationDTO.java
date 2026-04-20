@@ -64,4 +64,7 @@ public class CredentialConfigurationDTO {
     private List<Map<String, String>> pluginConfigurations;
 
     private List<String> credentialStatusPurposes;
+
+    // INJIBR-CUSTOM: identifies the logical issuer (MGI, INCRA, MDA) for multi-issuer govbr flow
+    private String issuerId;
 }

@@ -287,6 +287,31 @@ public class CredentialConfigurationServiceImpl implements CredentialConfigurati
         throw new CertifyException("Unsupported version: " + version);
     }
 
+    // INJIBR-CUSTOM: returns metadata filtered by issuerId for govbr multi-issuer flow
+    @Override
+    public CredentialIssuerMetadataDTO fetchCredentialIssuerMetadataByIssuerId(String issuerId) {
+        List<CredentialConfig> credentialConfigList = credentialConfigRepository.findByIssuerId(issuerId);
+        CredentialIssuerMetadataVD13DTO credentialIssuerMetadata = new CredentialIssuerMetadataVD13DTO();
+        Map<String, CredentialConfigurationSupportedDTO> credentialConfigurationSupportedMap = new HashMap<>();
+        credentialConfigList.stream()
+                .filter(config -> Constants.ACTIVE.equals(config.getStatus()))
+                .forEach(credentialConfig -> {
+                    CredentialConfigurationSupportedDTO dto = mapToSupportedDTO(credentialConfig);
+                    if (credentialConfig.getSignatureCryptoSuite() != null) {
+                        dto.setCredentialSigningAlgValuesSupported(credentialSigningAlgValuesSupportedMap.get(credentialConfig.getSignatureCryptoSuite()));
+                    } else {
+                        dto.setCredentialSigningAlgValuesSupported(Collections.singletonList(credentialConfig.getSignatureAlgo()));
+                    }
+                    credentialConfigurationSupportedMap.put(credentialConfig.getCredentialConfigKeyId(), dto);
+                });
+        credentialIssuerMetadata.setCredentialConfigurationSupportedDTO(credentialConfigurationSupportedMap);
+        credentialIssuerMetadata.setCredentialIssuer(credentialIssuer);
+        credentialIssuerMetadata.setAuthorizationServers(authUrlList);
+        credentialIssuerMetadata.setCredentialEndpoint(credentialIssuer + servletPath + "/issuance/credential");
+        credentialIssuerMetadata.setDisplay(issuerDisplay);
+        return credentialIssuerMetadata;
+    }
+
     private CredentialConfigurationSupportedDTO mapToSupportedDTO(CredentialConfig credentialConfig) {
         CredentialConfigurationSupportedDTO credentialConfigurationSupported = new CredentialConfigurationSupportedDTO();
         CredentialConfigurationDTO credentialConfigurationDTO = credentialConfigMapper.toDto(credentialConfig);
