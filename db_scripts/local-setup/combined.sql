@@ -124,6 +124,12 @@ CREATE UNIQUE INDEX idx_credential_config_doctype_unique
 ON credential_config(doctype, credential_format)
 WHERE doctype IS NOT NULL and doctype <> '';
 
+-- INJIBR-CUSTOM: identifies the logical issuer (MGI, INCRA, MDA) for multi-issuer govbr flow
+ALTER TABLE credential_config ADD COLUMN issuer_id VARCHAR(255);
+CREATE INDEX idx_credential_config_issuer_id
+    ON credential_config(issuer_id)
+    WHERE issuer_id IS NOT NULL;
+
 INSERT INTO key_policy_def (app_id, key_validity_duration, pre_expire_days, access_allowed, is_active, cr_by, cr_dtimes)
 SELECT app_id, key_validity_duration, pre_expire_days, access_allowed, is_active, cr_by, CURRENT_TIMESTAMP
 FROM CSVREAD('./db_scripts/mosip_certify/dml/certify-key_policy_def.csv');

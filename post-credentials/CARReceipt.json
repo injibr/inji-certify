@@ -1,0 +1,53 @@
+{
+  "credentialConfigKeyId": "CARReceipt",
+  "credentialFormat": "ldp_vc",
+  "scope": "openid",
+  "issuerId": "MGI",
+  "credentialTypes": ["VerifiableCredential", "CARReceipt"],
+  "contextURLs": ["https://www.w3.org/2018/credentials/v1"],
+  "vcTemplate": "eyJAY29udGV4dCI6IFsiaHR0cHM6Ly93d3cudzMub3JnLzIwMTgvY3JlZGVudGlhbHMvdjEiXSwiaXNzdWVyIjogIiR7X2lzc3Vlcn0iLCJ0eXBlIjogWyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkNBUlJlY2VpcHQiXSwiaXNzdWFuY2VEYXRlIjogIiR7dmFsaWRGcm9tfSIsImV4cGlyYXRpb25EYXRlIjogIiR7dmFsaWRVbnRpbH0iLCJjcmVkZW50aWFsU3ViamVjdCI6IHsiY29kaWdvSW1vdmVsIjogIiR7Y29kaWdvSW1vdmVsfSIsImRhdGFDYWRhc3RybyI6ICIke2RhdGFDYWRhc3Ryb30iLCJub21lSW1vdmVsIjogIiR7bm9tZUltb3ZlbH0iLCJtdW5pY2lwaW8iOiAiJHttdW5pY2lwaW99IiwidW5pZGFkZWZlZGVyYXRpdmEiOiAiJHt1bmlkYWRlZmVkZXJhdGl2YX0iLCJjb29yZGVuYWRhSW1vdmVsWCI6ICIke2Nvb3JkZW5hZGFJbW92ZWxYfSIsImNvb3JkZW5hZGFJbW92ZWxZIjogIiR7Y29vcmRlbmFkYUltb3ZlbFl9IiwiYXJlYVRvdGFsSW1vdmVsIjogIiR7YXJlYVRvdGFsSW1vdmVsfSIsIm1vZHVsb0Zpc2NhbCI6ICIke21vZHVsb0Zpc2NhbH0iLCJwcm90b2NvbG8iOiAiJHtwcm90b2NvbG99IiwiYXJlYUxpcXVpZGFJbW92ZWwiOiAiJHthcmVhTGlxdWlkYUltb3ZlbH0iLCJhcmVhUHJlc2VydmFjYW9QZXJtYW5lbnRlIjogIiR7YXJlYVByZXNlcnZhY2FvUGVybWFuZW50ZX0iLCJhcmVhUmVzZXJ2YUxlZ2FsIjogIiR7YXJlYVJlc2VydmFMZWdhbH0iLCJhcmVhVXNvUmVzdHJpdG8iOiAiJHthcmVhVXNvUmVzdHJpdG99IiwiYXJlYUNvbnNvbGlkYWRhIjogIiR7YXJlYUNvbnNvbGlkYWRhfSIsImFyZWFSZW1hbmVzY2VudGVWZWdldGFjYW9OYXRpdmEiOiAiJHthcmVhUmVtYW5lc2NlbnRlVmVnZXRhY2FvTmF0aXZhfSIsImNwZkNucGoiOiAiJHtjcGZDbnBqfSIsImluZm9ybWFjb2VzQWRpY2lvbmFpcyI6ICIke2luZm9ybWFjb2VzQWRpY2lvbmFpc30iLCJnZW9JbW92ZWwiOiAiJHtnZW9JbW92ZWx9IiwiYXJlYVNlcnZpZGFvQWRtaW5pc3RyYXRpdmEiOiAiJHthcmVhU2VydmlkYW9BZG1pbmlzdHJhdGl2YX0iLCJub21lUHJvcHJpZXRhcmlvIjogIiR7bm9tZVByb3ByaWV0YXJpb30ifX0=",
+  "didUrl": "did:web:did-server.inji-local.svc.cluster.local:mgi",
+  "keyManagerAppId": "CERTIFY_VC_SIGN_ED25519",
+  "keyManagerRefId": "ED25519_SIGN",
+  "signatureCryptoSuite": "Ed25519Signature2020",
+  "metaDataDisplay": [
+    {
+      "name": "RECIBO DE INSCRIÇÃO DO IMÓVEL RURAL NO CAR",
+      "locale": "en",
+      "logo": {"url": "https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png", "alt_text": "a square logo of CCIR"},
+      "background_color": "#FDFAF9",
+      "background_image": {"uri": "https://sunbird.org/images/sunbird-logo-new.png"},
+      "text_color": "#7C4616"
+    },
+    {
+      "name": "RECIBO DE INSCRIÇÃO DO IMÓVEL RURAL NO CAR",
+      "locale": "pt",
+      "logo": {"url": "https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png", "alt_text": "a square logo of CCIR"},
+      "background_color": "#FDFAF9",
+      "background_image": {"uri": "https://sunbird.org/images/sunbird-logo-new.png"},
+      "text_color": "#7C4616"
+    }
+  ],
+  "credentialSubjectDefinition": {
+    "codigoImovel": {"display": [{"name": "Código do Imóvel", "locale": "pt"}]},
+    "dataCadastro": {"display": [{"name": "Data de Cadastro", "locale": "pt"}]},
+    "nomeImovel": {"display": [{"name": "Nome do Imóvel", "locale": "pt"}]},
+    "municipio": {"display": [{"name": "Município", "locale": "pt"}]},
+    "unidadefederativa": {"display": [{"name": "Estado", "locale": "pt"}]},
+    "coordenadaImovelX": {"display": [{"name": "Longitude", "locale": "pt"}]},
+    "coordenadaImovelY": {"display": [{"name": "Latitude", "locale": "pt"}]},
+    "areaTotalImovel": {"display": [{"name": "Área Total do Imóvel", "locale": "pt"}]},
+    "moduloFiscal": {"display": [{"name": "Módulo Fiscal", "locale": "pt"}]},
+    "protocolo": {"display": [{"name": "Protocolo", "locale": "pt"}]},
+    "areaLiquidaImovel": {"display": [{"name": "Área Líquida do Imóvel", "locale": "pt"}]},
+    "areaPreservacaoPermanente": {"display": [{"name": "Área de Preservação Permanente", "locale": "pt"}]},
+    "areaReservaLegal": {"display": [{"name": "Área de Reserva Legal", "locale": "pt"}]},
+    "areaUsoRestrito": {"display": [{"name": "Área de Uso Restrito", "locale": "pt"}]},
+    "areaConsolidada": {"display": [{"name": "Área Consolidada", "locale": "pt"}]},
+    "areaRemanescenteVegetacaoNativa": {"display": [{"name": "Área de Vegetação Nativa", "locale": "pt"}]},
+    "cpfCnpj": {"display": [{"name": "CPF/CNPJ do Proprietário", "locale": "pt"}]},
+    "areaServidaoAdministrativa": {"display": [{"name": "Área de Servidão Administrativa", "locale": "pt"}]},
+    "nomeProprietario": {"display": [{"name": "Nome do Proprietário", "locale": "pt"}]}
+  },
+  "displayOrder": ["codigoImovel", "dataCadastro", "nomeImovel", "municipio", "unidadefederativa", "areaTotalImovel", "moduloFiscal", "protocolo", "areaLiquidaImovel", "areaPreservacaoPermanente", "areaReservaLegal", "areaUsoRestrito", "areaConsolidada", "areaRemanescenteVegetacaoNativa", "cpfCnpj", "nomeProprietario"]
+}

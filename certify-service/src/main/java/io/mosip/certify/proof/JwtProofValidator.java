@@ -56,6 +56,10 @@ public class JwtProofValidator implements ProofValidator {
     @Value("${mosip.certify.identifier}")
     private String credentialIdentifier;
 
+    // INJIBR-CUSTOM: govbr does not send cNonce in proof JWT, bypass controlled by property
+    @Value("${mosip.certify.govbr.cnonce-bypass-enabled:false}")
+    private boolean cNonceBypassEnabled;
+
     @Override
     public String getProofType() {
         return "jwt";
@@ -72,8 +76,11 @@ public class JwtProofValidator implements ProofValidator {
 
     @Override
     public void validateCNonce(String cNonce, int cNonceExpireSeconds, ParsedAccessToken parsedAccessToken, CredentialRequest credentialRequest) {
-        // No specific validation for CNonce in JWT proof, as it is not part of the JWT structure.
-        // CNonce validation is typically handled at the request level before the proof validation.
+        // INJIBR-CUSTOM: govbr does not send cNonce in proof JWT, bypass enabled via property
+        if (cNonceBypassEnabled) {
+            log.warn("[INJIBR-CUSTOM] cNonce bypass enabled — skipping nonce validation (govbr compatibility)");
+            return;
+        }
         if (parsedAccessToken.getClaims().containsKey(Constants.C_NONCE)
                 && credentialRequest.getProof().getJwt() != null) {
             // issue a c_nonce and return the error
@@ -121,13 +128,18 @@ public class JwtProofValidator implements ProofValidator {
             }
 
             JWTClaimsSet.Builder proofJwtClaimsBuilder = new JWTClaimsSet.Builder()
-                    .audience(credentialIdentifier)
-                    .claim("nonce", cNonce);
+                    .audience(credentialIdentifier);
+            // INJIBR-CUSTOM: skip nonce claim in JWT verifier when bypass is active (govbr compatibility)
+            // .claim("nonce", cNonce)  <- original
+            if (!cNonceBypassEnabled && cNonce != null) {
+                proofJwtClaimsBuilder.claim("nonce", cNonce);
+            }
 
             // if the proof contains issuer claim, then it should match with the client id ref: https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-ID1.html#section-7.2.1.1-2.2.2.1
             // https://github.com/openid/OpenID4VCI/issues/349
+            // INJIBR-CUSTOM: govbr access token has no client_id, so clientId is null — skip iss validation in that case
             Set<String> requiredClaims = new HashSet<>(DEFAULT_REQUIRED_CLAIMS);
-            if(jwt.getJWTClaimsSet().getClaim("iss") != null) {
+            if(jwt.getJWTClaimsSet().getClaim("iss") != null && clientId != null) {
                 proofJwtClaimsBuilder.issuer(clientId);
             }
             if(jwt.getJWTClaimsSet().getClaim("exp") != null) {

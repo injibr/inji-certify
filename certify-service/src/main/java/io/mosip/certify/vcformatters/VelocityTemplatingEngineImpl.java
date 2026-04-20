@@ -11,6 +11,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.Duration;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -65,6 +66,10 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
 
     @Value("${mosip.certify.data-provider-plugin.vc-expiry-duration:P730d}")
     String defaultExpiryDuration;
+
+    // INJIBR-CUSTOM: ECA has shorter expiry since age verification may change
+    @Value("${mosip.certify.data-provider-plugin.eca.vc-expiry-duration:P90d}")
+    String ecaExpiryDuration;
 
     @Value("${mosip.certify.data-provider-plugin.id-field-prefix-uri:}")
     String idPrefix;
@@ -233,9 +238,11 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
             }
         }
         if (!valueMap.has(VCDM2Constants.VALID_UNITL) && StringUtils.isNotEmpty(defaultExpiryDuration)) {
+            // INJIBR-CUSTOM: use ECA-specific expiry if template is ECACredential
+            String expiryToUse = templateName.contains("ECACredential") ? ecaExpiryDuration : defaultExpiryDuration;
             Duration duration;
             try {
-                duration = Duration.parse(defaultExpiryDuration);
+                duration = Duration.parse(expiryToUse);
             } catch (DateTimeParseException e) {
                 // set 730days(~2Y) as default VC expiry
                 duration = Duration.parse("P730D");
@@ -267,11 +274,20 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
         while(keys.hasNext()) {
             String key = keys.next();
             Object value = valueMap.get(key);
+            // INJIBR-CUSTOM: null-safe — govbr APIs return null fields
+            if (value == null) {
+                finalTemplate.put(key, "");
+                continue;
+            }
             if (value instanceof List) {
                 finalTemplate.put(key, new JSONArray((List<Object>) value));
             } else if (value.getClass().isArray()) {
                 finalTemplate.put(key, new JSONArray(List.of(value)));
-            } else if (value instanceof Integer | value instanceof Float | value instanceof Long | value instanceof Double) {
+            } else if (value instanceof Integer | value instanceof Float | value instanceof Long | value instanceof Double
+                    // INJIBR-CUSTOM: BigDecimal for area/modulo numeric fields from govbr APIs
+                    | value instanceof BigDecimal
+                    // INJIBR-CUSTOM: Boolean for ECACredential.isOver18 field
+                    | value instanceof Boolean) {
                 // entities which don't need to be quoted
                 finalTemplate.put(key, value);
             } else if (value instanceof String){
@@ -279,8 +295,7 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
                 finalTemplate.put(key, JSONObject.wrap(value));
             } else if( value instanceof Map<?,?>) {
                 finalTemplate.put(key,JSONObject.wrap(value));
-            }
-            else {
+            } else {
                 // no conversion needed
                 finalTemplate.put(key, value);
             }

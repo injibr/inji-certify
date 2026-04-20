@@ -117,6 +117,10 @@ public class CredentialConfig {
     @Column(name = "credential_status_purpose", columnDefinition = "TEXT[]")
     private List<String> credentialStatusPurposes;
 
+    // INJIBR-CUSTOM: identifies the logical issuer (MGI, INCRA, MDA) for multi-issuer govbr flow
+    @Column(name = "issuer_id")
+    private String issuerId;
+
     @NotNull
     @Column(name = "cr_dtimes")
     private LocalDateTime createdTimes;
