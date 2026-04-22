@@ -11,16 +11,29 @@ da branch `entrega` (baseada em v0.10.2) para a v0.12.2, nesta sessão de trabal
 
 ### Alterações sobre o upstream v0.12.2:
 
-**a) ECA expiry separado**
+**a) ECA expiry separado + método `calculateExpiryTime()`**
 ```java
 // INJIBR-CUSTOM: ECA has shorter expiry since age verification may change
 @Value("${mosip.certify.data-provider-plugin.eca.vc-expiry-duration:P90d}")
 String ecaExpiryDuration;
 ```
-No `format(JSONObject, ...)`, o expiry usa `ecaExpiryDuration` quando o template é `ECACredential`:
+A lógica de seleção de expiry foi extraída para um método privado chamado pelos dois overloads de `format()`:
 ```java
-String expiryToUse = templateName.contains("ECACredential") ? ecaExpiryDuration : defaultExpiryDuration;
+// INJIBR-CUSTOM: ECA has shorter expiry; centralizes expiry logic for both format() overloads
+private String calculateExpiryTime(String templateName) {
+    String expiryToUse = templateName.contains("ECACredential") ? ecaExpiryDuration : defaultExpiryDuration;
+    Duration duration;
+    try {
+        duration = Duration.parse(expiryToUse);
+    } catch (DateTimeParseException e) {
+        duration = Duration.parse("P730D");
+    }
+    return ZonedDateTime.now(ZoneOffset.UTC)
+            .plusSeconds(duration.getSeconds())
+            .format(DateTimeFormatter.ofPattern(Constants.UTC_DATETIME_PATTERN));
+}
 ```
+**Motivo:** o fluxo DataProvider chama `format(Map<String, Object>)` (segundo overload), que no upstream tinha o expiry hardcoded em `plusYears(2)`. Sem o método extraído, o `ecaExpiryDuration` só seria aplicado no primeiro overload (`format(JSONObject, Map)`), que não é chamado nesse fluxo.
 
 **b) `jsonify()` — 3 ajustes sobre o upstream:**
 - Null-safe: `if (value == null) { finalTemplate.put(key, ""); continue; }` — APIs govbr retornam campos nulos

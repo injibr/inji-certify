@@ -238,17 +238,7 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
             }
         }
         if (!valueMap.has(VCDM2Constants.VALID_UNITL) && StringUtils.isNotEmpty(defaultExpiryDuration)) {
-            // INJIBR-CUSTOM: use ECA-specific expiry if template is ECACredential
-            String expiryToUse = templateName.contains("ECACredential") ? ecaExpiryDuration : defaultExpiryDuration;
-            Duration duration;
-            try {
-                duration = Duration.parse(expiryToUse);
-            } catch (DateTimeParseException e) {
-                // set 730days(~2Y) as default VC expiry
-                duration = Duration.parse("P730D");
-            }
-            String expiryTime = ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(duration.getSeconds()).format(DateTimeFormatter.ofPattern(Constants.UTC_DATETIME_PATTERN));
-            finalTemplate.put(VCDM2Constants.VALID_UNITL, expiryTime);
+            finalTemplate.put(VCDM2Constants.VALID_UNITL, calculateExpiryTime(templateName));
         }
         if (!valueMap.has(VCDM2Constants.VALID_FROM)) {
             finalTemplate.put(VCDM2Constants.VALID_FROM, ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(Constants.UTC_DATETIME_PATTERN)));
@@ -261,6 +251,20 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
             return j.toString();
         }
         return writer.toString();
+    }
+
+    // INJIBR-CUSTOM: ECA has shorter expiry; centralizes expiry logic for both format() overloads
+    private String calculateExpiryTime(String templateName) {
+        String expiryToUse = templateName.contains("ECACredential") ? ecaExpiryDuration : defaultExpiryDuration;
+        Duration duration;
+        try {
+            duration = Duration.parse(expiryToUse);
+        } catch (DateTimeParseException e) {
+            duration = Duration.parse("P730D");
+        }
+        return ZonedDateTime.now(ZoneOffset.UTC)
+                .plusSeconds(duration.getSeconds())
+                .format(DateTimeFormatter.ofPattern(Constants.UTC_DATETIME_PATTERN));
     }
 
     /**
@@ -340,11 +344,8 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
         }
         if (!(templateInput.containsKey(VCDM2Constants.VALID_FROM)
                 && templateInput.containsKey(VCDM2Constants.VALID_UNITL))) {
-            String time = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(Constants.UTC_DATETIME_PATTERN));
-            // hardcoded time
-            String expiryTime = ZonedDateTime.now(ZoneOffset.UTC).plusYears(2).format(DateTimeFormatter.ofPattern(Constants.UTC_DATETIME_PATTERN));
-            finalTemplate.put(VCDM2Constants.VALID_FROM, time);
-            finalTemplate.put(VCDM2Constants.VALID_UNITL, expiryTime);
+            finalTemplate.put(VCDM2Constants.VALID_FROM, ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(Constants.UTC_DATETIME_PATTERN)));
+            finalTemplate.put(VCDM2Constants.VALID_UNITL, calculateExpiryTime(templateName));
         }
         VelocityContext context = new VelocityContext(finalTemplate);
         engine.evaluate(context, writer, /*logTag */ templateName, vcTemplateString); // use vcTemplateString
