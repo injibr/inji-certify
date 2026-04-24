@@ -250,10 +250,15 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                     // INJIBR-CUSTOM: CARReceipt has two subtypes (AST/PCT) determined by data returned from provider
                     if ("CARReceipt".equals(credentialRequest.getDoctype())) {
                         String tipoImovel = jsonObject.optString("tipoImovel");
+                        log.info("[INJIBR-CUSTOM] CARReceipt tipoImovel: {}", tipoImovel);
                         if ("AST".equals(tipoImovel)) {
                             vcRequestDto.setType(List.of("CARReceiptAST", "VerifiableCredential"));
+                            log.info("[INJIBR-CUSTOM] CARReceipt subtype resolved to CARReceiptAST");
                         } else if ("PCT".equals(tipoImovel)) {
                             vcRequestDto.setType(List.of("CARReceiptPCT", "VerifiableCredential"));
+                            log.info("[INJIBR-CUSTOM] CARReceipt subtype resolved to CARReceiptPCT");
+                        } else {
+                            log.info("[INJIBR-CUSTOM] CARReceipt tipoImovel '{}' not AST/PCT, using generic CARReceipt", tipoImovel);
                         }
                     }
                     Map<String, Object> templateParams = new HashMap<>();
@@ -264,7 +269,8 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                     if (!StringUtils.isEmpty(renderTemplateId)) {
                         templateParams.put(Constants.RENDERING_TEMPLATE_ID, renderTemplateId);
                     }
-                    jsonObject.put(Constants.TYPE, credentialRequest.getCredential_definition().getType());
+                    // INJIBR-CUSTOM: use vcRequestDto.getType() after AST/PCT switch, not original request type
+                    jsonObject.put(Constants.TYPE, vcRequestDto.getType());
                     List<String> credentialStatusPurposeList = vcFormatter.getCredentialStatusPurpose(templateName);
                     if (credentialStatusPurposeList != null && !credentialStatusPurposeList.isEmpty()) {
                         statusListCredentialService.addCredentialStatus(jsonObject, credentialStatusPurposeList.getFirst());
