@@ -5,7 +5,7 @@ Payloads para cadastrar as configurações de credenciais INJIBR via API REST.
 ## Endpoint
 
 ```
-POST http://localhost:8090/v1/certify/credential-configurations
+POST http://localhost:30090/v1/certify/credential-configurations
 Content-Type: application/json
 ```
 
@@ -28,7 +28,7 @@ Content-Type: application/json
 
 ### curl
 ```bash
-curl -X POST http://localhost:8090/v1/certify/credential-configurations \
+curl -X POST http://localhost:30090/v1/certify/credential-configurations \
   -H "Content-Type: application/json" \
   -d @CARReceipt.json
 ```
@@ -37,7 +37,7 @@ curl -X POST http://localhost:8090/v1/certify/credential-configurations \
 ```bash
 for f in *.json; do
   echo "Cadastrando $f..."
-  curl -s -w "\n%{http_code}" -X POST http://localhost:8090/v1/certify/credential-configurations \
+  curl -s -w "\n%{http_code}" -X POST http://localhost:30090/v1/certify/credential-configurations \
     -H "Content-Type: application/json" \
     -d @"$f"
   echo ""
