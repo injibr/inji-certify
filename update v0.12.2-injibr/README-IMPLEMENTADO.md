@@ -218,5 +218,5 @@ garantindo que cada issuer (MGI, INCRA, MDA) assine com sua própria chave.
 | `post-credentials` JSONs | ✅ implementado |
 | Audit (entity, repository, service) | ✅ implementado — `CertifyAudit`, `CertifyAuditRepository`, `CertifyAuditService`, `CertifyAuditServiceImpl` |
 | Audit aspect + config | ✅ implementado — `ControllerAuditAspect`, `AuditConfig` |
-| `Dockerfile` — paths + `java-security-override.properties` | ⏳ pendente |
+| `Dockerfile` — paths + `java-security-override.properties` | ✅ implementado |
 | `Jenkinsfile` + `README.adoc` | ✅ já existiam |
