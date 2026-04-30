@@ -7,16 +7,19 @@ automata {
     skipHom = true
     build.agent.image = 'library/maven:3.9-eclipse-temurin-21'
 
-    //kustomization not ready
-    //gitOps.provider = 'GIT_INFRA'     
-    //gitOps.namespace = 'inji'     
-    //gitOps.repos = [dev: 'gitops-np/inji']
+    gitOps.provider = 'GIT_INFRA'
+    gitOps.engine = 'HELM'
+    gitOps.repos = [
+        dev: 'gitops-np/credenciais-verificaveis',
+        //hom: 'gitops-np/inji',
+        //prd: 'gitops-p/fth-ap2145-jano/ctn-121',
+    ]
 
     //Dependency check
     artifacts.add file: 'certify-service/target/certify-service-${version}.jar'
     
     
-    containers.add descriptor: 'certify-service/Dockerfile', imageName: 'inji/inji-certify'
+    containers.add descriptor: 'certify-service/Dockerfile', imageName: 'inji/inji-certify',tagKey:'injiCertify.image.tag'
  
     build.opts = "-Dgpg.skip=true -Dmaven.javadoc.skip=true"
     
