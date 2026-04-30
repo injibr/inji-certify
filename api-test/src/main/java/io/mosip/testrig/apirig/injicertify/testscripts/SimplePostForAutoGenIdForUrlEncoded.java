@@ -33,9 +33,10 @@ import io.mosip.testrig.apirig.utils.AuthenticationTestException;
 import io.mosip.testrig.apirig.utils.GlobalConstants;
 import io.mosip.testrig.apirig.utils.OutputValidationUtil;
 import io.mosip.testrig.apirig.utils.ReportUtil;
+import io.mosip.testrig.apirig.utils.SecurityXSSException;
 import io.restassured.response.Response;
 
-public class SimplePostForAutoGenIdForUrlEncoded extends AdminTestUtil implements ITest {
+public class SimplePostForAutoGenIdForUrlEncoded extends InjiCertifyUtil implements ITest {
 	private static final Logger logger = Logger.getLogger(SimplePostForAutoGenIdForUrlEncoded.class);
 	protected String testCaseName = "";
 	public String idKeyName = null;
@@ -82,9 +83,9 @@ public class SimplePostForAutoGenIdForUrlEncoded extends AdminTestUtil implement
 	 */
 	@Test(dataProvider = "testcaselist")
 	public void test(TestCaseDTO testCaseDTO)
-			throws AuthenticationTestException, AdminTestException, NoSuchAlgorithmException {
+			throws AuthenticationTestException, AdminTestException, NoSuchAlgorithmException, SecurityXSSException {
 		testCaseName = testCaseDTO.getTestCaseName();
-		testCaseName = InjiCertifyUtil.isTestCaseValidForExecution(testCaseDTO);
+		testCaseDTO = InjiCertifyUtil.isTestCaseValidForExecution(testCaseDTO);
 		if (HealthChecker.signalTerminateExecution) {
 			throw new SkipException(
 					GlobalConstants.TARGET_ENV_HEALTH_CHECK_FAILED + HealthChecker.healthCheckFailureMapS);
@@ -134,7 +135,6 @@ public class SimplePostForAutoGenIdForUrlEncoded extends AdminTestUtil implement
 					throw new AdminTestException("Failed at output validation");
 			}
 		} else {
-//			jsonInput = inputJsonKeyWordHandeler(jsonInput, testCaseName);
 			jsonInput = InjiCertifyUtil.inputStringKeyWordHandeler(jsonInput, testCaseName);
 
 			if (testCaseName.contains("ESignet_")) {

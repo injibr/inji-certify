@@ -32,3 +32,4 @@ target/
 helm/*/Chart.lock
 helm/*/charts/
 .envrc
+.DS_Store

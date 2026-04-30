@@ -46,4 +46,16 @@
         </resources>
     </build>
 
+    <build>
+        <resources>
+            <resource>
+                <directory>../certify-service/src/main/resources</directory>
+                <includes>
+                    <include>application.properties</include>
+                </includes>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+    </build>
+
 </project>

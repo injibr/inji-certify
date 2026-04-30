@@ -25,6 +25,14 @@
 			<class name="io.mosip.testrig.apirig.injicertify.testscripts.AddIdentity" />
 		</classes>
 	</test>
+	
+	<test name="InsertDBData">
+		<parameter name="ymlFile"
+			value="injicertify/InsertDBData/InsertDBData.yml" />
+		<classes>
+			<class name="io.mosip.testrig.apirig.injicertify.testscripts.DBIntegration" />
+		</classes>
+	</test>
 	<test name="CreatePolicySunBirdR">
 		<parameter name="ymlFile"
 			value="injicertify/SunBirdR/CreatePolicySunBirdR/CreatePolicySunBirdR.yml" />
@@ -152,6 +160,34 @@
 			value="injicertify/VCIMockIDA/CreateOIDCClientV2ForMockIDA/CreateOIDCClientV2ForMockIDA.yml" />
 		<parameter name="idKeyName" value="clientId" />
 		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="CreateOIDCClientV2FormDoc">
+		<parameter name="ymlFile"
+			value="injicertify/mDocMDL/CreateOIDCClientV2FormDoc/CreateOIDCClientV2FormDoc.yml" />
+		<parameter name="idKeyName" value="clientId" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>	
+	<test name="CreateOIDCClientV2ForLandRegistry">
+		<parameter name="ymlFile"
+			value="injicertify/VCILandRegistry/CreateOIDCClientV2ForLandRegistry/CreateOIDCClientV2ForLandRegistry.yml" />
+		<parameter name="idKeyName" value="clientId" />
+		<parameter name="prerequisite" value="Yes" />
+		<classes>
+			<class
+				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />
+		</classes>
+	</test>
+	<test name="CreateVID">
+		<parameter name="ymlFile" value="injicertify/CreateVID/CreateVid.yml" />
+		<parameter name="idKeyName" value="VID" />
 		<classes>
 			<class
 				name="io.mosip.testrig.apirig.injicertify.testscripts.SimplePostForAutoGenId" />

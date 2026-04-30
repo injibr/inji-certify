@@ -11,8 +11,8 @@ Expected time to setup: ~10 minutes
 
 You have two options for the certify plugin which gives Verifiable Credentials of different types
 
-1. Farmer Credential: returns an JSON-LD VC and is implemented using the [CSV Plugin](https://github.com/mosip/digital-credential-plugins/blob/release-0.3.x/mock-certify-plugin/src/main/java/io.mosip.certify.mock.integration/service/MockCSVDataProviderPlugin.java).
-2. Mobile Driving License Credential: returns an mDL VC and is implemented using the [mock-mdl Plugin](https://github.com/mosip/digital-credential-plugins/blob/release-0.3.x/mock-certify-plugin/src/main/java/io.mosip.certify.mock.integration/service/MDocMockVCIssuancePlugin.java).
+1. Farmer Credential: returns an JSON-LD VC and is implemented using the [CSV Plugin](https://github.com/mosip/digital-credential-plugins/blob/release-0.5.x/mock-certify-plugin/src/main/java/io.mosip.certify.mock.integration/service/MockCSVDataProviderPlugin.java).
+2. Mobile Driving License Credential: returns an mDL VC and is implemented using the [mock-mdl Plugin](https://github.com/mosip/digital-credential-plugins/blob/release-0.5.x/mock-certify-plugin/src/main/java/io.mosip.certify.mock.integration/service/MDocMockVCIssuancePlugin.java).
 
 
 ## Prerequisites
@@ -26,7 +26,7 @@ You have two options for the certify plugin which gives Verifiable Credentials o
 
 ## Directory Structure Setup
 
-Create the following directory structure before proceeding:
+Create the following directory structure in your local codebase before proceeding inside the `docker-compose` directory:
 
 ```
 docker-compose-injistack/
@@ -55,18 +55,17 @@ docker-compose-injistack/
 
 ### Recommended: Use one of the Existing Mock Plugin
 
-- Supported versions: 0.3.0 and above
-- Download the latest JAR from the below link and place the downloaded JAR in `loader_path/certify/`
-
+- Supported versions: 0.5.0 and above
+- Download the latest JAR from:
   ```
-  https://repo1.maven.org/maven2/io/mosip/certify/mock-certify-plugin/0.3.0/mock-certify-plugin-0.3.0.jar
+  https://oss.sonatype.org/content/repositories/snapshots/io/mosip/certify/mock-certify-plugin/
   ```
 
 ### For Advanced Users: Create Custom Plugin
 
 You can create your own plugin by implementing the following interface and place the resultant jar in `loader_path`:
 
-Reference Implementation: [CSVDataProviderPlugin](https://github.com/mosip/digital-credential-plugins/blob/release-0.3.x/mock-certify-plugin/src/main/java/io.mosip.certify.mock.integration/service/MockCSVDataProviderPlugin.java) or [MDocMockVCIssuancePlugin](https://github.com/mosip/digital-credential-plugins/blob/release-0.3.x/mock-certify-plugin/src/main/java/io.mosip.certify.mock.integration/service/MDocMockVCIssuancePlugin.java).
+Reference Implementation: [CSVDataProviderPlugin](https://github.com/mosip/digital-credential-plugins/blob/release-0.5.x/mock-certify-plugin/src/main/java/io.mosip.certify.mock.integration/service/MockCSVDataProviderPlugin.java) or [MDocMockVCIssuancePlugin](https://github.com/mosip/digital-credential-plugins/blob/release-0.5.x/mock-certify-plugin/src/main/java/io.mosip.certify.mock.integration/service/MDocMockVCIssuancePlugin.java).
 
 ```java
 public interface DataProviderPlugin {
@@ -84,8 +83,10 @@ public interface VCIssuancePlugin {
 
 ## Certificate Setup
 
+**Note**: This step is required only if you are using the Inji Web application for your usecase.
+
 - Create a `certs/` directory inside the docker-compose-injistack directory.
-- Place your PKCS12 keystore file in the `certs` directory as `oidckeystore.p12`. This is required for the Inji Web application and other applications which rely on Mimoto as a BFF and it can be configured as per these [docs](https://docs.inji.io/inji-wallet/inji-mobile/customization-overview/credential_providers#onboarding-mimoto-as-oidc-client-for-a-new-issuer) after the file is downloaded in the `certs` directory as shown in the directory tree.
+- Place your PKCS12 keystore file in the `certs` directory as `oidckeystore.p12`. This is required for the Inji Web application and other applications which rely on Mimoto as a BFF and it can be configured as per these [docs](https://docs.inji.io/inji-wallet/inji-mobile/technical-overview/customization-overview/credential_providers#onboarding-mimoto-as-oidc-client-for-a-new-issuer) after the file is downloaded in the `certs` directory as shown in the directory tree.
 - Update `mosip.oidc.p12.password` to the password of the `oidckeystore.p12` file in the Mimoto [Config file](./config/mimoto-default.properties).
 
 
@@ -105,15 +106,14 @@ public interface VCIssuancePlugin {
 - If you are going ahead with the Farmer usecase, configure the below values in [here](config/certify-csvdp-farmer.properties) to refer to the web location where you'd host the DID.
 
 ```properties
-mosip.certify.data-provider-plugin.issuer-uri=did:web:someuser.github.io:somerepo:somedirectory
-mosip.certify.data-provider-plugin.issuer-public-key-uri=did:web:someuser.github.io:somerepo:somedirectory#key-0
+mosip.certify.data-provider-plugin.did-url=did:web:someuser.github.io:somerepo:somedirectory
 ```
 
-- (required for Farmer setup) Certify will automatically generate the DID document for your usecase at [this endpoint](http://localhost:8090/v1/certify/issuance/.well-known/did.json), please copy the contents of the HTTP response and host it appropriately in the same location.
+- (required for Farmer setup) Certify will automatically generate the DID document for your usecase at [this endpoint](http://localhost:8090/v1/certify/.well-known/did.json), please copy the contents of the HTTP response and host it appropriately in the same location.
     - A did with the ID `did:web:someuser.github.io:somerepo:somedirectory` will have be accessible at `https://someuser.github.io/somerepo/somedirectory/did.json`, i.e. if GitHub Pages is used to host the file, the contents should go in https://github.com/someuser/somerepo/blob/gh-pages/somedirectory/did.json assuming `gh-pages` is the branch for publishing GitHub Pages as per repository settings.
     - To verify if everything is working you can try to resolve the DID via public DID resolvers such as [Uniresolver](https://dev.uniresolver.io/).
 
-- (required if Mobile driving license configured) Onboard issuer key and certificate data into property `mosip.certify.mock.mdoc.issuer-key-cert` using the creation script, please read the [plugin README](https://github.com/mosip/digital-credential-plugins/tree/release-0.3.x/mock-certify-plugin) for the same.
+- (required if Mobile driving license configured) Onboard issuer key and certificate data into property `mosip.certify.mock.mdoc.issuer-key-cert` using the creation script, please read the [plugin README](https://github.com/mosip/digital-credential-plugins/tree/release-0.5.x/mock-certify-plugin) for the same.
 
 
 ## Other configurations
@@ -124,6 +124,9 @@ Ensure all configuration files are properly updated in the config directory if y
 
 - certify-default.properties
 - certify-csvdp-farmer.properties
+
+Following files are optional and can be used to configure the Inji Web application for your usecase, if you are not using web application, you can skip these files:
+
 - mimoto-default.properties
 - mimoto-issuers-config.json
 - mimoto-trusted-verifiers.json
@@ -134,6 +137,8 @@ Ensure all configuration files are properly updated in the config directory if y
 ## Running the Application
 
 ### Start the Services
+
+**Note** : In case you want to access only certify service, you can modify the docker-compose.yaml to remove the other services and run only the `certify` service.
 
 ```bash
 docker-compose up -d
@@ -165,7 +170,7 @@ The following services will be available:
     - View credential status at a Standards Compliant VC Verfier such as [Inji Verify](https://injiverify.collab.mosip.net).
 3. As a sample, you can try downloading VC with the UIN `5860356276` or `2154189532`. The OTP for this purpose can be given as `111111` which is the Mock OTP for eSignet Collab Environment. The above sample identities should be present at both the Identity Provider(here, National ID) and at the Local Issuer(here, Agriculture Department or Transport Department).
 
-### Advanced Users: Accessing the Credentials via the Postman Interface
+### Running only certify service - Accessing the Credentials via the Postman Interface
 
 1. Open Postman
 2. Import the [Mock Collections & Environments](../../docs/postman-collections/) from here, make appropriate changes to the Credential Type and contexts as per your VerifiableCredential and the configured WellKnown.
@@ -173,6 +178,8 @@ The following services will be available:
     - Download credentials
     - View credential status
     - Manage your digital identity
+
+Refer to [API documentation](https://mosip.stoplight.io/docs/inji-certify) for detailed usage instructions and examples.
 
 
 ## Advanced Configurations
@@ -222,7 +229,7 @@ The digest multibase can be hardcoded or if the template has been stored with Ce
 
 7. VC download is failing with Mimoto error logs stating that VC Verification is failing.
     - Check if the DID is updated & resolvable. The Multibase hash changes on each restart, please update it whenever a newer instance of Certify is setup.
-    - Check if the hosted DID matches with the [DID endpoint](http://localhost:8090/v1/certify/issuance/.well-known/did.json)
+    - Check if the hosted DID matches with the [DID endpoint](http://localhost:8090/v1/certify/.well-known/did.json)
     - As of now, Mimoto/Inji Web only supports downloads for Ed25519Signature2020 signed VerifiableCredential due to a limitation of the integrated VC-Verification module.
 
 

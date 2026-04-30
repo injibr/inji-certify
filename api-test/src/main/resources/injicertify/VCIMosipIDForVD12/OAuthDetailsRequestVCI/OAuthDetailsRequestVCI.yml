@@ -1,6 +1,8 @@
 OAuthDetailsRequestVCI:
    InjiCertify_ESignet_OAuthDetailsRequest_VCI_ForVD12_MOSIPID_uin_all_Valid_Smoke_sid:
       endPoint: $ESIGNETMOSIPIDBASEURL$/v1/esignet/authorization/v2/oauth-details
+      uniqueIdentifier: TC_esignetDependent_OAuthdetailsRequest_vd12
+      description: OAuth details request      
       role: resident
       restMethod: post
       checkErrorsOnlyInResponse: true
@@ -15,7 +17,7 @@ OAuthDetailsRequestVCI:
       	"display": "popup",
 	    "prompt": "login",
 	    "acrValues": "mosip:idp:acr:generated-code mosip:idp:acr:linked-wallet mosip:idp:acr:biometrics",
-	    "nonce": "973eieljzng",
+	    "nonce": "$UNIQUENONCEVALUE$",
 	    "state": "eree2311",
 	    "claimsLocales": "en",
 	    "codeChallenge": "$CODECHALLENGE$",

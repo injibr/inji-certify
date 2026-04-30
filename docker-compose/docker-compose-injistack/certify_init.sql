@@ -97,86 +97,109 @@ CREATE TABLE certify.rendering_template (
                                     CONSTRAINT pk_svgtmp_id PRIMARY KEY (id)
 );
 
-CREATE TABLE certify.credential_template(
-                                    context character varying(1024) NOT NULL,
-                                    credential_type character varying(512) NOT NULL,
-                                    template VARCHAR NOT NULL,
-                                    cr_dtimes timestamp NOT NULL default now(),
-                                    upd_dtimes timestamp,
-                                    CONSTRAINT pk_template PRIMARY KEY (context, credential_type)
+CREATE TABLE IF NOT EXISTS certify.credential_config (
+    credential_config_key_id VARCHAR(2048) NOT NULL UNIQUE,
+    config_id VARCHAR(255) NOT NULL,
+    status VARCHAR(255),
+    vc_template VARCHAR,
+    doctype VARCHAR,
+    sd_jwt_vct VARCHAR,
+    context VARCHAR,
+    credential_type VARCHAR,
+    credential_format VARCHAR(255) NOT NULL,
+    did_url VARCHAR,
+    key_manager_app_id VARCHAR(36),
+    key_manager_ref_id VARCHAR(128),
+    signature_algo VARCHAR(36),
+    signature_crypto_suite VARCHAR(128),
+    sd_claim VARCHAR,
+    display JSONB NOT NULL,
+    display_order TEXT[] NOT NULL,
+    scope VARCHAR(255) NOT NULL,
+    cryptographic_binding_methods_supported TEXT[] NOT NULL,
+    credential_signing_alg_values_supported TEXT[] NOT NULL,
+    proof_types_supported JSONB NOT NULL,
+    credential_subject JSONB,
+    sd_jwt_claims JSONB,
+    mso_mdoc_claims JSONB,
+    plugin_configurations JSONB,
+    credential_status_purpose TEXT[],
+    cr_dtimes TIMESTAMP NOT NULL,
+    upd_dtimes TIMESTAMP,
+    CONSTRAINT pk_config_id PRIMARY KEY (config_id)
 );
 
-CREATE TABLE certify.certify_keys (
-	config_key varchar NULL,
-	config_value text NULL
+CREATE UNIQUE INDEX idx_credential_config_type_context_unique
+ON certify.credential_config(credential_type, context, credential_format)
+WHERE credential_type IS NOT NULL AND credential_type <> ''
+AND context IS NOT NULL AND context <> '';
+
+CREATE UNIQUE INDEX idx_credential_config_sd_jwt_vct_unique
+ON certify.credential_config(sd_jwt_vct, credential_format)
+WHERE sd_jwt_vct IS NOT NULL and sd_jwt_vct <> '';
+
+CREATE UNIQUE INDEX idx_credential_config_doctype_unique
+ON certify.credential_config(doctype, credential_format)
+WHERE doctype IS NOT NULL and doctype <> '';
+
+INSERT INTO certify.credential_config (
+    credential_config_key_id,
+    config_id,
+    status,
+    vc_template,
+    doctype,
+    sd_jwt_vct,
+    context,
+    credential_type,
+    credential_format,
+    did_url,
+    key_manager_app_id,
+    key_manager_ref_id,
+    signature_algo,
+    signature_crypto_suite,
+    sd_claim,
+    display,
+    display_order,
+    scope,
+    cryptographic_binding_methods_supported,
+    credential_signing_alg_values_supported,
+    proof_types_supported,
+    credential_subject,
+    mso_mdoc_claims,
+    plugin_configurations,
+    credential_status_purpose,
+    cr_dtimes,
+    upd_dtimes
+)
+VALUES (
+    'FarmerCredential',
+    gen_random_uuid()::VARCHAR(255),  -- generating a unique config_id
+    'active',  -- assuming an active status
+    'ewogICAgICAgICAgIkBjb250ZXh0IjogWwogICAgICAgICAgICAgICJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSIsCiAgICAgICAgICAgICAgImh0dHBzOi8vcGl5dXNoNzAzNC5naXRodWIuaW8vbXktZmlsZXMvZmFybWVyLmpzb24iLAogICAgICAgICAgICAgICJodHRwczovL3czaWQub3JnL3NlY3VyaXR5L3N1aXRlcy9lZDI1NTE5LTIwMjAvdjEiCiAgICAgICAgICBdLAogICAgICAgICAgImlzc3VlciI6ICIke19pc3N1ZXJ9IiwKICAgICAgICAgICJ0eXBlIjogWwogICAgICAgICAgICAgICJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsCiAgICAgICAgICAgICAgIkZhcm1lckNyZWRlbnRpYWwiCiAgICAgICAgICBdLAogICAgICAgICAgImlzc3VhbmNlRGF0ZSI6ICIke3ZhbGlkRnJvbX0iLAogICAgICAgICAgImV4cGlyYXRpb25EYXRlIjogIiR7dmFsaWRVbnRpbH0iLAogICAgICAgICAgImNyZWRlbnRpYWxTdWJqZWN0IjogewogICAgICAgICAgICAgICJpZCI6ICIke19ob2xkZXJJZH0iLAogICAgICAgICAgICAgICJmdWxsTmFtZSI6ICIke2Z1bGxOYW1lfSIsCiAgICAgICAgICAgICAgIm1vYmlsZU51bWJlciI6ICIke21vYmlsZU51bWJlcn0iLAogICAgICAgICAgICAgICJkYXRlT2ZCaXJ0aCI6ICIke2RhdGVPZkJpcnRofSIsCiAgICAgICAgICAgICAgImdlbmRlciI6ICIke2dlbmRlcn0iLAogICAgICAgICAgICAgICJzdGF0ZSI6ICIke3N0YXRlfSIsCiAgICAgICAgICAgICAgImRpc3RyaWN0IjogIiR7ZGlzdHJpY3R9IiwKICAgICAgICAgICAgICAidmlsbGFnZU9yVG93biI6ICIke3ZpbGxhZ2VPclRvd259IiwKICAgICAgICAgICAgICAicG9zdGFsQ29kZSI6ICIke3Bvc3RhbENvZGV9IiwKICAgICAgICAgICAgICAibGFuZEFyZWEiOiAiJHtsYW5kQXJlYX0iLAogICAgICAgICAgICAgICJsYW5kT3duZXJzaGlwVHlwZSI6ICIke2xhbmRPd25lcnNoaXBUeXBlfSIsCiAgICAgICAgICAgICAgInByaW1hcnlDcm9wVHlwZSI6ICIke3ByaW1hcnlDcm9wVHlwZX0iLAogICAgICAgICAgICAgICJzZWNvbmRhcnlDcm9wVHlwZSI6ICIke3NlY29uZGFyeUNyb3BUeXBlfSIsCiAgICAgICAgICAgICAgImZhY2UiOiAiJHtmYWNlfSIsCiAgICAgICAgICAgICAgImZhcm1lcklEIjogIiR7ZmFybWVySUR9IgogICAgICAgICAgfQogICAgIH0=',  -- the VC template from the JSON
+    NULL,  -- doctype from JSON
+    NULL,  -- vct for SD-JWT VC
+    'https://www.w3.org/2018/credentials/v1',  -- context as comma-separated string
+    'FarmerCredential,VerifiableCredential',  -- credential_type as comma-separated string
+    'ldp_vc',  -- credential_format
+    'did:web:mosip.github.io:inji-config:vc-local-ed25519',  -- did_url
+    'CERTIFY_VC_SIGN_ED25519',  -- key_manager_app_id
+    'ED25519_SIGN',  -- key_manager_ref_id (optional)
+    'EdDSA',  -- signature_algo (optional)
+    'Ed25519Signature2020',  -- signature_crypto_suite
+    NULL,  -- sd_claim (optional)
+    '[{"name": "Farmer Verifiable Credential", "locale": "en", "logo": {"url": "https://mosip.github.io/inji-config/logos/agro-vertias-logo.png", "alt_text": "Farmer Credential Logo"}, "background_color": "#12107c", "text_color": "#FFFFFF", "background_image": { "uri": "https://mosip.github.io/inji-config/logos/agro-vertias-logo.png" }}]'::JSONB,  -- display
+    ARRAY['fullName', 'mobileNumber', 'dateOfBirth', 'gender', 'state', 'district', 'villageOrTown', 'postalCode', 'landArea', 'landOwnershipType', 'primaryCropType', 'secondaryCropType', 'farmerID'],  -- display_order
+    'mock_identity_vc_ldp',  -- scope
+    ARRAY['did:jwk'],  -- cryptographic_binding_methods_supported
+    ARRAY['Ed25519Signature2020'],  -- credential_signing_alg_values_supported
+    '{"jwt": {"proof_signing_alg_values_supported": ["RS256", "ES256"]}}'::JSONB,  -- proof_types_supported
+    '{"fullName": {"display": [{"name": "Full Name", "locale": "en"}]}, "phone": {"display": [{"name": "Phone Number", "locale": "en"}]}, "dateOfBirth": {"display": [{"name": "Date of Birth", "locale": "en"}]}, "gender": {"display": [{"name": "Gender", "locale": "en"}]}}'::JSONB,  -- credential_subject
+    NULL,  -- claims (optional)
+    '[{"mosip.certify.mock.data-provider.csv.identifier-column": "id", "mosip.certify.mock.data-provider.csv.data-columns": "id,fullName,mobileNumber,dateOfBirth,gender,state,district,villageOrTown,postalCode,landArea,landOwnershipType,primaryCropType,secondaryCropType,face,farmerID", "mosip.certify.mock.data-provider.csv-registry-uri": "/home/mosip/config/farmer_identity_data.csv"}]'::JSONB,  -- plugin_configurations
+    ARRAY['revocation'],  -- credential_status_purpose
+    NOW(),  -- cr_dtimes
+    NULL  -- upd_dtimes (optional)
 );
-
-INSERT INTO certify.credential_template (context, credential_type, template, cr_dtimes, upd_dtimes) VALUES ('https://www.w3.org/2018/credentials/v1', 'FarmerCredential,VerifiableCredential', '{
-     "@context": [
-         "https://www.w3.org/2018/credentials/v1",
-         "https://piyush7034.github.io/my-files/farmer.json",
-         "https://w3id.org/security/suites/ed25519-2020/v1"
-     ],
-     "issuer": "${_issuer}",
-     "type": [
-         "VerifiableCredential",
-         "FarmerCredential"
-     ],
-     "issuanceDate": "${validFrom}",
-     "expirationDate": "${validUntil}",
-     "credentialSubject": {
-         "id": "${_holderId}",
-         "fullName": "${fullName}",
-         "mobileNumber": "${mobileNumber}",
-         "dateOfBirth": "${dateOfBirth}",
-         "gender": "${gender}",
-         "state": "${state}",
-         "district": "${district}",
-         "villageOrTown": "${villageOrTown}",
-         "postalCode": "${postalCode}",
-         "landArea": "${landArea}",
-         "landOwnershipType": "${landOwnershipType}",
-         "primaryCropType": "${primaryCropType}",
-         "secondaryCropType": "${secondaryCropType}",
-         "face": "${face}",
-         "farmerID": "${farmerID}"
-     }
-}
-', '2024-10-24 12:32:38.065994', NULL);
-
-INSERT INTO certify.credential_template
-(context, credential_type, "template", cr_dtimes, upd_dtimes)
-VALUES('https://www.w3.org/2018/credentials/v1', 'CARReceipt,VerifiableCredential', '{"@context": ["https://www.w3.org/2018/credentials/v1"],"issuer": "${_issuer}","type": ["VerifiableCredential","CARReceipt"],"issuanceDate": "${validFrom}","expirationDate": "${validUntil}","credentialSubject": {"codigoImovel": "${codigoImovel}","dataCadastro": "${dataCadastro}","nomeImovel": "${nomeImovel}","municipio": "${municipio}","unidadefederativa": "${unidadefederativa}","coordenadaImovelX": "${coordenadaImovelX}","coordenadaImovelY": "${coordenadaImovelY}","areaTotalImovel": "${areaTotalImovel}","moduloFiscal": "${moduloFiscal}","protocolo": "${protocolo}","areaLiquidaImovel": "${areaLiquidaImovel}","areaPreservacaoPermanente": "${areaPreservacaoPermanente}","areaReservaLegal": "${areaReservaLegal}","areaUsoRestrito": "${areaUsoRestrito}","areaConsolidada": "${areaConsolidada}","areaRemanescenteVegetacaoNativa": "${areaRemanescenteVegetacaoNativa}","cpfCnpj": "${cpfCnpj}","informacoesAdicionais": "${informacoesAdicionais}","geoImovel": "${geoImovel}","areaServidaoAdministrativa": "${areaServidaoAdministrativa}","nomeProprietario": "${nomeProprietario}"}}', '2024-10-24 12:32:38.065', NULL);
-INSERT INTO certify.credential_template
-(context, credential_type, "template", cr_dtimes, upd_dtimes)
-VALUES('https://www.w3.org/2018/credentials/v1', 'CARDocument,VerifiableCredential', '{"@context": ["https://www.w3.org/2018/credentials/v1"],"issuer": "${_issuer}","type": ["VerifiableCredential","CARDocument"],"issuanceDate": "${validFrom}","expirationDate": "${validUntil}","credentialSubject": {"id": "${_holderId}","situacaoImovel": "${situacaoImovel}","codigoImovel": "${codigoImovel}","descricaoEtapaCadastro": "${descricaoEtapaCadastro}","areaTotalImovel": "${areaTotalImovel}","quantidadeModulosFiscais": "${quantidadeModulosFiscais}","dataCadastro": "${dataCadastro}","dataUltimaAtualizacaoCadastro": "${dataUltimaAtualizacaoCadastro}","municipio": "${municipio}","unidadeFederativa": "${unidadeFederativa}","coordenadaImovelX": "${coordenadaImovelX}","coordenadaImovelY": "${coordenadaImovelY}","areaRemanescenteVegetacaoNativa": "${areaRemanescenteVegetacaoNativa}","areaConsolidada": "${areaConsolidada}","areaServidaoAdministrativa": "${areaServidaoAdministrativa}","situacaoReservaLegal": "${situacaoReservaLegal}","areaReservaLegalAverbadaDocumental": "${areaReservaLegalAverbadaDocumental}","areaReservaLegalAverbada": "${areaReservaLegalAverbada}","areaReservaLegalAprovadaNaoAverbada": "${areaReservaLegalAprovadaNaoAverbada}","areaReservaLegalProposta": "${areaReservaLegalProposta}","areaReservaLegalDeclaradaProprietarioPossuidor": "${areaReservaLegalDeclaradaProprietarioPossuidor}","areaPreservacaoPermanente": "${areaPreservacaoPermanente}","areaPreservacaoPermanenteAreaRuralConsolida": "${areaPreservacaoPermanenteAreaRuralConsolida}","areaPreservacaoPermanenteAreaRemanescenteVegetacaoNativa": "${areaPreservacaoPermanenteAreaRemanescenteVegetacaoNativa}","areaUsoRestrito": "${areaUsoRestrito}","areaUsoRestritoDeclividade": "${areaUsoRestritoDeclividade}","areaReservaLegalExcedentePassivo": "${areaReservaLegalExcedentePassivo}","areaReservaLegalRecompor": "${areaReservaLegalRecompor}","areaPreservacaoPermanenteRecompor": "${areaPreservacaoPermanenteRecompor}","areaUsoRestritoRecompor": "${areaUsoRestritoRecompor}","sobreposicoesTerraIndigena": "${sobreposicoesTerraIndigena}","sobreposicoesUnidadeConservacao": "${sobreposicoesUnidadeConservacao}","sobreposicoesAreasEmbargadas": "${sobreposicoesAreasEmbargadas}"}}', '2024-10-24 12:32:38.065', NULL);
-INSERT INTO certify.credential_template
-(context, credential_type, "template", cr_dtimes, upd_dtimes)
-VALUES('https://www.w3.org/2018/credentials/v1', 'CARReceiptAST,VerifiableCredential', '{"@context":["https://www.w3.org/2018/credentials/v1"],"issuer":"${_issuer}","type":["VerifiableCredential","CARReceipt"],"issuanceDate":"${validFrom}","expirationDate":"${validUntil}","credentialSubject":{"codigoImovel":"${codigoImovel}","dataCadastro":"${dataCadastro}","nomeImovel":"${nomeImovel}","municipio":"${municipio}","tipoImovel":"${tipoImovel}","unidadeFederativa":"${unidadeFederativa}","coordenadaImovelX":"${coordenadaImovelX}","coordenadaImovelY":"${coordenadaImovelY}","areaTotalImovel":"${areaTotalImovel}","moduloFiscal":"${moduloFiscal}","protocolo":"${protocolo}","informacoesAdicionais":"${informacoesAdicionais}","geoImovel":"${geoImovel}","proprietarios":"${proprietarios}","areaServidaoAdministrativa":"${areaServidaoAdministrativa}","areaUsoRestrito":"${areaUsoRestrito}","areaPreservacaoPermanente":"${areaPreservacaoPermanente}","areaConsolidada":"${areaConsolidada}","areaRemanescenteVegetacaoNativa":"${areaRemanescenteVegetacaoNativa}","areaReservaLegal":"${areaReservaLegal}","areaLiquidaImovel":"${areaLiquidaImovel}","matricula":"${matricula}","dataMatricula":"${dataMatricula}","livroMatricula":"${livroMatricula}","folhaMatricula":"${folhaMatricula}","municipioCartorio":"${municipioCartorio}","ufCartorio":"${ufCartorio}","cpfCnpj":"${cpfCnpj}","nome":"${nome}"}}', '2024-10-24 12:32:38.065', NULL);
-INSERT INTO certify.credential_template
-(context, credential_type, "template", cr_dtimes, upd_dtimes)
-VALUES('https://www.w3.org/2018/credentials/v1', 'CAFCredential,VerifiableCredential', '{"@context": ["https://www.w3.org/2018/credentials/v1"],"issuer": "${_issuer}","type": ["VerifiableCredential","CAFCredential"],"issuanceDate": "${validFrom}","expirationDate": "${validUntil}","credentialSubject": {"enquadramentoPronaf": "${enquadramentoPronaf}","situacao": "${situacao}","dataCriacao": "${dataCriacao}","dataValidade": "${dataValidade}","numeroCaf": "${numeroCaf}","Ultima_Atualizacao": "${Ultima_Atualizacao}","atividadeprincipalUFPA": "${atividadeprincipalUFPA}","caracterizacaoArea": "${caracterizacaoArea}","membros_tipoMembro_descricao": "${membros_tipoMembro_descricao}","possuiMaoObraContratada": "${possuiMaoObraContratada}","membros_nome": "${membros_nome}","membros_cpf": "${membros_cpf}","areas_condicaoPosse": "${areas_condicaoPosse}","areas_tamanho": "${areas_tamanho}","areas_tamanho_areas_unidadeMedida_descricao": "${areas_tamanho_areas_unidadeMedida_descricao}","municipio": "${municipio}","entidadeEmissora_razaoSocial": "${entidadeEmissora_razaoSocial}","entidadeEmissora_cnpj": "${entidadeEmissora_cnpj}","emissor": "${emissor}"}}', '2024-10-24 12:32:38.065', NULL);
-INSERT INTO certify.credential_template
-(context, credential_type, "template", cr_dtimes, upd_dtimes)
-VALUES('https://www.w3.org/2018/credentials/v1', 'CARReceiptPCT,VerifiableCredential', '{"@context":["https://www.w3.org/2018/credentials/v1"],"issuer":"${_issuer}","type":["VerifiableCredential","CARReceipt"],"issuanceDate":"${validFrom}","expirationDate":"${validUntil}","credentialSubject":{"identificadorImovel":"${identificadorImovel}","codigoImovel":"${codigoImovel}","situacaoImovel":"${situacaoImovel}","tipoImovel":"${tipoImovel}","dataCadastro":"${dataCadastro}","nomeImovel":"${nomeImovel}","codigoMunicipio":"${codigoMunicipio}","municipio":"${municipio}","unidadeFederativa":"${unidadeFederativa}","coordenadaImovelX":"${coordenadaImovelX}","coordenadaImovelY":"${coordenadaImovelY}","areaTotalImovel":"${areaTotalImovel}","moduloFiscal":"${moduloFiscal}","protocolo":"${protocolo}","informacoesAdicionais":"${informacoesAdicionais}","geoImovel":"${geoImovel}","areaServidaoAdministrativa":"${areaServidaoAdministrativa}","areaLiquidaImovel":"${areaLiquidaImovel}","areaPreservacaoPermanente":"${areaPreservacaoPermanente}","areaUsoRestrito":"${areaUsoRestrito}","areaConsolidada":"${areaConsolidada}","areaRemanescenteVegetacaoNativa":"${areaRemanescenteVegetacaoNativa}","areaReservaLegal":"${areaReservaLegal}","matricula":"${matricula}","dataMatricula":"${dataMatricula}","livroMatricula":"${livroMatricula}","folhaMatricula":"${folhaMatricula}","municipioCartorio":"${municipioCartorio}","ufCartorio":"${ufCartorio}"}}', '2025-10-14 16:46:45.486', NULL);
-INSERT INTO certify.credential_template
-(context, credential_type, "template", cr_dtimes, upd_dtimes)
-VALUES('https://www.w3.org/2018/credentials/v1', 'CCIR,VerifiableCredential', '{"@context": ["https://www.w3.org/2018/credentials/v1"],"issuer": "${_issuer}","type": ["VerifiableCredential","CCIRCredential"],"issuanceDate": "${validFrom}","expirationDate": "${validUntil}","credentialSubject": {"id": "did:web:shubhm-m.github.io:certify:test#key-0" ,"codigoImovelIncra": "${codigoImovelIncra}","denominacao": "${denominacao}","areaTotal": "${areaTotal}","classificacaoFundiaria": "${classificacaoFundiaria}","dataProcessamentoUltimaDeclaracao": "${dataProcessamentoUltimaDeclaracao}","areaCertificada": "${areaCertificada}","indicacoesLocalizacao": "${indicacoesLocalizacao}","municipioSede": "${municipioSede}","ufSede": "${ufSede}","areaModuloRural": "${areaModuloRural}","numeroModulosRurais": "${numeroModulosRurais}","areaModuloFiscal": "${areaModuloFiscal}","numeroModulosFiscais": "${numeroModulosFiscais}","fracaoMinimaParcelamento": "${fracaoMinimaParcelamento}","totalAreaRegistrada": "${totalAreaRegistrada}","totalAreaPosseJustoTitulo": "${totalAreaPosseJustoTitulo}","totalAreaPosseSimplesOcupacao": "${totalAreaPosseSimplesOcupacao}","areaMedida": "${areaMedida}","declarante": "${declarante}","cpfCnpj": "${cpfCnpj}","nacionalidade": "${nacionalidade}","totalPessoasRelacionadasImovel": "${totalPessoasRelacionadasImovel}","nomeTitular": "${nomeTitular}","condicaoTitularidade": "${condicaoTitularidade}","percentualDetencao": "${percentualDetencao}","dataLancamento": "${dataLancamento}","numeroCcir": "${numeroCcir}","dataGeracaoCcir": "${dataGeracaoCcir}","dataVencimentoCcir": "${dataVencimentoCcir}","debitosAnteriores": "${debitosAnteriores}","taxaServicosCadastrais": "${taxaServicosCadastrais}","valorCobrado": "${valorCobrado}","multa": "${multa}","juros": "${juros}","valorTotal": "${valorTotal}"}}', '2024-10-24 12:32:38.065', NULL);
-
-
-INSERT INTO certify.credential_template
-(context, credential_type, "template", cr_dtimes, upd_dtimes)
-VALUES('https://www.w3.org/2018/credentials/v1', 'ECACredential,VerifiableCredential', '{"@context": ["https://www.w3.org/2018/credentials/v1"],"issuer": "${_issuer}","type": ["VerifiableCredential","ECACredential"],"issuanceDate": "${validFrom}","expirationDate": "${validUntil}","credentialSubject": {"id": "${_holderId}","isOver12": ${isOver12},"isOver14": ${isOver14},"isOver16": ${isOver16},"isOver18": ${isOver18}}}', now(), NULL);
-
-INSERT INTO certify.certify_keys
-(config_key, config_value)
-VALUES('MGI', '{"MGI":{"credential_issuer":"${mosip.certify.identifier}","authorization_servers":["${mosip.certify.authorization.url}"],"credential_endpoint":"${mosipbox.public.url}${server.servlet.path}/issuance/credential","display":[{"name":"MGI","locale":"en"}],"credential_configurations_supported":{"CARReceipt":{"format":"ldp_vc","scope":"openid","cryptographic_binding_methods_supported":["did:jwk"],"credential_signing_alg_values_supported":["Ed25519Signature2020"],"proof_types_supported":{"jwt":{"proof_signing_alg_values_supported":["RS256","PS256"]}},"credential_definition":{"type":["VerifiableCredential","CARReceipt"],"credentialSubject":{"codigoImovel":{"display":[{"name":"Código do Imóvel","locale":"pt"}]},"dataCadastro":{"display":[{"name":"Data de Cadastro","locale":"pt"}]},"nomeImovel":{"display":[{"name":"Nome do Imóvel","locale":"pt"}]},"municipio":{"display":[{"name":"Município","locale":"pt"}]},"unidadefederativa":{"display":[{"name":"Estado","locale":"pt"}]},"coordenadaImovelX":{"display":[{"name":"Longitude","locale":"pt"}]},"coordenadaImovelY":{"display":[{"name":"Latitude","locale":"pt"}]},"areaTotalImovel":{"display":[{"name":"Área Total do Imóvel","locale":"pt"}]},"moduloFiscal":{"display":[{"name":"Módulo Fiscal","locale":"pt"}]},"protocolo":{"display":[{"name":"Protocolo","locale":"pt"}]},"areaLiquidaImovel":{"display":[{"name":"Área Líquida do Imóvel","locale":"pt"}]},"areaPreservacaoPermanente":{"display":[{"name":"Área de Preservação Permanente","locale":"pt"}]},"areaReservaLegal":{"display":[{"name":"Área de Reserva Legal","locale":"pt"}]},"areaUsoRestrito":{"display":[{"name":"Área de Uso Restrito","locale":"pt"}]},"areaConsolidada":{"display":[{"name":"Área Consolidada","locale":"pt"}]},"areaRemanescenteVegetacaoNativa":{"display":[{"name":"Área de Vegetação Nativa","locale":"pt"}]},"cpfCnpj":{"display":[{"name":"CPF/CNPJ do Proprietário","locale":"pt"}]},"informacoesAdicionais":{"display":[{"name":"Informações adicionais sobre o imóvel","locale":"pt"}]},"geoImovel":{"display":[{"name":"Coordenadas do polígono da área do imóvel","locale":"pt"}]},"areaServidaoAdministrativa":{"display":[{"name":"Área de servidão administrativa do imóvel (em hectares)","locale":"pt"}]},"nomeProprietario":{"display":[{"name":"Nome do Proprietário","locale":"pt"}]},"proprietarios":{"display":[{"name":"Proprietários do Imóvel","locale":"pt"}]},"matricula":{"display":[{"name":"Número da Matrícula","locale":"pt"}]},"dataMatricula":{"display":[{"name":"Data da Matrícula","locale":"pt"}]},"livroMatricula":{"display":[{"name":"Livro da Matrícula","locale":"pt"}]},"folhaMatricula":{"display":[{"name":"Folha da Matrícula","locale":"pt"}]},"municipioCartorio":{"display":[{"name":"Município do Cartório","locale":"pt"}]},"ufCartorio":{"display":[{"name":"UF do Cartório","locale":"pt"}]},"nome":{"display":[{"name":"Nome","locale":"pt"}]},"unidadeFederativa":{"display":[{"name":"Unidade Federativa","locale":"pt"}]},"identificadorImovel":{"display":[{"name":"Identificador do Imóvel","locale":"pt"}]},"situacaoImovel":{"display":[{"name":"Situação do Imóvel","locale":"pt"}]},"tipoImovel":{"display":[{"name":"Tipo do Imóvel","locale":"pt"}]}}},"display":[{"name":"RECIBO DE INSCRIÇÃO DO IMÓVEL RURAL NO CAR","locale":"en","logo":{"url":"https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png","alt_text":"a square logo of CCIR"},"background_color":"#FDFAF9","background_image":{"uri":"https://sunbird.org/images/sunbird-logo-new.png"},"text_color":"#7C4616"},{"name":"RECIBO DE INSCRIÇÃO DO IMÓVEL RURAL NO CAR","locale":"pt","logo":{"url":"https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png","alt_text":"a square logo of CCIR"},"background_color":"#FDFAF9","background_image":{"uri":"https://sunbird.org/images/sunbird-logo-new.png"},"text_color":"#7C4616"}],"order":["codigoImovel","dataCadastro","nomeImovel","municipio","unidadefederativa","coordenadaImovelX","coordenadaImovelY","areaTotalImovel","moduloFiscal","informacoesAdicionais","geoImovel","protocolo","areaServidaoAdministrativa","areaLiquidaImovel","areaPreservacaoPermanente","areaReservaLegal","areaUsoRestrito","areaConsolidada","areaRemanescenteVegetacaoNativa","cpfCnpj","nomeProprietario","proprietarios","matricula","dataMatricula","livroMatricula","folhaMatricula","municipioCartorio","ufCartorio","nome","unidadeFederativa"]},"CARDocument":{"format":"ldp_vc","scope":"openid","cryptographic_binding_methods_supported":["did:jwk"],"credential_signing_alg_values_supported":["Ed25519Signature2020"],"proof_types_supported":{"jwt":{"proof_signing_alg_values_supported":["RS256","ES256"]}},"credential_definition":{"type":["VerifiableCredential","CARDocument"],"credentialSubject":{"situacaoImovel":{"display":[{"name":"Situação do Imóvel","locale":"pt"}]},"codigoImovel":{"display":[{"name":"Código do Imóvel","locale":"pt"}]},"descricaoEtapaCadastro":{"display":[{"name":"Etapa do Cadastro","locale":"pt"}]},"areaTotalImovel":{"display":[{"name":"Área Total do Imóvel","locale":"pt"}]},"quantidadeModulosFiscais":{"display":[{"name":"Quantidade de Módulos Fiscais","locale":"pt"}]},"dataCadastro":{"display":[{"name":"Data de Cadastro","locale":"pt"}]},"dataUltimaAtualizacaoCadastro":{"display":[{"name":"Data da Última Atualização","locale":"pt"}]},"municipio":{"display":[{"name":"Município","locale":"pt"}]},"unidadeFederativa":{"display":[{"name":"Estado","locale":"pt"}]},"coordenadaImovelX":{"display":[{"name":"Longitude","locale":"pt"}]},"coordenadaImovelY":{"display":[{"name":"Latitude","locale":"pt"}]},"areaRemanescenteVegetacaoNativa":{"display":[{"name":"Área de Vegetação Nativa","locale":"pt"}]},"areaConsolidada":{"display":[{"name":"Área Consolidada","locale":"pt"}]},"areaServidaoAdministrativa":{"display":[{"name":"Área de Servidão Administrativa","locale":"pt"}]},"situacaoReservaLegal":{"display":[{"name":"Situação da Reserva Legal","locale":"pt"}]},"areaReservaLegalAverbadaDocumental":{"display":[{"name":"Reserva Legal Averbada Documental","locale":"pt"}]},"areaReservaLegalAverbada":{"display":[{"name":"Reserva Legal Averbada","locale":"pt"}]},"areaReservaLegalAprovadaNaoAverbada":{"display":[{"name":"Reserva Legal Aprovada Não Averbada","locale":"pt"}]},"areaReservaLegalProposta":{"display":[{"name":"Reserva Legal Proposta","locale":"pt"}]},"areaReservaLegalDeclaradaProprietarioPossuidor":{"display":[{"name":"Reserva Legal Declarada pelo Proprietário","locale":"pt"}]},"areaPreservacaoPermanente":{"display":[{"name":"Área de Preservação Permanente","locale":"pt"}]},"areaPreservacaoPermanenteAreaRuralConsolidada":{"display":[{"name":"APP - Área Rural Consolidada","locale":"pt"}]},"areaPreservacaoPermanenteAreaRemanescenteVegetacaoNativa":{"display":[{"name":"APP - Vegetação Nativa Remanescente","locale":"pt"}]},"areaUsoRestrito":{"display":[{"name":"Área de Uso Restrito","locale":"pt"}]},"areaUsoRestritoDeclividade":{"display":[{"name":"Uso Restrito por Declividade","locale":"pt"}]},"areaReservaLegalPassivoExcedente":{"display":[{"name":"Passivo ou Excedente da Reserva Legal","locale":"pt"}]},"areaReservaLegalRecompor":{"display":[{"name":"Reserva Legal a Recompor","locale":"pt"}]},"areaPreservacaoPermanenteRecompor":{"display":[{"name":"APP a Recompor","locale":"pt"}]},"areaUsoRestritoRecompor":{"display":[{"name":"Uso Restrito a Recompor","locale":"pt"}]},"sobreposicoesTerraIndigena":{"display":[{"name":"Sobreposição com Terra Indígena","locale":"pt"}]},"sobreposicoesUnidadeConservacao":{"display":[{"name":"Sobreposição com Unidade de Conservação","locale":"pt"}]},"sobreposicoesAreasEmbargadas":{"display":[{"name":"Sobreposição com Áreas Embargadas","locale":"pt"}]}}},"display":[{"name":"CAR - Cadastro Ambiental Rural","locale":"pt","logo":{"url":"https://img.freepik.com/premium-vector/vector-brazil-flag-waving-realistic-flowing-flags_378399-102.jpg","alt_text":"Bandeira do Brasil"},"background_color":"#FDFAF9","background_image":{"uri":"https://img.freepik.com/premium-vector/vector-brazil-flag-waving-realistic-flowing-flags_378399-102.jpg"},"text_color":"#004d00"},{"name":"CAR - Cadastro Ambiental Rural","locale":"en","logo":{"url":"https://img.freepik.com/premium-vector/vector-brazil-flag-waving-realistic-flowing-flags_378399-102.jpg","alt_text":"Bandeira do Brasil"},"background_color":"#FDFAF9","background_image":{"uri":"https://img.freepik.com/premium-vector/vector-brazil-flag-waving-realistic-flowing-flags_378399-102.jpg"},"text_color":"#004d00"}],"order":["situacaoImovel","codigoImovel","descricaoEtapaCadastro","areaTotalImovel","quantidadeModulosFiscais","dataCadastro","dataUltimaAtualizacaoCadastro","municipio","unidadeFederativa","coordenadaImovelX","coordenadaImovelY","areaRemanescenteVegetacaoNativa","areaConsolidada","areaServidaoAdministrativa","situacaoReservaLegal","areaReservaLegalAverbadaDocumental","areaReservaLegalAverbada","areaReservaLegalAprovadaNaoAverbada","areaReservaLegalProposta","areaReservaLegalDeclaradaProprietarioPossuidor","areaPreservacaoPermanente","areaPreservacaoPermanenteAreaRuralConsolidada","areaPreservacaoPermanenteAreaRemanescenteVegetacaoNativa","areaUsoRestrito","areaUsoRestritoDeclividade","areaReservaLegalPassivoExcedente","areaReservaLegalRecompor","areaPreservacaoPermanenteRecompor","areaUsoRestritoRecompor","sobreposicoesTerraIndigena","sobreposicoesUnidadeConservacao","sobreposicoesAreasEmbargadas"]},"ECACredential":{"format":"ldp_vc","scope":"openid","cryptographic_binding_methods_supported":["did:jwk"],"credential_signing_alg_values_supported":["Ed25519Signature2020"],"proof_types_supported":{"jwt":{"proof_signing_alg_values_supported":["RS256","PS256"]}},"credential_definition":{"type":["VerifiableCredential","ECACredential"],"credentialSubject":{"isOver12":{"display":[{"name":"Maior de 12 anos","locale":"pt"}]},"isOver14":{"display":[{"name":"Maior de 14 anos","locale":"pt"}]},"isOver16":{"display":[{"name":"Maior de 16 anos","locale":"pt"}]},"isOver18":{"display":[{"name":"Maior de 18 anos","locale":"pt"}]}}},"display":[{"name":"Comprovante de Maioridade","locale":"pt","logo":{"url":"https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png","alt_text":"a square logo of ECA"},"background_color":"#FDFAF9","background_image":{"uri":"https://sunbird.org/images/sunbird-logo-new.png"},"text_color":"#000000"}]}}}}');
-INSERT INTO certify.certify_keys
-(config_key, config_value)
-VALUES('INCRA', '{"INCRA":{"credential_issuer":"${mosip.certify.identifier}","authorization_servers":["https://sso.staging.acesso.gov.br"],"credential_endpoint":"${mosipbox.public.url}${server.servlet.path}/issuance/credential","display":[{"name":"INCRA","locale":"pt"}],"credential_configurations_supported":{"CCIRCredential":{"format":"ldp_vc","scope":"openid","cryptographic_binding_methods_supported":["did:jwk"],"credential_signing_alg_values_supported":["Ed25519Signature2020"],"proof_types_supported":{"jwt":{"proof_signing_alg_values_supported":["RS256","PS256"]}},"credential_definition":{"type":["VerifiableCredential","CCIR"],"credentialSubject":{"codigoImovelIncra":{"display":[{"name":"CÓDIGO DO IMÓVEL RURAL","locale":"en"}]},"denominacao":{"display":[{"name":"DENOMINAÇÃO DO IMÓVEL RURAL","locale":"en"}]},"areaTotal":{"display":[{"name":"ÁREA TOTAL (ha)","locale":"en"}]},"classificacaoFundiaria":{"display":[{"name":"CLASSIFICAÇÃO FUNDIÁRIA","locale":"en"}]},"dataProcessamentoUltimaDeclaracao":{"display":[{"name":"DATA DO PROCESSAMENTO DA ÚLTIMA DECLARAÇÃO","locale":"en"}]},"areaCertificada":{"display":[{"name":"ÁREA CERTIFICADA7","locale":"en"}]},"indicacoesLocalizacao":{"display":[{"name":"INDICAÇÕES PARA LOCALIZAÇÃO DO IMÓVEL RURAL","locale":"en"}]},"municipioSede":{"display":[{"name":"MUNICÍPIO SEDE DO IMÓVEL RURAL","locale":"en"}]},"ufSede":{"display":[{"name":"UF","locale":"en"}]},"areaModuloRural":{"display":[{"name":"MÓDULO RURAL (ha)","locale":"en"}]},"numeroModulosRurais":{"display":[{"name":"Nº MÓDULOS RURAIS","locale":"en"}]},"areaModuloFiscal":{"display":[{"name":"MÓDULO FISCAL (ha)","locale":"en"}]},"numeroModulosFiscais":{"display":[{"name":"Nº MÓDULOS FISCAIS","locale":"en"}]},"fracaoMinimaParcelamento":{"display":[{"name":"FRAÇÃO MÍNIMA DE PARCELAMENTO (ha)","locale":"en"}]},"totalAreaRegistrada":{"display":[{"name":"REGISTRADA","locale":"en"}]},"totalAreaPosseJustoTitulo":{"display":[{"name":"POSSE A JUSTO TÍTULO","locale":"en"}]},"totalAreaPosseSimplesOcupacao":{"display":[{"name":"POSSE POR SIMPLES OCUPAÇÃO","locale":"en"}]},"areaMedida":{"display":[{"name":"ÁREA MEDIDA","locale":"en"}]},"declarante":{"display":[{"name":"NOME","locale":"en"}]},"cpfCnpj":{"display":[{"name":"CPF/CNPJ","locale":"en"}]},"nacionalidade":{"display":[{"name":"NACIONALIDADE","locale":"en"}]},"totalPessoasRelacionadasImovel":{"display":[{"name":"TOTAL DE PESSOAS RELACIONADAS AO IMÓVEL","locale":"en"}]},"nomeTitular":{"display":[{"name":"NOME1","locale":"en"}]},"condicaoTitularidade":{"display":[{"name":"CONDIÇÃO","locale":"en"}]},"percentualDetencao":{"display":[{"name":"DETENÇÃO (%)","locale":"en"}]},"dataLancamento":{"display":[{"name":"DATA DE LANÇAMENTO","locale":"en"}]},"numeroCcir":{"display":[{"name":"NÚMERO DO CCIR","locale":"en"}]},"dataGeracaoCcir":{"display":[{"name":"DATA DE GERAÇÃO DO CCIR","locale":"en"}]},"dataVencimentoCcir":{"display":[{"name":"DATA DE VENCIMENTO","locale":"en"}]},"debitosAnteriores":{"display":[{"name":"DÉBITOS ANTERIORES","locale":"en"}]},"taxaServicosCadastrais":{"display":[{"name":"TAXA DE SERVIÇOS CADASTRAIS","locale":"en"}]},"valorCobrado":{"display":[{"name":"VALOR COBRADO","locale":"en"}]},"multa":{"display":[{"name":"MULTA","locale":"en"}]},"juros":{"display":[{"name":"JUROS","locale":"en"}]},"valorTotal":{"display":[{"name":"VALOR TOTAL","locale":"en"}]}}},"display":[{"name":"CERTIFICADO DE CADASTRO DE IMÓVEL RURAL","locale":"pt","logo":{"url":"https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png","alt_text":"a square logo of CCIR"},"background_color":"#FDFAF9","background_image":{"uri":"https://sunbird.org/images/sunbird-logo-new.png"},"text_color":"#7C4616"},{"name":"CERTIFICADO DE CADASTRO DE IMÓVEL RURAL","locale":"en","logo":{"url":"https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png","alt_text":"a square logo of CCIR"},"background_color":"#FDFAF9","background_image":{"uri":"https://sunbird.org/images/sunbird-logo-new.png"},"text_color":"#7C4616"}],"order":["codigoImovelIncra","denominacao","areaTotal","classificacaoFundiaria","dataProcessamentoUltimaDeclaracao","areaCertificada","indicacoesLocalizacao","municipioSede","ufSede","areaModuloRural","numeroModulosRurais","areaModuloFiscal","numeroModulosFiscais","fracaoMinimaParcelamento","totalAreaRegistrada","totalAreaPosseJustoTitulo","totalAreaPosseSimplesOcupacao","areaMedida","declarante","cpfCnpj","nacionalidade","totalPessoasRelacionadasImovel","nomeTitular","condicaoTitularidade","percentualDetencao","dataLancamento","numeroCcir","dataGeracaoCcir","dataVencimentoCcir","debitosAnteriores","taxaServicosCadastrais","valorCobrado","multa","juros","valorTotal"]}}}}');
-INSERT INTO certify.certify_keys
-(config_key, config_value)
-VALUES('MDA', '{"MDA": {"credential_issuer": "${mosip.certify.identifier}","authorization_servers": ["https://sso.staging.acesso.gov.br"],"credential_endpoint": "${mosipbox.public.url}${server.servlet.path}/issuance/credential","display": [{"name": "EXTRATO PÚBLICO DA UNIDADE FAMILIAR DE PRODUÇÃO AGRÁRIA - CAF","locale": "pt"}],"credential_configurations_supported": {"CAFCredential": {"format": "ldp_vc","scope": "openid","cryptographic_binding_methods_supported": ["did:jwk"],"credential_signing_alg_values_supported": ["Ed25519Signature2020"],"proof_types_supported": {"jwt": {"proof_signing_alg_values_supported": ["RS256","PS256"]}},"credential_definition": {"type": ["VerifiableCredential","CAFCredential"],"credentialSubject": {"enquadramentoPronaf": {"display": [{"name": "Categoria de enquadramento no PRONAF","locale": "pt"}]},"situacao": {"display": [{"name": "Situação do CAF (Pode estar ativo ou inativo).","locale": "pt"}]},"dataCriacao": {"display": [{"name": "Data de criação do CAF","locale": "pt"}]},"dataValidade": {"display": [{"name": "Data de expiração do CAF","locale": "pt"}]},"numeroCaf": {"display": [{"name": "Número do registro do CAF","locale": "pt"}]},"ultimaAtualizacao": {"display": [{"name": "Última modificação no cadastro","locale": "pt"}]},"atividadeprincipalUFPA": {"display": [{"name": "Atividade principal","locale": "pt"}]},"caracterizacaoArea": {"display": [{"name": "Caracterização da UFPA","locale": "pt"}]},"membros.tipoMembro.descricao": {"display": [{"name": "Relação de parentesco com Declarante","locale": "pt"}]},"possuiMaoObraContratada": {"display": [{"name": "Se enquadra em mão de obra familiar","locale": "pt"}]},"membros.nome": {"display": [{"name": "Nome do(s) membros da composição familiar","locale": "pt"}]},"membros.cpf": {"display": [{"name": "CPF do(s) membros da composição familiar","locale": "pt"}]},"areas.condicaoPosse": {"display": [{"name": "Condição de Posse e Uso da Terra (Imovel Principal)","locale": "pt"}]},"areas.tamanho": {"display": [{"name": "Total do Estabelecimento em hectares","locale": "pt"}]},"areas.tamanho.unidadeMedida.descricao": {"display": [{"name": "Tamanho do Imovel Principal","locale": "pt"}]},"municipio": {"display": [{"name": "Municipio onde está localizado o imovel","locale": "pt"}]},"entidadeEmissora.razaoSocial": {"display": [{"name": "Razão Social da Entidade responsável pela inscrição no CAF","locale": "pt"}]},"entidadeEmissora.cnpj": {"display": [{"name": "CNPJ da Entidade responsável pela inscrição no CAF","locale": "pt"}]},"emissor": {"display": [{"name": "Nome da pessoa que fez o cadastro","locale": "pt"}]}}},"display": [{"name": "Cadastro Nacional da Agricultura Familiar","locale": "pt","logo": {"url": "https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png","alt_text": "a square logo of CCIR"},"background_color": "#FDFAF9","background_image": {"uri": "https://sunbird.org/images/sunbird-logo-new.png"},"text_color": "#7C4616"},{"name": "National Registry of Family Farming","locale": "en","logo": {"url": "https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png","alt_text": "a square logo of CCIR"},"background_color": "#FDFAF9","background_image": {"uri": "https://sunbird.org/images/sunbird-logo-new.png"},"text_color": "#7C4616"}],"order": ["enquadramentoPronaf","situacao","dataCriacao","dataValidade","numeroCaf","Ultima Atualização:","atividadeprincipalUFPA","caracterizacaoArea","membros -> tipoMembro -> descricao","possuiMaoObraContratada","membros -> nome","membros -> cpf","areas -> condicaoPosse","areas -> tamanho","areas -> tamanho + areas -> (unidadeMedida -> descricao)","municipio","entidadeEmissora -> razaoSocial","entidadeEmissora -> cnpj","emissor"]}}}}');
 
 INSERT INTO certify.key_policy_def(APP_ID,KEY_VALIDITY_DURATION,PRE_EXPIRE_DAYS,ACCESS_ALLOWED,IS_ACTIVE,CR_BY,CR_DTIMES) VALUES('ROOT', 2920, 1125, 'NA', true, 'mosipadmin', now());
 INSERT INTO certify.key_policy_def(APP_ID,KEY_VALIDITY_DURATION,PRE_EXPIRE_DAYS,ACCESS_ALLOWED,IS_ACTIVE,CR_BY,CR_DTIMES) VALUES('CERTIFY_SERVICE', 1095, 60, 'NA', true, 'mosipadmin', now());
@@ -184,3 +207,114 @@ INSERT INTO certify.key_policy_def(APP_ID,KEY_VALIDITY_DURATION,PRE_EXPIRE_DAYS,
 INSERT INTO certify.key_policy_def(APP_ID,KEY_VALIDITY_DURATION,PRE_EXPIRE_DAYS,ACCESS_ALLOWED,IS_ACTIVE,CR_BY,CR_DTIMES) VALUES('CERTIFY_VC_SIGN_RSA', 1095, 60, 'NA', true, 'mosipadmin', now());
 INSERT INTO certify.key_policy_def(APP_ID,KEY_VALIDITY_DURATION,PRE_EXPIRE_DAYS,ACCESS_ALLOWED,IS_ACTIVE,CR_BY,CR_DTIMES) VALUES('CERTIFY_VC_SIGN_ED25519', 1095, 60, 'NA', true, 'mosipadmin', now());
 INSERT INTO certify.key_policy_def(APP_ID,KEY_VALIDITY_DURATION,PRE_EXPIRE_DAYS,ACCESS_ALLOWED,IS_ACTIVE,CR_BY,CR_DTIMES) VALUES('BASE', 1095, 60, 'NA', true, 'mosipadmin', now());
+INSERT INTO certify.key_policy_def(APP_ID,KEY_VALIDITY_DURATION,PRE_EXPIRE_DAYS,ACCESS_ALLOWED,IS_ACTIVE,CR_BY,CR_DTIMES) VALUES('CERTIFY_VC_SIGN_EC_K1', 1095, 60, 'NA', true, 'mosipadmin', now());
+INSERT INTO certify.key_policy_def(APP_ID,KEY_VALIDITY_DURATION,PRE_EXPIRE_DAYS,ACCESS_ALLOWED,IS_ACTIVE,CR_BY,CR_DTIMES) VALUES('CERTIFY_VC_SIGN_EC_R1', 1095, 60, 'NA', true, 'mosipadmin', now());
+
+CREATE TYPE credential_status_enum AS ENUM ('AVAILABLE', 'FULL');
+
+-- Create status_list_credential table
+CREATE TABLE certify.status_list_credential (
+    id VARCHAR(255) PRIMARY KEY,          -- The unique ID (URL/DID/URN) extracted from the VC's 'id' field.
+    vc_document VARCHAR NOT NULL,           -- Stores the entire Verifiable Credential JSON document.
+    credential_type VARCHAR(100) NOT NULL, -- Type of the status list (e.g., 'StatusList2021Credential')
+    status_purpose VARCHAR(100),             -- Intended purpose of this list within the system (e.g., 'revocation', 'suspension', 'general'). NULLABLE.
+    capacity BIGINT,                        --- length of status list
+    credential_status credential_status_enum, -- Use the created ENUM type here
+    cr_dtimes timestamp NOT NULL default now(),
+    upd_dtimes timestamp                    -- When this VC record was last updated in the system
+);
+
+
+CREATE INDEX IF NOT EXISTS idx_slc_status_purpose ON certify.status_list_credential(status_purpose);
+CREATE INDEX IF NOT EXISTS idx_slc_credential_type ON certify.status_list_credential(credential_type);
+CREATE INDEX IF NOT EXISTS idx_slc_credential_status ON certify.status_list_credential(credential_status);
+CREATE INDEX IF NOT EXISTS idx_slc_cr_dtimes ON certify.status_list_credential(cr_dtimes);
+
+-- Create the ledger table
+CREATE TABLE certify.ledger (
+    id SERIAL PRIMARY KEY,                          -- Auto-incrementing serial primary key
+    credential_id VARCHAR(255) NOT NULL,            -- Unique ID of the Verifiable Credential WHOSE STATUS IS BEING TRACKED
+    issuer_id VARCHAR(255) NOT NULL,                -- Issuer of the TRACKED credential
+    issue_date TIMESTAMPTZ NOT NULL,                -- Issuance date of the TRACKED credential
+    expiration_date TIMESTAMPTZ,                    -- Expiration date of the TRACKED credential, if any
+    credential_type VARCHAR(100) NOT NULL,          -- Type of the TRACKED credential (e.g., 'VerifiableId')
+    indexed_attributes JSONB,                       -- Optional searchable attributes from the TRACKED credential
+    credential_status_details JSONB NOT NULL DEFAULT '[]'::jsonb,    -- Stores a list of status objects for this credential, defaults to an empty array.
+    cr_dtimes TIMESTAMP NOT NULL DEFAULT NOW(),     -- Creation timestamp of this ledger entry for the tracked credential
+
+    -- Constraints
+    CONSTRAINT uq_ledger_tracked_credential_id UNIQUE (credential_id), -- Ensure tracked credential_id is unique
+    CONSTRAINT ensure_credential_status_details_is_array CHECK (jsonb_typeof(credential_status_details) = 'array') -- Ensure it's always a JSON array
+);
+
+
+CREATE INDEX IF NOT EXISTS idx_ledger_credential_id ON certify.ledger(credential_id);
+CREATE INDEX IF NOT EXISTS idx_ledger_issuer_id ON certify.ledger(issuer_id);
+CREATE INDEX IF NOT EXISTS idx_ledger_credential_type ON certify.ledger(credential_type);
+CREATE INDEX IF NOT EXISTS idx_ledger_issue_date ON certify.ledger(issue_date);
+CREATE INDEX IF NOT EXISTS idx_ledger_expiration_date ON certify.ledger(expiration_date);
+CREATE INDEX IF NOT EXISTS idx_ledger_cr_dtimes ON certify.ledger(cr_dtimes);
+CREATE INDEX IF NOT EXISTS idx_gin_ledger_indexed_attrs ON certify.ledger USING GIN (indexed_attributes);
+CREATE INDEX IF NOT EXISTS idx_gin_ledger_status_details ON certify.ledger USING GIN (credential_status_details);
+
+CREATE TABLE IF NOT EXISTS certify.credential_status_transaction (
+    transaction_log_id SERIAL PRIMARY KEY,        -- Unique ID for this transaction log entry
+    credential_id VARCHAR(255) NOT NULL,          -- The ID of the credential this transaction pertains to (should exist in ledger.credential_id)
+    status_purpose VARCHAR(100),                  -- The purpose of this status update
+    status_value boolean,                         -- The status value (true/false)
+    status_list_credential_id VARCHAR(255),       -- The ID of the status list credential involved, if any
+    status_list_index BIGINT,                     -- The index on the status list, if any
+    cr_dtimes TIMESTAMP NOT NULL DEFAULT NOW(),   -- Creation timestamp
+    upd_dtimes TIMESTAMP                          -- Update timestamp
+);
+
+CREATE INDEX IF NOT EXISTS idx_cst_credential_id ON certify.credential_status_transaction(credential_id);
+CREATE INDEX IF NOT EXISTS idx_cst_status_purpose ON certify.credential_status_transaction(status_purpose);
+CREATE INDEX IF NOT EXISTS idx_cst_status_list_credential_id ON certify.credential_status_transaction(status_list_credential_id);
+CREATE INDEX IF NOT EXISTS idx_cst_status_list_index ON certify.credential_status_transaction(status_list_index);
+CREATE INDEX IF NOT EXISTS idx_cst_cr_dtimes ON certify.credential_status_transaction(cr_dtimes);
+CREATE INDEX IF NOT EXISTS idx_cst_status_value ON certify.credential_status_transaction(status_value);
+
+CREATE TABLE certify.status_list_available_indices (
+    id SERIAL PRIMARY KEY,                         -- Serial primary key
+    status_list_credential_id VARCHAR(255) NOT NULL, -- References status_list_credential.id
+    list_index BIGINT NOT NULL,                    -- The numerical index within the status list
+    is_assigned BOOLEAN NOT NULL DEFAULT FALSE,   -- Flag indicating if this index has been assigned
+    cr_dtimes TIMESTAMP NOT NULL DEFAULT NOW(),   -- Creation timestamp
+    upd_dtimes TIMESTAMP,                          -- Update timestamp
+
+    -- Foreign key constraint
+    CONSTRAINT fk_status_list_credential
+        FOREIGN KEY(status_list_credential_id)
+        REFERENCES certify.status_list_credential(id)
+        ON DELETE CASCADE -- If a status list credential is deleted, its available index entries are also deleted.
+        ON UPDATE CASCADE, -- If the ID of a status list credential changes, update it here too.
+
+    -- Unique constraint to ensure each index within a list is represented only once
+    CONSTRAINT uq_list_id_and_index
+        UNIQUE (status_list_credential_id, list_index)
+);
+
+CREATE INDEX IF NOT EXISTS idx_sla_available_indices
+    ON certify.status_list_available_indices (status_list_credential_id, is_assigned, list_index)
+    WHERE is_assigned = FALSE;
+
+-- Additional indexes for performance
+CREATE INDEX IF NOT EXISTS idx_sla_status_list_credential_id ON certify.status_list_available_indices(status_list_credential_id);
+CREATE INDEX IF NOT EXISTS idx_sla_is_assigned ON certify.status_list_available_indices(is_assigned);
+CREATE INDEX IF NOT EXISTS idx_sla_list_index ON certify.status_list_available_indices(list_index);
+CREATE INDEX IF NOT EXISTS idx_sla_cr_dtimes ON certify.status_list_available_indices(cr_dtimes);
+
+CREATE TABLE IF NOT EXISTS certify.shedlock (
+  name VARCHAR(64),
+  lock_until TIMESTAMPTZ(3) NOT NULL,
+  locked_at TIMESTAMPTZ(3) NOT NULL,
+  locked_by VARCHAR(255) NOT NULL,
+  PRIMARY KEY (name)
+);
+
+COMMENT ON TABLE shedlock IS 'Table for managing distributed locks using ShedLock library.';
+COMMENT ON COLUMN shedlock.name IS 'Unique name of the lock.';
+COMMENT ON COLUMN shedlock.lock_until IS 'Timestamp until which the lock is held. NULL if not locked.';
+COMMENT ON COLUMN shedlock.locked_at IS 'Timestamp when the lock was acquired. NULL if not locked.';
+COMMENT ON COLUMN shedlock.locked_by IS 'Identifier of the node/process that holds the lock. NULL if not locked.';

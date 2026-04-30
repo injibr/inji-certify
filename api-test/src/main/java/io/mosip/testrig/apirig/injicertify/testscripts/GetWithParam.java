@@ -33,9 +33,10 @@ import io.mosip.testrig.apirig.utils.AuthenticationTestException;
 import io.mosip.testrig.apirig.utils.GlobalConstants;
 import io.mosip.testrig.apirig.utils.OutputValidationUtil;
 import io.mosip.testrig.apirig.utils.ReportUtil;
+import io.mosip.testrig.apirig.utils.SecurityXSSException;
 import io.restassured.response.Response;
 
-public class GetWithParam extends AdminTestUtil implements ITest {
+public class GetWithParam extends InjiCertifyUtil implements ITest {
 	private static final Logger logger = Logger.getLogger(GetWithParam.class);
 	protected String testCaseName = "";
 	public Response response = null;
@@ -81,9 +82,9 @@ public class GetWithParam extends AdminTestUtil implements ITest {
 	 * @throws AdminTestException
 	 */
 	@Test(dataProvider = "testcaselist")
-	public void test(TestCaseDTO testCaseDTO) throws AuthenticationTestException, AdminTestException {
+	public void test(TestCaseDTO testCaseDTO) throws AuthenticationTestException, AdminTestException, SecurityXSSException {
 		testCaseName = testCaseDTO.getTestCaseName();
-		testCaseName = InjiCertifyUtil.isTestCaseValidForExecution(testCaseDTO);
+		testCaseDTO = InjiCertifyUtil.isTestCaseValidForExecution(testCaseDTO);
 		if (HealthChecker.signalTerminateExecution) {
 			throw new SkipException(
 					GlobalConstants.TARGET_ENV_HEALTH_CHECK_FAILED + HealthChecker.healthCheckFailureMapS);
@@ -148,10 +149,6 @@ public class GetWithParam extends AdminTestUtil implements ITest {
 					if (InjiCertifyConfigManager.getSunBirdBaseURL() != null
 							&& !InjiCertifyConfigManager.getSunBirdBaseURL().isBlank())
 						tempUrl = InjiCertifyConfigManager.getSunBirdBaseURL();
-					// Once sunbird registry is pointing to specific env, remove the above line and
-					// uncomment below line
-					// tempUrl = ApplnURI.replace(GlobalConstants.API_INTERNAL,
-					// MimotoConfigManager.getSunBirdBaseURL());
 					testCaseDTO.setEndPoint(testCaseDTO.getEndPoint().replace("$SUNBIRDBASEURL$", ""));
 				}
 
@@ -159,7 +156,19 @@ public class GetWithParam extends AdminTestUtil implements ITest {
 						COOKIENAME, testCaseDTO.getRole(), testCaseDTO.getTestCaseName(), sendEsignetToken);
 
 			} else {
-				response = getWithPathParamAndCookie(ApplnURI + testCaseDTO.getEndPoint(), inputJson, auditLogCheck,
+				String tempUrl = ApplnURI;
+				String endPointKeyWord = "";
+
+				if (testCaseDTO.getEndPoint().contains("BASEURL$")) {
+					tempUrl = InjiCertifyUtil.getTempURL(testCaseDTO);
+					endPointKeyWord = InjiCertifyUtil.getKeyWordFromEndPoint(testCaseDTO.getEndPoint());
+
+					if (!(endPointKeyWord.isBlank()) && testCaseDTO.getEndPoint().startsWith(endPointKeyWord)) {
+						testCaseDTO.setEndPoint(testCaseDTO.getEndPoint().replace(endPointKeyWord, ""));
+					}
+				}
+
+				response = getWithPathParamAndCookie(tempUrl + testCaseDTO.getEndPoint(), inputJson, auditLogCheck,
 						COOKIENAME, testCaseDTO.getRole(), testCaseDTO.getTestCaseName(), sendEsignetToken);
 			}
 

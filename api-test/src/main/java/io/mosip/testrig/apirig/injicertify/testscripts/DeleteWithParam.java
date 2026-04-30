@@ -31,9 +31,10 @@ import io.mosip.testrig.apirig.utils.AuthenticationTestException;
 import io.mosip.testrig.apirig.utils.GlobalConstants;
 import io.mosip.testrig.apirig.utils.OutputValidationUtil;
 import io.mosip.testrig.apirig.utils.ReportUtil;
+import io.mosip.testrig.apirig.utils.SecurityXSSException;
 import io.restassured.response.Response;
 
-public class DeleteWithParam extends AdminTestUtil implements ITest {
+public class DeleteWithParam extends InjiCertifyUtil implements ITest {
 	private static final Logger logger = Logger.getLogger(DeleteWithParam.class);
 	protected String testCaseName = "";
 	public Response response = null;
@@ -76,9 +77,9 @@ public class DeleteWithParam extends AdminTestUtil implements ITest {
 	 * @throws AdminTestException
 	 */
 	@Test(dataProvider = "testcaselist")
-	public void test(TestCaseDTO testCaseDTO) throws AuthenticationTestException, AdminTestException {
+	public void test(TestCaseDTO testCaseDTO) throws AuthenticationTestException, AdminTestException, SecurityXSSException {
 		testCaseName = testCaseDTO.getTestCaseName();
-		testCaseName = InjiCertifyUtil.isTestCaseValidForExecution(testCaseDTO);
+		testCaseDTO = InjiCertifyUtil.isTestCaseValidForExecution(testCaseDTO);
 		if (HealthChecker.signalTerminateExecution) {
 			throw new SkipException(
 					GlobalConstants.TARGET_ENV_HEALTH_CHECK_FAILED + HealthChecker.healthCheckFailureMapS);
@@ -123,10 +124,6 @@ public class DeleteWithParam extends AdminTestUtil implements ITest {
 					if (InjiCertifyConfigManager.getSunBirdBaseURL() != null
 							&& !InjiCertifyConfigManager.getSunBirdBaseURL().isBlank())
 						tempUrl = InjiCertifyConfigManager.getSunBirdBaseURL();
-					// Once sunbird registry is pointing to specific env, remove the above line and
-					// uncomment below line
-					// tempUrl = ApplnURI.replace(GlobalConstants.API_INTERNAL,
-					// MimotoConfigManager.getSunBirdBaseURL());
 					testCaseDTO.setEndPoint(testCaseDTO.getEndPoint().replace("$SUNBIRDBASEURL$", ""));
 				}
 
@@ -134,7 +131,18 @@ public class DeleteWithParam extends AdminTestUtil implements ITest {
 						testCaseDTO.getRole(), testCaseDTO.getTestCaseName());
 
 			} else {
-				response = deleteWithPathParamAndCookie(ApplnURI + testCaseDTO.getEndPoint(), inputJson, COOKIENAME,
+				String tempUrl = ApplnURI;
+				String endPointKeyWord = "";
+
+				if (testCaseDTO.getEndPoint().contains("BASEURL$")) {
+					tempUrl = InjiCertifyUtil.getTempURL(testCaseDTO);
+					endPointKeyWord = InjiCertifyUtil.getKeyWordFromEndPoint(testCaseDTO.getEndPoint());
+
+					if (!(endPointKeyWord.isBlank()) && testCaseDTO.getEndPoint().startsWith(endPointKeyWord)) {
+						testCaseDTO.setEndPoint(testCaseDTO.getEndPoint().replace(endPointKeyWord, ""));
+					}
+				}				
+				response = deleteWithPathParamAndCookie(tempUrl + testCaseDTO.getEndPoint(), inputJson, COOKIENAME,
 						testCaseDTO.getRole(), testCaseDTO.getTestCaseName());
 			}
 			Map<String, List<OutputValidationDto>> ouputValid = OutputValidationUtil.doJsonOutputValidation(

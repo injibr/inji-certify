@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import io.mosip.testrig.apirig.injicertify.testrunner.MosipTestRunner;
@@ -13,6 +14,9 @@ public class InjiCertifyConfigManager extends ConfigManager{
 	private static final Logger LOGGER = Logger.getLogger(InjiCertifyConfigManager.class);
 
 	public static void init() {
+		Logger configManagerLogger = Logger.getLogger(ConfigManager.class);
+		configManagerLogger.setLevel(Level.WARN);
+		
 		Map<String, Object> moduleSpecificPropertiesMap = new HashMap<>();
 		// Load scope specific properties
 		try {
@@ -20,8 +24,7 @@ public class InjiCertifyConfigManager extends ConfigManager{
 			Properties props = getproperties(path);
 			// Convert Properties to Map and add to moduleSpecificPropertiesMap
 			for (String key : props.stringPropertyNames()) {
-				String value = System.getenv(key) == null ? props.getProperty(key) : System.getenv(key);
-				moduleSpecificPropertiesMap.put(key, value);
+				moduleSpecificPropertiesMap.put(key, props.getProperty(key));
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
@@ -29,7 +32,13 @@ public class InjiCertifyConfigManager extends ConfigManager{
 		// Add module specific properties as well.
 		init(moduleSpecificPropertiesMap);
 	}
+	
+	public static String getInjiCertifyDBURL() {
+		return "jdbc:postgresql://" + getproperty("db-server") + ":" + getproperty("db-port") + "/" + getproperty("inji_certify_db_table");
+	}
 
-
+	public static void add(Map<String, Object> additionalPropertiesMap) {
+		propertiesMap.putAll(additionalPropertiesMap);
+	}
 
 }

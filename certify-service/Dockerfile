@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:21.0.5_11-jre
 
 ARG SOURCE
 ARG COMMIT_HASH
@@ -49,7 +49,8 @@ ENV artifactory_url_env=${artifactory_url}
 ENV enable_certify_artifactory="true"
 
 # environment variable for downloading hsm client in certify, to pass at docker run time
-ENV download_hsm_client="true"
+# HSM is installed at build time, so this is false at runtime
+ENV download_hsm_client="false"
 
 # can be passed during Docker build as build time environment for github branch to pickup configuration from.
 ARG container_user=mosip
@@ -62,7 +63,6 @@ ARG container_user_uid=1001
 
 # can be passed during Docker build as build time environment for github branch to pickup configuration from.
 ARG container_user_gid=1001
-
 
 ARG hsm_local_dir=hsm-client
 
@@ -85,7 +85,7 @@ RUN mkdir -p ${loader_path}
 
 ENV loader_path_env=${loader_path}
 
-# Install HSM client at build time
+# Install HSM client at build time (as root, no sudo needed)
 ARG hsm_zip_path=artifactory/libs-release-local/hsm/client-21.zip
 RUN if [ -n "${artifactory_url}" ]; then \
     cd /tmp && \
@@ -102,8 +102,6 @@ RUN if [ -n "${artifactory_url}" ]; then \
     chmod +x $DIR_NAME/install.sh && $DIR_NAME/install.sh && \
     rm -f $FILE_NAME; \
     fi
-
-ENV download_hsm_client="false"
 
 ADD certify-service/configure_start.sh configure_start.sh
 
@@ -124,7 +122,7 @@ USER ${container_user_uid}:${container_user_gid}
 EXPOSE 8090
 EXPOSE 9010
 
-ENTRYPOINT [ "/home/mosip/configure_start.sh" ]
+ENTRYPOINT ["/home/mosip/configure_start.sh"]
 
 CMD if [ "$is_glowroot_env" = "present" ]; then \
     wget -q "${artifactory_url_env}"/artifactory/libs-release-local/io/mosip/testing/glowroot.zip ; \
