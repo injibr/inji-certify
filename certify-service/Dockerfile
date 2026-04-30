@@ -70,11 +70,9 @@ ENV hsm_local_dir_name=${hsm_local_dir}
 
 # install packages and create user
 RUN apt-get -y update \
-&& apt-get install -y unzip sudo\
+&& apt-get install -y unzip wget ca-certificates \
 && groupadd -g ${container_user_gid} ${container_user_group} \
-&& useradd -u ${container_user_uid} -g ${container_user_group} -s /bin/sh -m -l ${container_user} \
-&& usermod -aG sudo ${container_user} \
-&& echo "%sudo ALL=(ALL) NOPASSWD:/home/${container_user}/${hsm_local_dir}/install.sh" >> /etc/sudoers
+&& useradd -u ${container_user_uid} -g ${container_user_group} -s /bin/sh -m -l ${container_user}
 
 # set working directory for the user
 WORKDIR /home/${container_user}
@@ -87,11 +85,30 @@ RUN mkdir -p ${loader_path}
 
 ENV loader_path_env=${loader_path}
 
+# Install HSM client at build time
+ARG hsm_zip_path=artifactory/libs-release-local/hsm/client-21.zip
+RUN if [ -n "${artifactory_url}" ]; then \
+    cd /tmp && \
+    wget -q "${artifactory_url}/${hsm_zip_path}" -O client-21.zip && \
+    FILE_NAME=client-21.zip && \
+    DIR_NAME=/home/${container_user}/${hsm_local_dir} && \
+    has_parent=$(zipinfo -1 "$FILE_NAME" | awk '{split($NF,a,"/");print a[1]}' | sort -u | wc -l) && \
+    if test "$has_parent" -eq 1; then \
+      dirname=$(zipinfo -1 "$FILE_NAME" | awk '{split($NF,a,"/");print a[1]}' | sort -u | head -n 1) && \
+      unzip $FILE_NAME && mv -v $dirname $DIR_NAME; \
+    else \
+      mkdir -p $DIR_NAME && unzip -d $DIR_NAME $FILE_NAME; \
+    fi && \
+    chmod +x $DIR_NAME/install.sh && $DIR_NAME/install.sh && \
+    rm -f $FILE_NAME; \
+    fi
+
+ENV download_hsm_client="false"
+
 ADD certify-service/configure_start.sh configure_start.sh
 
-RUN chmod +x configure_start.sh
-
-RUN chmod a-w /home/${container_user}/configure_start.sh
+RUN sed -i 's/\r$//' configure_start.sh \
+&& chmod 0555 configure_start.sh
 
 COPY ./certify-service/target/certify-service-*.jar certify-service.jar
 
@@ -107,7 +124,7 @@ USER ${container_user_uid}:${container_user_gid}
 EXPOSE 8090
 EXPOSE 9010
 
-ENTRYPOINT [ "./configure_start.sh" ]
+ENTRYPOINT [ "/home/mosip/configure_start.sh" ]
 
 CMD if [ "$is_glowroot_env" = "present" ]; then \
     wget -q "${artifactory_url_env}"/artifactory/libs-release-local/io/mosip/testing/glowroot.zip ; \
@@ -116,5 +133,5 @@ CMD if [ "$is_glowroot_env" = "present" ]; then \
     sed -i 's/<service_name>/idp-service/g' glowroot/glowroot.properties ; \
     java -jar -javaagent:glowroot/glowroot.jar -Dloader.path="${loader_path_env}" -Dspring.cloud.config.label="${spring_config_label_env}" -Dspring.profiles.active="${active_profile_env}" -Dspring.cloud.config.uri="${spring_config_url_env}" certify-service.jar ; \
     else \
-    java -jar -Dloader.path="${loader_path_env}" -Dspring.cloud.config.label="${spring_config_label_env}" -Dspring.profiles.active="${active_profile_env}" -Dspring.cloud.config.uri="${spring_config_url_env}" certify-service.jar ; \
+    java -jar -Dloader.path="${loader_path_env}" -Dspring.cloud.config.label="${spring_config_label_env}" -Dspring.profiles.active="${active_profile_env}" -Dspring.cloud.config.uri="${spring_config_url_env}" /home/mosip/certify-service.jar ; \
     fi

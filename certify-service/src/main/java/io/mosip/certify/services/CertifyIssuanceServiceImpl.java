@@ -335,6 +335,7 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                         }
                         case "CAFCredential" -> "velocityEngineCaf";
                         case "CARDocument" -> "velocityEngineCarDocument";
+                        case "CCIRDocument", "CCIRCredential" -> "velocityEngineCcir";
                         case "ECACredential" -> "velocityEngineEca";
                         default -> "velocityEngineDefault";
                     };

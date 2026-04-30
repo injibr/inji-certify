@@ -4,33 +4,37 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.mosip.certify.api.dataprovider.DataProviderService;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
+@Slf4j
 @Component
 public class CCIRDataProvider implements DataProviderService {
+    private final SncrCpfCnpjClient sncrCpfCnpjClient;
+
     private final WebClient webClient;
 
-    // OAuth2 token endpoint
-    private final String tokenUrl = "https://pisrj.dataprev.gov.br/oauth2/token";
-
-    // Client credentials (replace with your actual values)
-    private final String clientId = "clientId";
-    private final String clientSecret = "clientSecret";
-
-    // Optional scope (empty string if not needed)
     private final String scope = "";
 
-    // Protected API endpoint to call with token
-    private final String apiUrl = "https://gateway.apiserpro.serpro.gov.br/consulta-ccir-trial/v1/consultarDadosCcirPorCodigoImovel/11111111";
+    private final String apiUrl;
 
-    public CCIRDataProvider(WebClient webClient) {
+    private final String xcpfuser;
+
+    private final CCIRTokenClient ccirTokenClient;
+
+    public CCIRDataProvider(SncrCpfCnpjClient sncrCpfCnpjClient, WebClient webClient, @Value("${ccir.document.api.url}")String apiUrl,@Value("${ccir.xcpf.user}")String xcpfuser, CCIRTokenClient ccirTokenClient) {
         this.webClient = webClient;
+        this.sncrCpfCnpjClient = sncrCpfCnpjClient;
+        this.apiUrl = apiUrl;
+        this.ccirTokenClient = ccirTokenClient;
+        this.xcpfuser = xcpfuser;
     }
 
 
@@ -42,61 +46,28 @@ public class CCIRDataProvider implements DataProviderService {
 
     @Override
     public JSONObject getData(String cpfNumber) throws JSONException {
-        // Step 1: Get access token
-        // String accessToken = getAccessToken();
-
+    // Step 1: Get access token
+        String accessToken = ccirTokenClient.getAccessToken();
+        String registrationNumber = sncrCpfCnpjClient.getRegistrationNumber(cpfNumber, accessToken, xcpfuser);
+        log.info("Registration Number: {}", registrationNumber);
         // Step 2: Call protected API with Bearer token
         String response =  webClient.get()
-                .uri(apiUrl)
-                .headers(headers -> headers.setBearerAuth("Bearer 06aef429-a981-3ec5-a1f8-71d38d86481e"))
+                .uri(String.format(apiUrl, registrationNumber))
+                .headers(headers -> {
+                     headers.setBearerAuth(accessToken);
+                     headers.add("x-cpf-usuario", xcpfuser);
+                 })
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
         if (response == null) {
             throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "No data found for CCIR for Cpf:"+cpfNumber);
         }
-        return new JSONObject(response);
+        JSONObject jsonResponse = new JSONObject(response);
+        if (jsonResponse.isNull("ccir")) {
+            throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "CCIR data is null for property code: " + registrationNumber + ". Property may be cancelled.");
+        }
+        return jsonResponse;
     }
 
-    /**
-     * Retrieves the OAuth 2.0 token from the token endpoint using client credentials grant.
-     */
-    private String getAccessToken() {
-
-        Map tokenResponse = webClient.post()
-                .uri(tokenUrl)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .bodyValue("grant_type=client_credentials" +
-                        "&client_id=" + clientId +
-                        "&client_secret=" + clientSecret +
-                        "&scope=default" )
-                .retrieve()
-                .bodyToMono(Map.class)
-                .block();
-
-        if (tokenResponse == null || tokenResponse.get("access_token") == null) {
-            throw new RuntimeException("Failed to retrieve access token");
-        }
-
-        return (String) tokenResponse.get("access_token");
-    }
-
-    /**
-     * Class representing the OAuth token JSON response.
-     * Maps JSON keys to Java fields.
-     */
-    public static class TokenResponse {
-        private String access_token;
-        private String token_type;
-        private long expires_in;
-        private String scope;
-
-        public String getAccessToken() {
-            return access_token;
-        }
-
-        public void setAccessToken(String access_token) {
-            this.access_token = access_token;
-        }
-    }
 }
