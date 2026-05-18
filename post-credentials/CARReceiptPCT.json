@@ -1,0 +1,43 @@
+{
+  "credentialConfigKeyId": "CARReceiptPCT",
+  "credentialFormat": "ldp_vc",
+  "scope": "openid",
+  "issuerId": "MGI",
+  "credentialTypes": ["VerifiableCredential", "CARReceiptPCT"],
+  "contextURLs": ["https://www.w3.org/2018/credentials/v1"],
+  "vcTemplate": "eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJpc3N1ZXIiOiIke19pc3N1ZXJ9IiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkNBUlJlY2VpcHQiXSwiaXNzdWFuY2VEYXRlIjoiJHt2YWxpZEZyb219IiwiZXhwaXJhdGlvbkRhdGUiOiIke3ZhbGlkVW50aWx9IiwiY3JlZGVudGlhbFN1YmplY3QiOnsiaWRlbnRpZmljYWRvckltb3ZlbCI6IiR7aWRlbnRpZmljYWRvckltb3ZlbH0iLCJjb2RpZ29JbW92ZWwiOiIke2NvZGlnb0ltb3ZlbH0iLCJzaXR1YWNhb0ltb3ZlbCI6IiR7c2l0dWFjYW9JbW92ZWx9IiwidGlwb0ltb3ZlbCI6IiR7dGlwb0ltb3ZlbH0iLCJkYXRhQ2FkYXN0cm8iOiIke2RhdGFDYWRhc3Ryb30iLCJub21lSW1vdmVsIjoiJHtub21lSW1vdmVsfSIsImNvZGlnb011bmljaXBpbyI6IiR7Y29kaWdvTXVuaWNpcGlvfSIsIm11bmljaXBpbyI6IiR7bXVuaWNpcGlvfSIsInVuaWRhZGVGZWRlcmF0aXZhIjoiJHt1bmlkYWRlRmVkZXJhdGl2YX0iLCJjb29yZGVuYWRhSW1vdmVsWCI6IiR7Y29vcmRlbmFkYUltb3ZlbFh9IiwiY29vcmRlbmFkYUltb3ZlbFkiOiIke2Nvb3JkZW5hZGFJbW92ZWxZfSIsImFyZWFUb3RhbEltb3ZlbCI6IiR7YXJlYVRvdGFsSW1vdmVsfSIsIm1vZHVsb0Zpc2NhbCI6IiR7bW9kdWxvRmlzY2FsfSIsInByb3RvY29sbyI6IiR7cHJvdG9jb2xvfSIsImluZm9ybWFjb2VzQWRpY2lvbmFpcyI6IiR7aW5mb3JtYWNvZXNBZGljaW9uYWlzfSIsImdlb0ltb3ZlbCI6IiR7Z2VvSW1vdmVsfSIsImFyZWFTZXJ2aWRhb0FkbWluaXN0cmF0aXZhIjoiJHthcmVhU2VydmlkYW9BZG1pbmlzdHJhdGl2YX0iLCJhcmVhTGlxdWlkYUltb3ZlbCI6IiR7YXJlYUxpcXVpZGFJbW92ZWx9IiwiYXJlYVByZXNlcnZhY2FvUGVybWFuZW50ZSI6IiR7YXJlYVByZXNlcnZhY2FvUGVybWFuZW50ZX0iLCJhcmVhVXNvUmVzdHJpdG8iOiIke2FyZWFVc29SZXN0cml0b30iLCJhcmVhQ29uc29saWRhZGEiOiIke2FyZWFDb25zb2xpZGFkYX0iLCJhcmVhUmVtYW5lc2NlbnRlVmVnZXRhY2FvTmF0aXZhIjoiJHthcmVhUmVtYW5lc2NlbnRlVmVnZXRhY2FvTmF0aXZhfSIsImFyZWFSZXNlcnZhTGVnYWwiOiIke2FyZWFSZXNlcnZhTGVnYWx9IiwibWF0cmljdWxhIjoiJHttYXRyaWN1bGF9IiwiZGF0YU1hdHJpY3VsYSI6IiR7ZGF0YU1hdHJpY3VsYX0iLCJsaXZyb01hdHJpY3VsYSI6IiR7bGl2cm9NYXRyaWN1bGF9IiwiZm9saGFNYXRyaWN1bGEiOiIke2ZvbGhhTWF0cmljdWxhfSIsIm11bmljaXBpb0NhcnRvcmlvIjoiJHttdW5pY2lwaW9DYXJ0b3Jpb30iLCJ1ZkNhcnRvcmlvIjoiJHt1ZkNhcnRvcmlvfSJ9fQ==",
+  "didUrl": "did:web:did-server.inji-local.svc.cluster.local:mgi",
+  "keyManagerAppId": "CERTIFY_VC_SIGN_ED25519",
+  "keyManagerRefId": "ED25519_SIGN",
+  "signatureAlgo": "EdDSA",
+  "signatureCryptoSuite": "Ed25519Signature2020",
+  "metaDataDisplay": [
+    {
+      "name": "RECIBO DE INSCRIÇÃO DO IMÓVEL RURAL NO CAR - PCT",
+      "locale": "pt",
+      "logo": {"url": "https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png", "alt_text": "a square logo of CAR"},
+      "background_color": "#FDFAF9",
+      "background_image": {"uri": "https://sunbird.org/images/sunbird-logo-new.png"},
+      "text_color": "#7C4616"
+    },
+    {
+      "name": "RECIBO DE INSCRIÇÃO DO IMÓVEL RURAL NO CAR - PCT",
+      "locale": "en",
+      "logo": {"url": "https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png", "alt_text": "a square logo of CAR"},
+      "background_color": "#FDFAF9",
+      "background_image": {"uri": "https://sunbird.org/images/sunbird-logo-new.png"},
+      "text_color": "#7C4616"
+    }
+  ],
+  "credentialSubjectDefinition": {
+    "identificadorImovel": {"display": [{"name": "Identificador do Imóvel", "locale": "pt"}]},
+    "codigoImovel": {"display": [{"name": "Código do Imóvel", "locale": "pt"}]},
+    "situacaoImovel": {"display": [{"name": "Situação do Imóvel", "locale": "pt"}]},
+    "tipoImovel": {"display": [{"name": "Tipo do Imóvel", "locale": "pt"}]},
+    "nomeImovel": {"display": [{"name": "Nome do Imóvel", "locale": "pt"}]},
+    "municipio": {"display": [{"name": "Município", "locale": "pt"}]},
+    "unidadeFederativa": {"display": [{"name": "Estado", "locale": "pt"}]},
+    "areaTotalImovel": {"display": [{"name": "Área Total do Imóvel", "locale": "pt"}]}
+  },
+  "displayOrder": ["identificadorImovel", "codigoImovel", "situacaoImovel", "tipoImovel", "dataCadastro", "nomeImovel", "codigoMunicipio", "municipio", "unidadeFederativa", "coordenadaImovelX", "coordenadaImovelY", "areaTotalImovel", "moduloFiscal", "protocolo", "informacoesAdicionais", "geoImovel", "areaServidaoAdministrativa", "areaLiquidaImovel", "areaPreservacaoPermanente", "areaUsoRestrito", "areaConsolidada", "areaRemanescenteVegetacaoNativa", "areaReservaLegal", "matricula", "dataMatricula", "livroMatricula", "folhaMatricula", "municipioCartorio", "ufCartorio"]
+}

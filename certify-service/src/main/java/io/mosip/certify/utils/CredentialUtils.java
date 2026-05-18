@@ -1,6 +1,7 @@
 package io.mosip.certify.utils;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.GeneralSecurityException;
 import java.util.*;
 
@@ -125,7 +126,11 @@ public class CredentialUtils {
                 finalTemplate.put(key, new JSONArray((List<Object>) value));
             } else if (value.getClass().isArray()) {
                 finalTemplate.put(key, new JSONArray(List.of(value)));
-            } else if (value instanceof Integer | value instanceof Float | value instanceof Long | value instanceof Double) {
+            } else if (value instanceof Integer | value instanceof Float | value instanceof Long | value instanceof Double
+                    // INJIBR-CUSTOM: BigDecimal for area/modulo numeric fields from govbr APIs
+                    | value instanceof BigDecimal
+                    // INJIBR-CUSTOM: Boolean for ECACredential.isOver18 field
+                    | value instanceof Boolean) {
                 // entities which don't need to be quoted
                 finalTemplate.put(key, value);
             } else if (value instanceof String){

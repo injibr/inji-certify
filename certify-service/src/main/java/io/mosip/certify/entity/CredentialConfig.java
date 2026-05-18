@@ -125,6 +125,10 @@ public class CredentialConfig {
     @Column(name = "qr_signature_algo")
     private String qrSignatureAlgo;
 
+    // INJIBR-CUSTOM: identifies the logical issuer (MGI, INCRA, MDA) for multi-issuer govbr flow
+    @Column(name = "issuer_id")
+    private String issuerId;
+
     @NotNull
     @Column(name = "cr_dtimes")
     private LocalDateTime createdTimes;

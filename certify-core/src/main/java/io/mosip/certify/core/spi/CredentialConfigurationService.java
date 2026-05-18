@@ -16,4 +16,7 @@ public interface CredentialConfigurationService {
     String deleteCredentialConfigurationById(String id);
 
     CredentialIssuerMetadataDTO fetchCredentialIssuerMetadata(String version);
+
+    // INJIBR-CUSTOM: lookup by issuerId for govbr multi-issuer flow
+    CredentialIssuerMetadataDTO fetchCredentialIssuerMetadataByIssuerId(String issuerId);
 }

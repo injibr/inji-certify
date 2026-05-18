@@ -44,7 +44,7 @@ public class VCIssuanceController {
      */
     @PostMapping(value = "/credential",produces = "application/json")
     public CredentialResponse getCredential(@Valid @RequestBody CredentialRequest credentialRequest) throws CertifyException {
-        log.info("Get credential request received for format: {}", credentialRequest.getFormat());
+        log.info("VCIssuanceController getCredential() request : {}", credentialRequest);
         return vcIssuanceService.getCredential(credentialRequest);
     }
 
@@ -81,7 +81,12 @@ public class VCIssuanceController {
     @Deprecated
     @GetMapping(value = "/.well-known/openid-credential-issuer",produces = "application/json")
     public CredentialIssuerMetadataDTO getMetadata(
-            @RequestParam(name = "version", required = false, defaultValue = "latest") String version) {
+            @RequestParam(name = "version", required = false, defaultValue = "latest") String version,
+            // INJIBR-CUSTOM: issuer_id param para lookup multi-issuer govbr
+            @RequestParam(name = "issuer_id", required = false) String issuerId) {
+        if (issuerId != null && !issuerId.isBlank()) {
+            return credentialConfigurationService.fetchCredentialIssuerMetadataByIssuerId(issuerId);
+        }
         return credentialConfigurationService.fetchCredentialIssuerMetadata(version);
     }
 

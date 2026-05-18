@@ -30,7 +30,12 @@ public class WellKnownController {
 
     @GetMapping(value = "/.well-known/openid-credential-issuer", produces = "application/json")
     public CredentialIssuerMetadataDTO getCredentialIssuerMetadata(
-            @RequestParam(name = "version", required = false, defaultValue = "latest") String version) {
+            @RequestParam(name = "version", required = false, defaultValue = "latest") String version,
+            // INJIBR-CUSTOM: issuer_id param para lookup multi-issuer govbr
+            @RequestParam(name = "issuer_id", required = false) String issuerId) {
+        if (issuerId != null && !issuerId.isBlank()) {
+            return credentialConfigurationService.fetchCredentialIssuerMetadataByIssuerId(issuerId);
+        }
         return credentialConfigurationService.fetchCredentialIssuerMetadata(version);
     }
 

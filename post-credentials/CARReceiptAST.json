@@ -1,0 +1,42 @@
+{
+  "credentialConfigKeyId": "CARReceiptAST",
+  "credentialFormat": "ldp_vc",
+  "scope": "openid",
+  "issuerId": "MGI",
+  "credentialTypes": ["VerifiableCredential", "CARReceiptAST"],
+  "contextURLs": ["https://www.w3.org/2018/credentials/v1"],
+  "vcTemplate": "eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJpc3N1ZXIiOiIke19pc3N1ZXJ9IiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIkNBUlJlY2VpcHQiXSwiaXNzdWFuY2VEYXRlIjoiJHt2YWxpZEZyb219IiwiZXhwaXJhdGlvbkRhdGUiOiIke3ZhbGlkVW50aWx9IiwiY3JlZGVudGlhbFN1YmplY3QiOnsiY29kaWdvSW1vdmVsIjoiJHtjb2RpZ29JbW92ZWx9IiwiZGF0YUNhZGFzdHJvIjoiJHtkYXRhQ2FkYXN0cm99Iiwibm9tZUltb3ZlbCI6IiR7bm9tZUltb3ZlbH0iLCJtdW5pY2lwaW8iOiIke211bmljaXBpb30iLCJ0aXBvSW1vdmVsIjoiJHt0aXBvSW1vdmVsfSIsInVuaWRhZGVGZWRlcmF0aXZhIjoiJHt1bmlkYWRlRmVkZXJhdGl2YX0iLCJjb29yZGVuYWRhSW1vdmVsWCI6IiR7Y29vcmRlbmFkYUltb3ZlbFh9IiwiY29vcmRlbmFkYUltb3ZlbFkiOiIke2Nvb3JkZW5hZGFJbW92ZWxZfSIsImFyZWFUb3RhbEltb3ZlbCI6IiR7YXJlYVRvdGFsSW1vdmVsfSIsIm1vZHVsb0Zpc2NhbCI6IiR7bW9kdWxvRmlzY2FsfSIsInByb3RvY29sbyI6IiR7cHJvdG9jb2xvfSIsImluZm9ybWFjb2VzQWRpY2lvbmFpcyI6IiR7aW5mb3JtYWNvZXNBZGljaW9uYWlzfSIsImdlb0ltb3ZlbCI6IiR7Z2VvSW1vdmVsfSIsInByb3ByaWV0YXJpb3MiOiIke3Byb3ByaWV0YXJpb3N9IiwiYXJlYVNlcnZpZGFvQWRtaW5pc3RyYXRpdmEiOiIke2FyZWFTZXJ2aWRhb0FkbWluaXN0cmF0aXZhfSIsImFyZWFVc29SZXN0cml0byI6IiR7YXJlYVVzb1Jlc3RyaXRvfSIsImFyZWFQcmVzZXJ2YWNhb1Blcm1hbmVudGUiOiIke2FyZWFQcmVzZXJ2YWNhb1Blcm1hbmVudGV9IiwiYXJlYUNvbnNvbGlkYWRhIjoiJHthcmVhQ29uc29saWRhZGF9IiwiYXJlYVJlbWFuZXNjZW50ZVZlZ2V0YWNhb05hdGl2YSI6IiR7YXJlYVJlbWFuZXNjZW50ZVZlZ2V0YWNhb05hdGl2YX0iLCJhcmVhUmVzZXJ2YUxlZ2FsIjoiJHthcmVhUmVzZXJ2YUxlZ2FsfSIsImFyZWFMaXF1aWRhSW1vdmVsIjoiJHthcmVhTGlxdWlkYUltb3ZlbH0iLCJtYXRyaWN1bGEiOiIke21hdHJpY3VsYX0iLCJkYXRhTWF0cmljdWxhIjoiJHtkYXRhTWF0cmljdWxhfSIsImxpdnJvTWF0cmljdWxhIjoiJHtsaXZyb01hdHJpY3VsYX0iLCJmb2xoYU1hdHJpY3VsYSI6IiR7Zm9saGFNYXRyaWN1bGF9IiwibXVuaWNpcGlvQ2FydG9yaW8iOiIke211bmljaXBpb0NhcnRvcmlvfSIsInVmQ2FydG9yaW8iOiIke3VmQ2FydG9yaW99IiwiY3BmQ25waiI6IiR7Y3BmQ25wan0iLCJub21lIjoiJHtub21lfSJ9fQ==",
+  "didUrl": "did:web:did-server.inji-local.svc.cluster.local:mgi",
+  "keyManagerAppId": "CERTIFY_VC_SIGN_ED25519",
+  "keyManagerRefId": "ED25519_SIGN",
+  "signatureAlgo": "EdDSA",
+  "signatureCryptoSuite": "Ed25519Signature2020",
+  "metaDataDisplay": [
+    {
+      "name": "RECIBO DE INSCRIÇÃO DO IMÓVEL RURAL NO CAR - AST",
+      "locale": "pt",
+      "logo": {"url": "https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png", "alt_text": "a square logo of CAR"},
+      "background_color": "#FDFAF9",
+      "background_image": {"uri": "https://sunbird.org/images/sunbird-logo-new.png"},
+      "text_color": "#7C4616"
+    },
+    {
+      "name": "RECIBO DE INSCRIÇÃO DO IMÓVEL RURAL NO CAR - AST",
+      "locale": "en",
+      "logo": {"url": "https://raw.githubusercontent.com/kunalash/Files/refs/heads/main/logo.png", "alt_text": "a square logo of CAR"},
+      "background_color": "#FDFAF9",
+      "background_image": {"uri": "https://sunbird.org/images/sunbird-logo-new.png"},
+      "text_color": "#7C4616"
+    }
+  ],
+  "credentialSubjectDefinition": {
+    "codigoImovel": {"display": [{"name": "Código do Imóvel", "locale": "pt"}]},
+    "nomeImovel": {"display": [{"name": "Nome do Imóvel", "locale": "pt"}]},
+    "tipoImovel": {"display": [{"name": "Tipo do Imóvel", "locale": "pt"}]},
+    "municipio": {"display": [{"name": "Município", "locale": "pt"}]},
+    "unidadeFederativa": {"display": [{"name": "Estado", "locale": "pt"}]},
+    "areaTotalImovel": {"display": [{"name": "Área Total do Imóvel", "locale": "pt"}]},
+    "proprietarios": {"display": [{"name": "Proprietários", "locale": "pt"}]}
+  },
+  "displayOrder": ["codigoImovel", "dataCadastro", "nomeImovel", "municipio", "tipoImovel", "unidadeFederativa", "coordenadaImovelX", "coordenadaImovelY", "areaTotalImovel", "moduloFiscal", "protocolo", "informacoesAdicionais", "geoImovel", "proprietarios", "areaServidaoAdministrativa", "areaUsoRestrito", "areaPreservacaoPermanente", "areaConsolidada", "areaRemanescenteVegetacaoNativa", "areaReservaLegal", "areaLiquidaImovel", "matricula", "dataMatricula", "livroMatricula", "folhaMatricula", "municipioCartorio", "ufCartorio", "cpfCnpj", "nome"]
+}

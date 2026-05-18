@@ -53,5 +53,8 @@ public class CredentialRequest {
      */
     private Map<String,Object> claims;
 
+    // INJIBR-CUSTOM: identifies the logical issuer (MGI, INCRA, MDA) for multi-issuer govbr flow
+    private String issuerId;
+
     String vct;
 }

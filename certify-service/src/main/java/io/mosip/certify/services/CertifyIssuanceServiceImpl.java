@@ -16,6 +16,7 @@ import io.mosip.certify.api.util.ActionStatus;
 import io.mosip.certify.api.util.AuditHelper;
 import io.mosip.certify.config.VelocityEnvConfig;
 import io.mosip.certify.core.constants.*;
+import io.mosip.certify.core.dto.CredentialConfigurationSupportedDTO;
 import io.mosip.certify.core.dto.CredentialMetadata;
 import io.mosip.certify.core.dto.CredentialRequest;
 import io.mosip.certify.core.dto.CredentialResponse;
@@ -133,6 +134,10 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
     @Value("${mosip.certify.data-provider-plugin.vc-expiry-duration:P730D}")
     String defaultExpiryDuration;
 
+    // INJIBR-CUSTOM: ECA has shorter expiry since age verification may change
+    @Value("${mosip.certify.data-provider-plugin.eca.vc-expiry-duration:P90d}")
+    String ecaExpiryDuration;
+
     @Value("#{${mosip.certify.signature-algo.key-alias-mapper}}")
     private Map<String, List<List<String>>> keyAliasMapper;
 
@@ -150,8 +155,16 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
         if(!parsedAccessToken.isActive())
             throw new NotAuthenticatedException();
         // 2. Scope Validation
-        String scopeClaim = (String) parsedAccessToken.getClaims().getOrDefault("scope", "");
+        // INJIBR-CUSTOM: govbr token scope does not identify the credential type;
+        // original esignet lookup kept as fallback, govbr uses issuerId + doctype from request body
         CredentialMetadata credentialMetadata = null;
+        String scopeClaim;
+        Object scopeRaw = parsedAccessToken.getClaims().getOrDefault("scope", "");
+        if (scopeRaw instanceof List) {
+            scopeClaim = String.join(" ", (List<String>) scopeRaw);
+        } else {
+            scopeClaim = (String) scopeRaw;
+        }
         for(String scope : scopeClaim.split(Constants.SPACE)) {
             Optional<CredentialMetadata> result = getScopeCredentialMapping(scope, credentialRequest.getFormat(), credentialConfigurationService.fetchCredentialIssuerMetadata("latest"), credentialRequest);
             if(result.isPresent()) {
@@ -160,14 +173,25 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
             }
         }
 
+        // INJIBR-CUSTOM: fallback for govbr — lookup by issuerId + doctype when scope-based lookup fails
+        if (credentialMetadata == null) {
+            credentialMetadata = resolveCredentialMetadata(credentialRequest);
+        }
+
         if(credentialMetadata == null) {
-            log.error("No credential mapping found for the provided scope {}", scopeClaim);
-            throw new CertifyException(VCIErrorConstants.INVALID_SCOPE, "No credential mapping found for the provided scope.");
+            log.error("No credential mapping found for the provided scope {} or issuerId {}", scopeClaim, credentialRequest.getIssuerId());
+            throw new CertifyException(VCIErrorConstants.INVALID_SCOPE);
         }
 
         // 3. Proof Validation
         ProofValidator proofValidator = proofValidatorFactory.getProofValidator(credentialRequest.getProof().getProof_type());
-        String validCNonce = VCIssuanceUtil.getValidClientNonce(vciCacheService, parsedAccessToken, cNonceExpireSeconds, securityHelperService, log);
+        // INJIBR-CUSTOM: govbr does not use cNonce — bypass via JwtProofValidator property
+        String validCNonce = null;
+        try {
+            validCNonce = VCIssuanceUtil.getValidClientNonce(vciCacheService, parsedAccessToken, cNonceExpireSeconds, securityHelperService, log);
+        } catch (Exception e) {
+            log.debug("[INJIBR-CUSTOM] cNonce not found, proceeding without it (govbr bypass may be active)");
+        }
         proofValidator.validateCNonce(validCNonce, cNonceExpireSeconds, parsedAccessToken, credentialRequest);
         if(!proofValidator.validate((String)parsedAccessToken.getClaims().get(Constants.CLIENT_ID), validCNonce,
                 credentialRequest.getProof(), credentialMetadata.getProofTypesSupported())) {
@@ -183,6 +207,48 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
         return VCIssuanceUtil.getCredentialResponse(credentialRequest.getFormat(), vcResult);
     }
 
+    /**
+     * INJIBR-CUSTOM: resolves CredentialMetadata for govbr multi-issuer flow using issuerId + doctype
+     */
+    private CredentialMetadata resolveCredentialMetadata(CredentialRequest credentialRequest) {
+        if (credentialRequest.getIssuerId() == null || credentialRequest.getDoctype() == null) {
+            return null;
+        }
+        try {
+            Map<String, CredentialConfigurationSupportedDTO> supported = credentialConfigurationService
+                    .fetchCredentialIssuerMetadataByIssuerId(credentialRequest.getIssuerId())
+                    .getCredentialConfigurationSupportedDTO();
+            if (supported == null) return null;
+            return supported.entrySet().stream()
+                    .filter(e -> {
+                        CredentialConfigurationSupportedDTO dto = e.getValue();
+                        String doctype = credentialRequest.getDoctype();
+                        // mso_mdoc: compara contra docType da config (ex: br.gov.mgi.eca)
+                        if (dto.getDocType() != null) return doctype.equals(dto.getDocType());
+                        // ldp_vc: compara contra credentialConfigKeyId (ex: ECACredential)
+                        return doctype.equals(e.getKey());
+                    })
+                    .findFirst()
+                    .map(e -> {
+                        CredentialConfigurationSupportedDTO dto = e.getValue();
+                        CredentialMetadata cm = new CredentialMetadata();
+                        cm.setId(e.getKey());
+                        cm.setFormat(dto.getFormat());
+                        cm.setScope(dto.getScope());
+                        cm.setProofTypesSupported(dto.getProofTypesSupported());
+                        if (dto.getCredentialDefinition() != null) {
+                            cm.setTypes(dto.getCredentialDefinition().getType());
+                        }
+                        return cm;
+                    })
+                    .orElse(null);
+        } catch (Exception e) {
+            log.warn("[INJIBR-CUSTOM] resolveCredentialMetadata failed for issuerId={} doctype={}: {}",
+                    credentialRequest.getIssuerId(), credentialRequest.getDoctype(), e.getMessage());
+            return null;
+        }
+    }
+
     @Override
     public Map<String, Object> getDIDDocument() {
         didDocument = didDocumentUtil.generateDIDDocument(didUrl);
@@ -195,6 +261,22 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
         vcRequestDto.setFormat(credentialRequest.getFormat());
 
         try {
+            // INJIBR-CUSTOM: DataProviderPluginImpl dispatches by docType; inject credentialMetadata.getId()
+            // (credentialConfigKeyId) para que a normalizacao de sufixo funcione para qualquer formato
+            // ex: ECACredential (ldp_vc) e ECACredential-mdoc (mso_mdoc) ambos resolvem para EcaDataProvider
+            String docType = credentialMetadata.getId();
+            if (docType == null) {
+                docType = credentialRequest.getDoctype();
+            }
+            if (docType == null && credentialRequest.getCredential_definition() != null
+                    && credentialRequest.getCredential_definition().getType() != null) {
+                docType = credentialRequest.getCredential_definition().getType().stream()
+                        .filter(t -> !"VerifiableCredential".equals(t))
+                        .findFirst()
+                        .orElse(null);
+            }
+            parsedAccessToken.getClaims().put("docType", docType);
+
             // Fetch data once, as it's common to all formats
             JSONObject jsonObject = dataProviderPlugin.fetchData(parsedAccessToken.getClaims());
             log.info("Data fetched successfully from Data Provider Plugin");
@@ -210,8 +292,18 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
                     vcRequestDto.setType(credentialRequest.getCredential_definition().getType());
                     vcRequestDto.setCredentialSubject(credentialRequest.getCredential_definition().getCredentialSubject());
                     validateLdpVcFormatRequest(credentialRequest, credentialMetadata);
+                    // INJIBR-CUSTOM: CARReceipt has two subtypes (AST/PCT) determined by data returned from provider
+                    if ("CARReceipt".equals(docType)) {
+                        String tipoImovel = jsonObject.optString("tipoImovel");
+                        if ("AST".equals(tipoImovel)) {
+                            vcRequestDto.setType(List.of("CARReceiptAST", "VerifiableCredential"));
+                        } else if ("PCT".equals(tipoImovel)) {
+                            vcRequestDto.setType(List.of("CARReceiptPCT", "VerifiableCredential"));
+                        }
+                    }
                     templateName = CredentialUtils.getTemplateName(vcRequestDto);
-                    jsonObject.put(Constants.TYPE, credentialRequest.getCredential_definition().getType());
+                    // INJIBR-CUSTOM: use vcRequestDto.getType() after AST/PCT switch
+                    jsonObject.put(Constants.TYPE, vcRequestDto.getType());
 
                     List<String> credentialStatusPurposeList = vcFormatter.getCredentialStatusPurpose(templateName);
                     if (credentialStatusPurposeList != null && !credentialStatusPurposeList.isEmpty() && credentialRequest.getCredential_definition().getContext().contains(VCDM2Constants.URL)) {
@@ -244,7 +336,8 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
             }
             // Common logic for all formats
             templateParams.put(Constants.TEMPLATE_NAME, templateName);
-            templateParams.put(Constants.DID_URL, didUrl);
+            // INJIBR-CUSTOM: usa didUrl da credential_config para suportar multi-issuer (MGI, INCRA, MDA)
+            templateParams.put(Constants.DID_URL, vcFormatter.getDidUrl(templateName));
             if (!StringUtils.isEmpty(renderTemplateId)) {
                 templateParams.put(Constants.RENDERING_TEMPLATE_ID, renderTemplateId);
             }
@@ -258,7 +351,10 @@ public class CertifyIssuanceServiceImpl implements VCIssuanceService {
             String time = zonedDateTime.format(DateTimeFormatter.ofPattern(Constants.UTC_DATETIME_PATTERN));
             Duration duration;
             try {
-                duration = Duration.parse(defaultExpiryDuration);
+                // INJIBR-CUSTOM: ECA has shorter expiry since age verification may change
+                String expiryToUse = docType != null && (docType.contains("ECACredential") || docType.contains("br.gov.mgi.eca"))
+                        ? ecaExpiryDuration : defaultExpiryDuration;
+                duration = Duration.parse(expiryToUse);
             } catch (DateTimeParseException e) {
                 log.warn("Incorrect expiry duration format in properties: {}. Using default P730D ~ 2Y", defaultExpiryDuration);
                 duration = Duration.parse("P730D");

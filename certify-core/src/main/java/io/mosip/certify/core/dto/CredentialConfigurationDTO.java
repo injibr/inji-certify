@@ -69,4 +69,7 @@ public class CredentialConfigurationDTO {
     private List<Map<String, Object>> qrSettings;
 
     private String qrSignatureAlgo;
+
+    // INJIBR-CUSTOM: identifies the logical issuer (MGI, INCRA, MDA) for multi-issuer govbr flow
+    private String issuerId;
 }

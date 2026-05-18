@@ -40,10 +40,17 @@ CREATE TABLE credential_config (
     credential_status_purpose TEXT[],
     qr_settings JSONB,
     qr_signature_algo TEXT,
+    -- INJIBR-CUSTOM: identifies the logical issuer (MGI, INCRA, MDA) for multi-issuer govbr flow
+    issuer_id VARCHAR(255),
     cr_dtimes TIMESTAMP NOT NULL,
     upd_dtimes TIMESTAMP,
     CONSTRAINT pk_config_id PRIMARY KEY (config_id)
 );
+
+-- INJIBR-CUSTOM: index para lookup multi-issuer (MGI, INCRA, MDA)
+CREATE INDEX idx_credential_config_issuer_id
+    ON credential_config(issuer_id)
+    WHERE issuer_id IS NOT NULL;
 
 CREATE UNIQUE INDEX idx_credential_config_type_context_unique
 ON credential_config(credential_type, context, credential_format)
