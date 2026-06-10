@@ -458,8 +458,8 @@ def main():
     certify_url = os.environ.get("CERTIFY_URL", DEFAULT_CERTIFY_URL)
     certify_identifier = os.environ.get("CERTIFY_IDENTIFIER", DEFAULT_CERTIFY_IDENTIFIER)
 
-    client_id = os.environ.get("SSO_CLIENT_ID", "<SSO_CLIENT_ID>")
-    client_secret = os.environ.get("SSO_CLIENT_SECRET", "<SSO_CLIENT_SECRET>")
+    client_id = os.environ.get("SSO_CLIENT_ID")
+    client_secret = os.environ.get("SSO_CLIENT_SECRET")
 
     if not client_id or not client_secret:
         print("ERROR: Set SSO_CLIENT_ID and SSO_CLIENT_SECRET environment variables")
