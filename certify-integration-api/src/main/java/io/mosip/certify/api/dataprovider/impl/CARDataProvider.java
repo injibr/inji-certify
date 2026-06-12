@@ -2,6 +2,7 @@ package io.mosip.certify.api.dataprovider.impl;
 
 import io.mosip.certify.api.dataprovider.DataProviderService;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,6 +72,21 @@ public class CARDataProvider implements DataProviderService {
             throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "No data found for CAR Document for Cpf:"+cpfNumber);
         }
         JSONObject jsonObject = new JSONObject(response);
-        return (JSONObject) jsonObject.getJSONArray("result").get(0);
+        JSONObject result = (JSONObject) jsonObject.getJSONArray("result").get(0);
+        serializeSobreposicoes(result);
+        return result;
+    }
+
+    // INJIBR-CUSTOM: serializa campos de sobreposição (arrays) como strings JSON escapadas
+    // para compatibilidade com o template Velocity que espera "${campo}" como string.
+    // Mesmo padrão do CAFDataProvider para "membros"/"areas".
+    private void serializeSobreposicoes(JSONObject obj) {
+        for (String key : new String[]{"sobreposicoesTerraIndigena", "sobreposicoesUnidadeConservacao", "sobreposicoesAreasEmbargadas"}) {
+            if (!obj.isNull(key) && obj.get(key) instanceof JSONArray) {
+                String serialized = obj.getJSONArray(key).toString();
+                String quoted = JSONObject.quote(serialized);
+                obj.put(key, quoted.substring(1, quoted.length() - 1));
+            }
+        }
     }
 }
