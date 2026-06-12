@@ -311,7 +311,7 @@ def request_credential(certify_url, access_token, proof_jwt, doc_type, issuer_id
         "issuerId": issuer_id,
         "doctype": doc_type,
         "credential_definition": {
-            "@context": ["https://www.w3.org/2018/credentials/v1"],
+            "@context": ["https://www.w3.org/ns/credentials/v2"],
             "type": ["VerifiableCredential", doc_type],
         },
         "proof": {
