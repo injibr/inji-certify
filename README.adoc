@@ -9,7 +9,7 @@
 | 
 
 | https://scm.prevnet/inji/inji-certify/tree/entrega[entrega]
-| v5.1.0
+| v5.1.1
 | image:https://www-ci.prevnet/job/MGI/job/code_inji-certify/job/entrega/badge/icon[Build Status, link=https://www-ci.prevnet/job/MGI/job/code_inji-certify/job/entrega/]
 |===
 
