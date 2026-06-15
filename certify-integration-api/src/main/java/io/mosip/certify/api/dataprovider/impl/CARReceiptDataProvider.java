@@ -2,6 +2,7 @@ package io.mosip.certify.api.dataprovider.impl;
 
 import io.mosip.certify.api.dataprovider.DataProviderService;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -67,6 +68,21 @@ public class CARReceiptDataProvider implements DataProviderService {
             throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "No data found for CarReceipt for Cpf:"+cpfNumber);
         }
         JSONObject jsonObject = new JSONObject(response);
-        return new JSONObject((jsonObject.getJSONArray("result").get(0)).toString());
+        JSONObject result = new JSONObject((jsonObject.getJSONArray("result").get(0)).toString());
+        serializeArrayFields(result);
+        return result;
+    }
+
+    // INJIBR-CUSTOM: serializa campos de array como strings JSON escapadas
+    // para compatibilidade com o template Velocity que espera "${campo}" como string.
+    // Mesmo padrão do CAFDataProvider para "membros"/"areas".
+    private void serializeArrayFields(JSONObject obj) {
+        for (String key : new String[]{"proprietarios"}) {
+            if (obj.has(key) && !obj.isNull(key) && obj.get(key) instanceof JSONArray) {
+                String serialized = obj.getJSONArray(key).toString();
+                String quoted = JSONObject.quote(serialized);
+                obj.put(key, quoted.substring(1, quoted.length() - 1));
+            }
+        }
     }
 }

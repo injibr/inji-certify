@@ -77,11 +77,11 @@ public class CARDataProvider implements DataProviderService {
         return result;
     }
 
-    // INJIBR-CUSTOM: serializa campos de array como strings JSON escapadas
+    // INJIBR-CUSTOM: serializa campos de sobreposição (arrays) como strings JSON escapadas
     // para compatibilidade com o template Velocity que espera "${campo}" como string.
     // Mesmo padrão do CAFDataProvider para "membros"/"areas".
     private void serializeSobreposicoes(JSONObject obj) {
-        for (String key : new String[]{"proprietarios", "sobreposicoesTerraIndigena", "sobreposicoesUnidadeConservacao", "sobreposicoesAreasEmbargadas"}) {
+        for (String key : new String[]{"sobreposicoesTerraIndigena", "sobreposicoesUnidadeConservacao", "sobreposicoesAreasEmbargadas"}) {
             if (!obj.isNull(key) && obj.get(key) instanceof JSONArray) {
                 String serialized = obj.getJSONArray(key).toString();
                 String quoted = JSONObject.quote(serialized);
