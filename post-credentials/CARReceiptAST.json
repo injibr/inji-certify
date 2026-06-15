@@ -5,7 +5,7 @@
   "issuerId": "MGI",
   "credentialTypes": ["VerifiableCredential", "CARReceiptAST"],
   "contextURLs": ["https://www.w3.org/ns/credentials/v2"],
-  "vcTemplate": "eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvbnMvY3JlZGVudGlhbHMvdjIiXSwiaXNzdWVyIjoiJHtfaXNzdWVyfSIsInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJDQVJSZWNlaXB0Il0sInZhbGlkRnJvbSI6IiR7dmFsaWRGcm9tfSIsInZhbGlkVW50aWwiOiIke3ZhbGlkVW50aWx9IiwiY3JlZGVudGlhbFN1YmplY3QiOnsiY29kaWdvSW1vdmVsIjoiJHtjb2RpZ29JbW92ZWx9IiwiZGF0YUNhZGFzdHJvIjoiJHtkYXRhQ2FkYXN0cm99Iiwibm9tZUltb3ZlbCI6IiR7bm9tZUltb3ZlbH0iLCJtdW5pY2lwaW8iOiIke211bmljaXBpb30iLCJ0aXBvSW1vdmVsIjoiJHt0aXBvSW1vdmVsfSIsInVuaWRhZGVGZWRlcmF0aXZhIjoiJHt1bmlkYWRlRmVkZXJhdGl2YX0iLCJjb29yZGVuYWRhSW1vdmVsWCI6IiR7Y29vcmRlbmFkYUltb3ZlbFh9IiwiY29vcmRlbmFkYUltb3ZlbFkiOiIke2Nvb3JkZW5hZGFJbW92ZWxZfSIsImFyZWFUb3RhbEltb3ZlbCI6IiR7YXJlYVRvdGFsSW1vdmVsfSIsIm1vZHVsb0Zpc2NhbCI6IiR7bW9kdWxvRmlzY2FsfSIsInByb3RvY29sbyI6IiR7cHJvdG9jb2xvfSIsImluZm9ybWFjb2VzQWRpY2lvbmFpcyI6IiR7aW5mb3JtYWNvZXNBZGljaW9uYWlzfSIsImdlb0ltb3ZlbCI6IiR7Z2VvSW1vdmVsfSIsInByb3ByaWV0YXJpb3MiOiIke3Byb3ByaWV0YXJpb3N9IiwiYXJlYVNlcnZpZGFvQWRtaW5pc3RyYXRpdmEiOiIke2FyZWFTZXJ2aWRhb0FkbWluaXN0cmF0aXZhfSIsImFyZWFVc29SZXN0cml0byI6IiR7YXJlYVVzb1Jlc3RyaXRvfSIsImFyZWFQcmVzZXJ2YWNhb1Blcm1hbmVudGUiOiIke2FyZWFQcmVzZXJ2YWNhb1Blcm1hbmVudGV9IiwiYXJlYUNvbnNvbGlkYWRhIjoiJHthcmVhQ29uc29saWRhZGF9IiwiYXJlYVJlbWFuZXNjZW50ZVZlZ2V0YWNhb05hdGl2YSI6IiR7YXJlYVJlbWFuZXNjZW50ZVZlZ2V0YWNhb05hdGl2YX0iLCJhcmVhUmVzZXJ2YUxlZ2FsIjoiJHthcmVhUmVzZXJ2YUxlZ2FsfSIsImFyZWFMaXF1aWRhSW1vdmVsIjoiJHthcmVhTGlxdWlkYUltb3ZlbH0iLCJtYXRyaWN1bGEiOiIke21hdHJpY3VsYX0iLCJkYXRhTWF0cmljdWxhIjoiJHtkYXRhTWF0cmljdWxhfSIsImxpdnJvTWF0cmljdWxhIjoiJHtsaXZyb01hdHJpY3VsYX0iLCJmb2xoYU1hdHJpY3VsYSI6IiR7Zm9saGFNYXRyaWN1bGF9IiwibXVuaWNpcGlvQ2FydG9yaW8iOiIke211bmljaXBpb0NhcnRvcmlvfSIsInVmQ2FydG9yaW8iOiIke3VmQ2FydG9yaW99IiwiY3BmQ25waiI6IiR7Y3BmQ25wan0iLCJub21lIjoiJHtub21lfSJ9fQ==",
+  "vcTemplate": "eyJAY29udGV4dCI6IFsiaHR0cHM6Ly93d3cudzMub3JnL25zL2NyZWRlbnRpYWxzL3YyIl0sICJpc3N1ZXIiOiAiJHtfaXNzdWVyfSIsICJ0eXBlIjogWyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsICJDQVJSZWNlaXB0Il0sICJ2YWxpZEZyb20iOiAiJHt2YWxpZEZyb219IiwgInZhbGlkVW50aWwiOiAiJHt2YWxpZFVudGlsfSIsICJjcmVkZW50aWFsU3ViamVjdCI6IHsiaWRlbnRpZmljYWRvckltb3ZlbCI6ICIke2lkZW50aWZpY2Fkb3JJbW92ZWx9IiwgImNvZGlnb0ltb3ZlbCI6ICIke2NvZGlnb0ltb3ZlbH0iLCAic2l0dWFjYW9JbW92ZWwiOiAiJHtzaXR1YWNhb0ltb3ZlbH0iLCAidGlwb0ltb3ZlbCI6ICIke3RpcG9JbW92ZWx9IiwgImRhdGFDYWRhc3RybyI6ICIke2RhdGFDYWRhc3Ryb30iLCAibm9tZUltb3ZlbCI6ICIke25vbWVJbW92ZWx9IiwgImNvZGlnb011bmljaXBpbyI6ICIke2NvZGlnb011bmljaXBpb30iLCAibXVuaWNpcGlvIjogIiR7bXVuaWNpcGlvfSIsICJ1bmlkYWRlRmVkZXJhdGl2YSI6ICIke3VuaWRhZGVGZWRlcmF0aXZhfSIsICJjb29yZGVuYWRhSW1vdmVsWCI6ICIke2Nvb3JkZW5hZGFJbW92ZWxYfSIsICJjb29yZGVuYWRhSW1vdmVsWSI6ICIke2Nvb3JkZW5hZGFJbW92ZWxZfSIsICJhcmVhVG90YWxJbW92ZWwiOiAiJHthcmVhVG90YWxJbW92ZWx9IiwgIm1vZHVsb0Zpc2NhbCI6ICIke21vZHVsb0Zpc2NhbH0iLCAicHJvdG9jb2xvIjogIiR7cHJvdG9jb2xvfSIsICJpbmZvcm1hY29lc0FkaWNpb25haXMiOiAiJHtpbmZvcm1hY29lc0FkaWNpb25haXN9IiwgImdlb0ltb3ZlbCI6ICIke2dlb0ltb3ZlbH0iLCAicHJvcHJpZXRhcmlvcyI6ICIke3Byb3ByaWV0YXJpb3N9IiwgImFyZWFTZXJ2aWRhb0FkbWluaXN0cmF0aXZhIjogIiR7YXJlYVNlcnZpZGFvQWRtaW5pc3RyYXRpdmF9IiwgImFyZWFMaXF1aWRhSW1vdmVsIjogIiR7YXJlYUxpcXVpZGFJbW92ZWx9IiwgImFyZWFQcmVzZXJ2YWNhb1Blcm1hbmVudGUiOiAiJHthcmVhUHJlc2VydmFjYW9QZXJtYW5lbnRlfSIsICJhcmVhVXNvUmVzdHJpdG8iOiAiJHthcmVhVXNvUmVzdHJpdG99IiwgImFyZWFDb25zb2xpZGFkYSI6ICIke2FyZWFDb25zb2xpZGFkYX0iLCAiYXJlYVJlbWFuZXNjZW50ZVZlZ2V0YWNhb05hdGl2YSI6ICIke2FyZWFSZW1hbmVzY2VudGVWZWdldGFjYW9OYXRpdmF9IiwgImFyZWFSZXNlcnZhTGVnYWwiOiAiJHthcmVhUmVzZXJ2YUxlZ2FsfSIsICJtYXRyaWN1bGEiOiAiJHttYXRyaWN1bGF9IiwgImRhdGFNYXRyaWN1bGEiOiAiJHtkYXRhTWF0cmljdWxhfSIsICJsaXZyb01hdHJpY3VsYSI6ICIke2xpdnJvTWF0cmljdWxhfSIsICJmb2xoYU1hdHJpY3VsYSI6ICIke2ZvbGhhTWF0cmljdWxhfSIsICJtdW5pY2lwaW9DYXJ0b3JpbyI6ICIke211bmljaXBpb0NhcnRvcmlvfSIsICJ1ZkNhcnRvcmlvIjogIiR7dWZDYXJ0b3Jpb30ifX0=",
   "didUrl": "did:web:injibr.github.io:inji-did:dev:mgi",
   "keyManagerAppId": "CERTIFY_VC_SIGN_ED25519",
   "keyManagerRefId": "ED25519_SIGN",
@@ -30,13 +30,36 @@
     }
   ],
   "credentialSubjectDefinition": {
+    "identificadorImovel": {"display": [{"name": "Identificador do Imóvel", "locale": "pt"}]},
     "codigoImovel": {"display": [{"name": "Código do Imóvel", "locale": "pt"}]},
-    "nomeImovel": {"display": [{"name": "Nome do Imóvel", "locale": "pt"}]},
+    "situacaoImovel": {"display": [{"name": "Situação do Imóvel", "locale": "pt"}]},
     "tipoImovel": {"display": [{"name": "Tipo do Imóvel", "locale": "pt"}]},
+    "dataCadastro": {"display": [{"name": "Data de Cadastro", "locale": "pt"}]},
+    "nomeImovel": {"display": [{"name": "Nome do Imóvel", "locale": "pt"}]},
+    "codigoMunicipio": {"display": [{"name": "Código do Município", "locale": "pt"}]},
     "municipio": {"display": [{"name": "Município", "locale": "pt"}]},
     "unidadeFederativa": {"display": [{"name": "Estado", "locale": "pt"}]},
+    "coordenadaImovelX": {"display": [{"name": "Longitude", "locale": "pt"}]},
+    "coordenadaImovelY": {"display": [{"name": "Latitude", "locale": "pt"}]},
     "areaTotalImovel": {"display": [{"name": "Área Total do Imóvel", "locale": "pt"}]},
-    "proprietarios": {"display": [{"name": "Proprietários", "locale": "pt"}]}
+    "moduloFiscal": {"display": [{"name": "Módulo Fiscal", "locale": "pt"}]},
+    "protocolo": {"display": [{"name": "Protocolo", "locale": "pt"}]},
+    "informacoesAdicionais": {"display": [{"name": "Informações Adicionais", "locale": "pt"}]},
+    "geoImovel": {"display": [{"name": "Geo Imóvel", "locale": "pt"}]},
+    "proprietarios": {"display": [{"name": "Proprietários", "locale": "pt"}]},
+    "areaServidaoAdministrativa": {"display": [{"name": "Área de Servidão Administrativa", "locale": "pt"}]},
+    "areaLiquidaImovel": {"display": [{"name": "Área Líquida do Imóvel", "locale": "pt"}]},
+    "areaPreservacaoPermanente": {"display": [{"name": "Área de Preservação Permanente", "locale": "pt"}]},
+    "areaUsoRestrito": {"display": [{"name": "Área de Uso Restrito", "locale": "pt"}]},
+    "areaConsolidada": {"display": [{"name": "Área Consolidada", "locale": "pt"}]},
+    "areaRemanescenteVegetacaoNativa": {"display": [{"name": "Área de Vegetação Nativa", "locale": "pt"}]},
+    "areaReservaLegal": {"display": [{"name": "Área de Reserva Legal", "locale": "pt"}]},
+    "matricula": {"display": [{"name": "Matrícula", "locale": "pt"}]},
+    "dataMatricula": {"display": [{"name": "Data da Matrícula", "locale": "pt"}]},
+    "livroMatricula": {"display": [{"name": "Livro da Matrícula", "locale": "pt"}]},
+    "folhaMatricula": {"display": [{"name": "Folha da Matrícula", "locale": "pt"}]},
+    "municipioCartorio": {"display": [{"name": "Município do Cartório", "locale": "pt"}]},
+    "ufCartorio": {"display": [{"name": "UF do Cartório", "locale": "pt"}]}
   },
-  "displayOrder": ["codigoImovel", "dataCadastro", "nomeImovel", "municipio", "tipoImovel", "unidadeFederativa", "coordenadaImovelX", "coordenadaImovelY", "areaTotalImovel", "moduloFiscal", "protocolo", "informacoesAdicionais", "geoImovel", "proprietarios", "areaServidaoAdministrativa", "areaUsoRestrito", "areaPreservacaoPermanente", "areaConsolidada", "areaRemanescenteVegetacaoNativa", "areaReservaLegal", "areaLiquidaImovel", "matricula", "dataMatricula", "livroMatricula", "folhaMatricula", "municipioCartorio", "ufCartorio", "cpfCnpj", "nome"]
+  "displayOrder": ["identificadorImovel", "codigoImovel", "situacaoImovel", "tipoImovel", "dataCadastro", "nomeImovel", "codigoMunicipio", "municipio", "unidadeFederativa", "coordenadaImovelX", "coordenadaImovelY", "areaTotalImovel", "moduloFiscal", "protocolo", "informacoesAdicionais", "geoImovel", "proprietarios", "areaServidaoAdministrativa", "areaLiquidaImovel", "areaPreservacaoPermanente", "areaUsoRestrito", "areaConsolidada", "areaRemanescenteVegetacaoNativa", "areaReservaLegal", "matricula", "dataMatricula", "livroMatricula", "folhaMatricula", "municipioCartorio", "ufCartorio"]
 }
