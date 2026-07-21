@@ -492,15 +492,14 @@ E o endpoint `.well-known` deprecated passa a aceitar `issuer_id` em vez de `ver
 +ADD certify-service/configure_start.sh configure_start.sh
 -COPY ./target/certify-service-*.jar certify-service.jar
 +COPY ./certify-service/target/certify-service-*.jar certify-service.jar
-+RUN mkdir -p /home/${container_user}/config
-+COPY ./docker-compose/docker-compose-injistack/config/java-security-override.properties \
-+     /home/${container_user}/config/java-security-override.properties
++RUN sed -i 's/TLS_RSA_\*, //g' /opt/java/openjdk/conf/security/java.security
 ```
 
-O `java-security-override.properties` reabilita cifras TLS necessárias para
-`hapirj.dataprev.gov.br` (servidor Dataprev que só suporta `TLS_RSA_WITH_AES_256_GCM_SHA384`).
+O `sed` remove `TLS_RSA_*` da lista `jdk.tls.disabledAlgorithms` do `java.security` da imagem,
+reabilitando as cifras TLS necessárias para `hisrj`/`papirj.dataprev.gov.br`
+(servidores Dataprev que só suportam `TLS_RSA_WITH_AES_256_GCM_SHA384`).
 
-**Como aplicar na v0.12.2:** Verificar se o Dockerfile da v0.12.2 já usa os paths corretos. Portar o `java-security-override.properties` e o `COPY` correspondente.
+**Como aplicar na v0.12.2:** Adicionar o `RUN sed` no Dockerfile após o step de instalação de pacotes.
 
 ---
 
@@ -523,7 +522,7 @@ Arquivos novos específicos da infraestrutura INJIBR (Dataprev/prevnet). Portar 
 9. **certify-integration-api** — DataProviders + TokenClients + WebClientConfig + pom.xml
 10. **Properties** — application-local.properties + certify-default.properties
 11. **DB DML** — inserts na `credential_config` com templates base64 + issuer_id
-12. **Dockerfile** — paths + java-security-override.properties
+12. **Dockerfile** — paths + `RUN sed` TLS_RSA
 13. **Jenkinsfile + README.adoc** — infraestrutura INJIBR
 
 ---
@@ -573,6 +572,6 @@ Arquivos novos específicos da infraestrutura INJIBR (Dataprev/prevnet). Portar 
    A property `mosip.certify.govbr.cnonce-bypass-enabled` permite desativar o bypass
    quando o govbr passar a suportar.
 
-7. **`java-security-override.properties`:** Necessário para conectar com
-   `hapirj.dataprev.gov.br` que usa cifras TLS legadas. Verificar se a v0.12.2
-   já tem algum mecanismo equivalente.
+7. **`RUN sed` no Dockerfile:** Necessário para conectar com
+   `hisrj`/`papirj.dataprev.gov.br` que usam cifras TLS legadas (`TLS_RSA_WITH_AES_256_GCM_SHA384`).
+   Verificar se a v0.12.2 já tem algum mecanismo equivalente.

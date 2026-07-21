@@ -32,7 +32,6 @@ services:
       - mosipbox_public_url=http://localhost:8090
       - ECA_CLIENT_ID=${ECA_CLIENT_ID}
       - ECA_CLIENT_SECRET=${ECA_CLIENT_SECRET}
-      - JAVA_TOOL_OPTIONS=-Djava.security.properties=/home/mosip/config/java-security-override.properties
       # Explicit env var so Spring resolves the @ComponentScan placeholder even when
       # bootstrap context loads before the external config files are available.
       # Spring Boot relaxed binding maps MOSIP_CERTIFY_INTEGRATION_SCAN_BASE_PACKAGE
@@ -42,7 +41,6 @@ services:
       - ./config/certify-default.properties:/home/mosip/config/certify-default.properties:z
       - ./config/certify-csvdp-farmer.properties:/home/mosip/config/certify-csvdp-farmer.properties:z
       - ./config/certify-mock-mdl.properties:/home/mosip/config/certify-mock-mdl.properties:z
-      # - ./config/java-security-override.properties:/home/mosip/config/java-security-override.properties:z
       - ./data/CERTIFY_PKCS12:/home/mosip/CERTIFY_PKCS12:z
       - ./loader_path/certify/:/home/mosip/additional_jars/:z
       - ./config/farmer_identity_data.csv:/home/mosip/config/farmer_identity_data.csv:z
