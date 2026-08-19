@@ -15,7 +15,6 @@ import io.mosip.certify.core.constants.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.EscapeTool;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,8 +61,7 @@ public class VelocityTemplatingEngineImpl implements VCFormatter {
     @PostConstruct
     public void initialize() {
         engine = new VelocityEngine();
-        engine.setProperty(RuntimeConstants.INPUT_ENCODING, "UTF-8");
-        engine.setProperty(RuntimeConstants.OUTPUT_ENCODING, "UTF-8");
+        engine.setProperty("input.encoding", "UTF-8");
         engine.init();
         log.info("VelocityTemplatingEngineImpl initialized. Using Spring Cache for CredentialConfig.");
     }
