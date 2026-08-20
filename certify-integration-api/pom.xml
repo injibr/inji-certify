@@ -6,12 +6,12 @@
     <parent>
         <groupId>io.inji.certify</groupId>
         <artifactId>certify-parent</artifactId>
-        <version>5.1.3</version>
+        <version>5.1.4</version>
     </parent>
 
     <groupId>io.inji.certify</groupId>
     <artifactId>certify-integration-api</artifactId>
-    <version>5.1.3</version>
+    <version>5.1.4</version>
     <name>certify-integration-api</name>
     <description>Certify Integration Library</description>
 
